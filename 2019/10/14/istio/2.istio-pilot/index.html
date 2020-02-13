@@ -110,15 +110,15 @@
 <meta property="og:site_name" content="Zamperini">
 <meta property="og:description" content="PilotPilot是Istio的控制中枢，它负责sidecar的生命周期管理并负责向Sidecar下发控制数据。 [TOC] 下面将从以下几个方面来分析Pilot:  整体架构 启动过程 Sidecar 初始拉取过程 &amp; 信息下发过程 拓展性  整体架构Pilot 内部整体架构如下：  实现 Grpc Server 对Envoy提供查询配置以及服务发现服务； 支持配置控制器、服务控制器">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://dorgenjones.github.io/2019/10/14/istio/2.istio-pilot/media/15769230772008/15769864174743.jpg">
-<meta property="og:image" content="https://dorgenjones.github.io/2019/10/14/istio/2.istio-pilot/media/15762032316330/15766110366375.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/media/15769864174743.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/media/15766110366375.jpg">
 <meta property="article:published_time" content="2019-10-13T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-02-13T11:04:42.605Z">
+<meta property="article:modified_time" content="2020-02-13T12:07:15.053Z">
 <meta property="article:author" content="Zamperini">
 <meta property="article:tag" content="istio">
 <meta property="article:tag" content="servicemesh">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://dorgenjones.github.io/2019/10/14/istio/2.istio-pilot/media/15769230772008/15769864174743.jpg">
+<meta name="twitter:image" content="https://dorgenjones.github.io/media/15769864174743.jpg">
 
 
 
@@ -388,7 +388,7 @@
 <li>服务控制器同样支持多种类型服务注册中心，如 K8s、Consul以及可以拓展MCP协议实现的注册中心服务</li>
 <li>另外，通过<code>ControlZ</code>服务对外暴露 <code>Pilot</code> 内部配置&amp;运行时信息的查询和修改接口</li>
 </ul>
-<p><img src="media/15769230772008/15769864174743.jpg" alt=""></p>
+<p><img src="/media/15769864174743.jpg" alt=""></p>
 <h2 id="启动分析"><a href="#启动分析" class="headerlink" title="启动分析"></a>启动分析</h2><p>首先其入口地址为：<code>istio/pilot/cmd/pilot-discovery</code>。<br>启动前，<code>init</code>方法预先执行，其解析出启动参数如：<code>registries</code>(注册中心配置，若未配置，则默认注册中心为<code>k8s</code>)、<code>meshConfig</code>(mesh的配置文件地址)、<code>httpAddr</code>、<code>grpcAddr</code> 服务器启动http、Grpc端口等。<br><code>discoveryCmd.Run</code>方法为启动入口，首先通过<code>bootstrap.NewServer</code>创建<strong>Server</strong>，然后通过<code>Start</code>方法启动 <strong>Server</strong>。<br>首先，看<code>bootstrap.NewServer</code>方法：</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">s := &amp;Server&#123;</span><br><span class="line">    <span class="comment">// 文件监听器组件，用于监听文件更新事件</span></span><br><span class="line">	fileWatcher: filewatcher.NewWatcher(),</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 创建k8s client</span></span><br><span class="line">s.initKubeClient(&amp;args)</span><br><span class="line"><span class="comment">// 初始化 mesh配置 根据配置地址从指定位置获取配置，并添加文件监听器监听更新</span></span><br><span class="line">s.initMesh(&amp;args)</span><br><span class="line"><span class="comment">//  初始化Mesh网络配置，根据配置地址从指定位置获取配置，并添加文件监听器监听更新</span></span><br><span class="line">s.initMeshNetworks(&amp;args)</span><br><span class="line"><span class="comment">// 初始化证书控制器</span></span><br><span class="line">s.initCertController(&amp;args)</span><br><span class="line"><span class="comment">// 初始化配置控制器</span></span><br><span class="line">s.initConfigController(&amp;args)</span><br><span class="line"><span class="comment">// 初始化服务控制器</span></span><br><span class="line">s.initServiceControllers(&amp;args)</span><br><span class="line"><span class="comment">// 初始化发现服务</span></span><br><span class="line">s.initDiscoveryService(&amp;args)</span><br><span class="line"><span class="comment">// 初始化监控服务</span></span><br><span class="line">s.initMonitor(&amp;args)</span><br><span class="line"><span class="comment">// 初始化集群注册器，监控远程集群并初始化多集群结构</span></span><br><span class="line">s.initClusterRegistries(&amp;args)</span><br></pre></td></tr></table></figure>
 <p>创建完<code>DiscoveryServer</code>后，通过调用<code>Start</code>方法启动各组件。<br>上面执行流程大致过程如下：首先创建与<code>k8s</code>的交互客户端，然后根据初始传入配置路径读取配置文件中<code>mesh</code>以及网络的配置，同时监听、维护配置文件更新；其后创建三个控制器：证书、配置、服务控制器分别管理 Secert、config、service信息；再创建发现服务：聚合上面所有控制器的能力对<strong>Sidecar</strong>提供服务。<br>下面将分别介绍初始化<code>mesh</code>配置以及网络配置过程，初始化证书、配置以及服务控制器，以及初始化发现服务。</p>
@@ -506,7 +506,7 @@
 <p>同时该机制支持组件拓展，比如配置服务可以通过该机制对外暴露接口查询信息。目前，<code>McpController</code>以及<code>sseMcpController</code>（组合服务MCP控制器）也是通过它来暴露查询信息接口的：</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *configzTopic)</span> <span class="title">Activate</span><span class="params">(context fw.TopicContext)</span></span> &#123;</span><br><span class="line">	l := template.Must(context.Layout().Clone())</span><br><span class="line">	c.tmpl = template.Must(l.Parse(<span class="keyword">string</span>(assets.MustAsset(<span class="string">"templates/config.html"</span>))))</span><br><span class="line">	_ = context.HTMLRouter().StrictSlash(<span class="literal">true</span>).NewRoute().Path(<span class="string">"/"</span>).HandlerFunc(<span class="function"><span class="keyword">func</span><span class="params">(w http.ResponseWriter, req *http.Request)</span></span> &#123;</span><br><span class="line">		d := c.collectData()</span><br><span class="line">		fw.RenderHTML(w, c.tmpl, d)</span><br><span class="line">	&#125;)</span><br><span class="line">	_ = context.JSONRouter().StrictSlash(<span class="literal">true</span>).NewRoute().Methods(<span class="string">"GET"</span>).Path(<span class="string">"/"</span>).HandlerFunc(<span class="function"><span class="keyword">func</span><span class="params">(w http.ResponseWriter, req *http.Request)</span></span> &#123;</span><br><span class="line">		d := c.collectData()</span><br><span class="line">		fw.RenderJSON(w, http.StatusOK, d)</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *configzTopic)</span> <span class="title">collectData</span><span class="params">()</span> *<span class="title">data</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;data&#123;</span><br><span class="line">		ID:             c.topic.ID(),</span><br><span class="line">		Metadata:       c.topic.Metadata(), <span class="comment">// mcp元数据</span></span><br><span class="line">		Collections:    c.topic.Collections(), <span class="comment">// mcp请求的资源集合包含版本信息</span></span><br><span class="line">		LatestRequests: c.topic.SnapshotRequestInfo(), <span class="comment">// 最近一组已知请求结果的快照信息</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><code>CtrolZ</code>提供 接口<code>ctrlz.RegisterTopic(CreateTopic(topic)</code>来拓展信息暴露</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>总结启动过程大致如下：<br><img src="media/15762032316330/15766110366375.jpg" alt=""></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>总结启动过程大致如下：<br><img src="/media/15766110366375.jpg" alt=""></p>
 <ol>
 <li>根据参数创建 <code>k8s</code> Client；</li>
 <li>从配置地址中获取 <strong>mesh</strong> 配置，并监听文件变更；</li>
@@ -559,6 +559,35 @@
 
     
 
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>您的支持是我创作源源不断的动力</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="Zamperini 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="Zamperini 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
     
 
     
@@ -701,7 +730,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">10</span>
+                      
+                    
+                    <span class="site-state-item-count">11</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -758,9 +789,7 @@
                     
                       
                     
-                      
-                    
-                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-count">22</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -770,6 +799,28 @@
 
           
 
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/DorgenJones" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:dblpfilter@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/u/1938368215" target="_blank" title="Weibo">
+                      
+                        <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                  </span>
+                
+            </div>
           
 
           

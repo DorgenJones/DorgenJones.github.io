@@ -110,13 +110,13 @@
 <meta property="og:site_name" content="Zamperini">
 <meta property="og:description" content="2. Informer[TOC] 在介绍完apiserver之后，在介绍其他重要组件之前，本章将介绍各组件与apiserver交互的重要工具Informer。通过其我们可以轻松List\Get所有资源对象，同时可以监听资源的变更事件，当变化发生时触发回调函数。下面将从Informer的初始化过程、更新变更两个方便来讲解其工作原理。 初始化&amp;监听更新变更流程首先，k8s 里 Informer">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://dorgenjones.github.io/2020/02/05/k8s/4.k8s-informer/media/15810707102253/15810929307162.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/media/15810929307162.jpg">
 <meta property="article:published_time" content="2020-02-04T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-02-13T11:02:35.722Z">
+<meta property="article:modified_time" content="2020-02-13T12:08:38.881Z">
 <meta property="article:author" content="Zamperini">
 <meta property="article:tag" content="k8s">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://dorgenjones.github.io/2020/02/05/k8s/4.k8s-informer/media/15810707102253/15810929307162.jpg">
+<meta name="twitter:image" content="https://dorgenjones.github.io/media/15810929307162.jpg">
 
 
 
@@ -392,7 +392,7 @@
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *Reflector)</span> <span class="title">Run</span><span class="params">(stopCh &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">    r.ListAndWatch(stopCh)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *Reflector)</span> <span class="title">ListAndWatch</span><span class="params">(stopCh &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="comment">// 查询资源所有数据</span></span><br><span class="line">	list, err := r.listerWatcher.List(options)</span><br><span class="line">	listMetaInterface, err := meta.ListAccessor(list)</span><br><span class="line">	resourceVersion = listMetaInterface.GetResourceVersion()</span><br><span class="line">	items, err := meta.ExtractList(list)</span><br><span class="line">	<span class="comment">// 同步资源到`Queue`</span></span><br><span class="line">	r.syncWith(items, resourceVersion)</span><br><span class="line">	r.setLastSyncResourceVersion(resourceVersion)</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		w, err := r.listerWatcher.Watch(options)</span><br><span class="line">		<span class="comment">// 监听资源更新</span></span><br><span class="line">		r.watchHandler(w, &amp;resourceVersion, resyncerrc, stopCh)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *Reflector)</span> <span class="title">watchHandler</span><span class="params">(w watch.Interface, resourceVersion *<span class="keyword">string</span>, errc <span class="keyword">chan</span> error, stopCh &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> event, ok := &lt;-w.ResultChan():</span><br><span class="line">		    <span class="comment">// ...校验</span></span><br><span class="line">			meta, err := meta.Accessor(event.Object)</span><br><span class="line">			newResourceVersion := meta.GetResourceVersion()</span><br><span class="line">			<span class="comment">//将更新对象添加到Queue中</span></span><br><span class="line">			<span class="keyword">switch</span> event.Type &#123;</span><br><span class="line">			<span class="keyword">case</span> watch.Added:</span><br><span class="line">				err := r.store.Add(event.Object)</span><br><span class="line">			<span class="keyword">case</span> watch.Modified:</span><br><span class="line">				err := r.store.Update(event.Object)</span><br><span class="line">			<span class="keyword">case</span> watch.Deleted:</span><br><span class="line">				err := r.store.Delete(event.Object)			&#125;</span><br><span class="line">			*resourceVersion = newResourceVersion</span><br><span class="line">			r.setLastSyncResourceVersion(newResourceVersion)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>下面将详细研究<code>sharedIndexInformer.HandleDeltas</code>：</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *sharedIndexInformer)</span> <span class="title">HandleDeltas</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="comment">// from oldest to newest</span></span><br><span class="line">	<span class="keyword">for</span> _, d := <span class="keyword">range</span> obj.(Deltas) &#123;</span><br><span class="line">		<span class="keyword">switch</span> d.Type &#123;</span><br><span class="line">		<span class="keyword">case</span> Sync, Added, Updated:</span><br><span class="line">			isSync := d.Type == Sync</span><br><span class="line">			<span class="keyword">if</span> old, exists, err := s.indexer.Get(d.Object); err == <span class="literal">nil</span> &amp;&amp; exists &#123;</span><br><span class="line">			   <span class="comment">//更新索引中数据</span></span><br><span class="line">				s.indexer.Update(d.Object)</span><br><span class="line">				<span class="comment">// 分发更新通知，通知注册到Informer上的EventHandler</span></span><br><span class="line">				s.processor.distribute(updateNotification&#123;oldObj: old, newObj: d.Object&#125;, isSync)</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				<span class="comment">// 向索引中添加数据</span></span><br><span class="line">				s.indexer.Add(d.Object)</span><br><span class="line">				<span class="comment">// 分发新增通知</span></span><br><span class="line">				s.processor.distribute(addNotification&#123;newObj: d.Object&#125;, isSync)</span><br><span class="line">			&#125;</span><br><span class="line">		<span class="keyword">case</span> Deleted:</span><br><span class="line">		   <span class="comment">// 从索引中删除数据</span></span><br><span class="line">			s.indexer.Delete(d.Object)</span><br><span class="line">			<span class="comment">// 分发删除通知		</span></span><br><span class="line">			s.processor.distribute(deleteNotification&#123;oldObj: d.Object&#125;, <span class="literal">false</span>)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><strong>总结起来：</strong>更新流程如下：<br><img src="media/15810707102253/15810929307162.jpg" alt=""></p>
+<p><strong>总结起来：</strong>更新流程如下：<br><img src="/media/15810929307162.jpg" alt=""></p>
 <h2 id="重同步"><a href="#重同步" class="headerlink" title="重同步"></a>重同步</h2><p><strong>重同步</strong>也是<code>Informer</code>的关键功能之一，<code>k8s</code>中众多实现基于此来做<code>recheck</code>，如单次部署失败，重同步可以修复自动修复部署失败的问题；再比如<code>HPA</code>模块，若单次需要扩容分片数超过自身分片数的2倍时，需要执行多次<code>reconcileAutoscaler</code>方法才能到达目标状态。<br>在创建<code>informer</code>时，会传入参数<code>resyncPeriod</code>，表示重同步的间隔，每过一个这样的接个，<code>informer</code>就会捞出相应的所有数据执行相应逻辑。</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">resyncerrc := <span class="built_in">make</span>(<span class="keyword">chan</span> error, <span class="number">1</span>)</span><br><span class="line">cancelCh := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line"><span class="keyword">defer</span> <span class="built_in">close</span>(cancelCh)</span><br><span class="line"><span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">   <span class="comment">// 重同步Timer</span></span><br><span class="line">	resyncCh, cleanup := r.resyncChan()</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-resyncCh:</span><br><span class="line">		<span class="keyword">if</span> r.ShouldResync() &#123;</span><br><span class="line">			r.store.Resync()</span><br><span class="line">		&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		cleanup()</span><br><span class="line">		resyncCh, cleanup = r.resyncChan()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;()</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *DeltaFIFO)</span> <span class="title">Resync</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	keys := f.knownObjects.ListKeys()</span><br><span class="line">	<span class="keyword">for</span> _, k := <span class="keyword">range</span> keys &#123;</span><br><span class="line">		f.syncKeyLocked(k)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *sharedProcessor)</span> <span class="title">shouldResync</span><span class="params">()</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	p.syncingListeners = []*processorListener&#123;&#125;</span><br><span class="line">	resyncNeeded := <span class="literal">false</span></span><br><span class="line">	now := p.clock.Now()</span><br><span class="line">	<span class="keyword">for</span> _, listener := <span class="keyword">range</span> p.listeners &#123;</span><br><span class="line">		<span class="keyword">if</span> listener.shouldResync(now) &#123;</span><br><span class="line">			resyncNeeded = <span class="literal">true</span></span><br><span class="line">			p.syncingListeners = <span class="built_in">append</span>(p.syncingListeners, listener)</span><br><span class="line">			listener.determineNextResync(now)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> resyncNeeded</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>可以看到会起一个 <code>Timer</code> 来定时重同步，重同步之前<code>ShouldResync</code>筛选出需要接收本次重同步的<code>Listener</code>放到<code>syncingListeners</code>，同步时只会同步这些<code>syncingListeners</code>。</p>
@@ -405,6 +405,35 @@
 
     
 
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>您的支持是我创作源源不断的动力</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="Zamperini 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="Zamperini 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
     
 
     
@@ -545,7 +574,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">10</span>
+                      
+                    
+                    <span class="site-state-item-count">11</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -602,9 +633,7 @@
                     
                       
                     
-                      
-                    
-                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-count">22</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -614,6 +643,28 @@
 
           
 
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/DorgenJones" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:dblpfilter@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/u/1938368215" target="_blank" title="Weibo">
+                      
+                        <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                  </span>
+                
+            </div>
           
 
           

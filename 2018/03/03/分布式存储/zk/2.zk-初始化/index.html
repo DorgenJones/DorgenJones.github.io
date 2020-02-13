@@ -110,18 +110,18 @@
 <meta property="og:site_name" content="Zamperini">
 <meta property="og:description" content="2. 初始化过程下面，将从客户端初始化和服务端初始化两个方面来讲解ZK的初始化过程： 客户端初始化123456789101112131415161718192021222324public ZooKeeper(String connectString, int sessionTimeout, Watcher watcher, boolean canBeReadOnly, HostProvider">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://dorgenjones.github.io/2018/03/03/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/zk/2.zk-%E5%88%9D%E5%A7%8B%E5%8C%96/media/15274999409834/15276381215150.jpg">
-<meta property="og:image" content="https://dorgenjones.github.io/2018/03/03/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/zk/2.zk-%E5%88%9D%E5%A7%8B%E5%8C%96/media/15269002735103/15273896493986.jpg">
-<meta property="og:image" content="https://dorgenjones.github.io/2018/03/03/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/zk/2.zk-%E5%88%9D%E5%A7%8B%E5%8C%96/media/15269002735103/15273897358019.jpg">
-<meta property="og:image" content="https://dorgenjones.github.io/2018/03/03/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/zk/2.zk-%E5%88%9D%E5%A7%8B%E5%8C%96/media/15269002735103/15273897358019.jpg">
-<meta property="og:image" content="https://dorgenjones.github.io/2018/03/03/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/zk/2.zk-%E5%88%9D%E5%A7%8B%E5%8C%96/media/15269002735103/15274690874468.jpg">
-<meta property="og:image" content="https://dorgenjones.github.io/2018/03/03/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/zk/2.zk-%E5%88%9D%E5%A7%8B%E5%8C%96/media/15269002735103/15274691255643.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/media/15276381215150.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/media/15273896493986.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/media/15273897358019.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/media/15273897358019.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/media/15274690874468.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/media/15274691255643.jpg">
 <meta property="article:published_time" content="2018-03-02T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-02-13T11:11:28.861Z">
+<meta property="article:modified_time" content="2020-02-13T11:58:40.016Z">
 <meta property="article:author" content="Zamperini">
 <meta property="article:tag" content="zookeeper">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://dorgenjones.github.io/2018/03/03/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/zk/2.zk-%E5%88%9D%E5%A7%8B%E5%8C%96/media/15274999409834/15276381215150.jpg">
+<meta name="twitter:image" content="https://dorgenjones.github.io/media/15276381215150.jpg">
 
 
 
@@ -414,16 +414,16 @@
 </li>
 </ol>
 <p>每个角色最大的不同即是其所对应的<code>ZookeeperServer</code>不同，而每个<code>ZookeeperServer</code>的本质不同在于其处理器链的不同。</p>
-<p><img src="media/15274999409834/15276381215150.jpg" alt=""></p>
+<p><img src="/media/15276381215150.jpg" alt=""></p>
 <ul>
-<li><p><strong>Leader的处理链：</strong><br><img src="media/15269002735103/15273896493986.jpg" alt=""></p>
+<li><p><strong>Leader的处理链：</strong><br><img src="/media/15273896493986.jpg" alt=""></p>
 </li>
-<li><p><strong>Follower的处理链：</strong><br><img src="media/15269002735103/15273897358019.jpg" alt=""></p>
+<li><p><strong>Follower的处理链：</strong><br><img src="/media/15273897358019.jpg" alt=""></p>
 </li>
-<li><p><strong>Observer的处理链</strong><br><img src="media/15269002735103/15273897358019.jpg" alt=""></p>
+<li><p><strong>Observer的处理链</strong><br><img src="/media/15273897358019.jpg" alt=""></p>
 </li>
 </ul>
-<p><strong>每个处理器的作用如下：</strong><br><img src="media/15269002735103/15274690874468.jpg" alt=""><br><img src="media/15269002735103/15274691255643.jpg" alt=""></p>
+<p><strong>每个处理器的作用如下：</strong><br><img src="/media/15274690874468.jpg" alt=""><br><img src="/media/15274691255643.jpg" alt=""></p>
 <h3 id="Reference"><a href="#Reference" class="headerlink" title="Reference:"></a>Reference:</h3><ul>
 <li>《从Paxos到ZooKeeper 分布式一致性原理与实践》</li>
 </ul>
@@ -436,6 +436,35 @@
 
     
 
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>您的支持是我创作源源不断的动力</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="Zamperini 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="Zamperini 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
     
 
     
@@ -576,7 +605,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">10</span>
+                      
+                    
+                    <span class="site-state-item-count">11</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -633,9 +664,7 @@
                     
                       
                     
-                      
-                    
-                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-count">22</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -645,6 +674,28 @@
 
           
 
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/DorgenJones" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:dblpfilter@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/u/1938368215" target="_blank" title="Weibo">
+                      
+                        <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                  </span>
+                
+            </div>
           
 
           

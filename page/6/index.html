@@ -367,12 +367,12 @@
       
         
           
-            <p>#Hystrix 简介<br>“<strong>Excuse me? 头戴金冠 北极熊??</strong>“<br><img src="media/14964556682419/15018147277400.jpg" alt="set up-w300"></p>
+            <p>#Hystrix 简介<br>“<strong>Excuse me? 头戴金冠 北极熊??</strong>“<br><img src="/media/15018147277400.jpg" alt="set up-w300"></p>
 <blockquote>
 <p>Netflix(世界最大在线影片租赁服务商)开源的延迟容错工具包，用于隔离分布式系统之间的依赖访问。防止级联故障，使得复杂的分布式系统在错误不可避免的条件下仍具有弹性，具有自我保护的能力。</p>
 </blockquote>
 <p><a href="https://github.com/Netflix/Hystrix/wiki/FAQ%20:%20General#where-does-the-name-come-from" target="_blank" rel="noopener"><strong>Where does the name from?</strong></a></p>
-<p><img src="media/14964556682419/14980602061637.jpg" alt="set up-w300"></p>
+<p><img src="/media/14980602061637.jpg" alt="set up-w300"></p>
 <h2 id="功能："><a href="#功能：" class="headerlink" title="功能："></a>功能：</h2><ul>
 <li>防护并控制因依赖第三方服务导致的延时和故障；</li>
 <li>阻止级联故障；</li>
@@ -384,10 +384,10 @@
 <blockquote>
 <p>一个应用依赖30个外部服务，每个服务的可用性为<code>99.99%</code>，那么主应用的可用性即为<code>99.99^30</code> = <code>99.7%</code><br><code>0.3%</code>的故障率意味着每月有2+小时的时间服务不可用。可用性是相当差的<br>当服务依赖数越多时，整体可用性越差</p>
 </blockquote>
-<p>服务正常运行时，如下图所示:<br><img src="media/14964556682419/14980612634741.jpg" alt=""></p>
+<p>服务正常运行时，如下图所示:<br><img src="/media/14980612634741.jpg" alt=""></p>
 <p>当有一个后台系统延时较高时，会阻塞整个用户的请求：</p>
-<p><img src="media/14964556682419/14980612716095.jpg" alt=""><br>在高并发的场景下，单个后台依赖接口超时后会造成所有服务器上的资源都被耗尽，造成更多级联故障。</p>
-<p><img src="media/14964556682419/14980612832009.jpg" alt=""></p>
+<p><img src="/media/14980612716095.jpg" alt=""><br>在高并发的场景下，单个后台依赖接口超时后会造成所有服务器上的资源都被耗尽，造成更多级联故障。</p>
+<p><img src="/media/14980612832009.jpg" alt=""></p>
 <p>因此，所有这些延时和故障都应该被隔离和管理，使得单个接口故障不会拖累整个应用。</p>
 <h2 id="设计原则"><a href="#设计原则" class="headerlink" title="设计原则"></a>设计原则</h2><ul>
 <li>通过<strong>线程隔离</strong>来防止单个依赖耗尽所有的容器内所有用户线程；</li>
@@ -408,7 +408,7 @@
 <li>监控计量数据和配置修改信息并支持近实时地修改配置。</li>
 </ul>
 <p>当使用Hystrix来包装每个依赖服务时，上面的架构即变为如下图所示。其中每个依赖都相互隔离，当延迟发生时只会耗尽其内部资源而不影响其他资源，同时也覆盖了降级逻辑用于依赖服务发生错误时向用户返回信息。</p>
-<p><img src="media/14964556682419/14980613555431.jpg" alt=""></p>
+<p><img src="/media/14980613555431.jpg" alt=""></p>
 <p>参考：</p>
 <ol>
 <li><a href="https://github.com/Netflix/Hystrix/wiki" target="_blank" rel="noopener">Hystrix</a></li>
@@ -560,7 +560,7 @@
 <p>PluginManager.collectPlugins里，它会创建一个PluginRegistry单例，其<code>decodeCacheFiles</code>方法用于从META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat文件中加载并解析插件对象，并按类别存储。目前共有6中类型插件：converter,lookup,core,configurationfactory,fileconverter,typeconverter</p>
 </blockquote>
 <h2 id="PatternLayout的处理"><a href="#PatternLayout的处理" class="headerlink" title="PatternLayout的处理:"></a>PatternLayout的处理:</h2><blockquote>
-<p>在实例化PatternFormatter时，同时会通过PatternParser将 字符串转换成转换器列表<code>PatternFormater(LogEventPatternConverter,FormattingInfo)</code>。LogEventPatternConverter是转换类插件的抽象类。<br>下图演示的就是其对应关系：<br><img src="media/14932659149539/14933065402517.jpg" alt="set up-w888"></p>
+<p>在实例化PatternFormatter时，同时会通过PatternParser将 字符串转换成转换器列表<code>PatternFormater(LogEventPatternConverter,FormattingInfo)</code>。LogEventPatternConverter是转换类插件的抽象类。<br>下图演示的就是其对应关系：<br><img src="/media/14933065402517.jpg" alt="set up-w888"></p>
 </blockquote>
 <!--
 **修改：**
@@ -726,7 +726,7 @@
 </li>
 <li><strong>Filter</strong>: <strong>过滤器</strong>，在整个日志系统的类图中，多个地方应用。起到一个过滤的作用，用于过滤特定日志级别的日志事件。有多个地方引用<code>Filter</code>：日志事件进入LoggerConfig之前；进入LoggerConfig后调用任何Appender之前；进入LoggerConfig后调用特殊的Appender之前；每个Appender内部。</li>
 <li><strong>LoggerConfig</strong>: 真正的日志操作实体，对应配置文件中的<code>&lt;Logger&gt;</code>下定义的Logger。含有全局唯一标识（名称），一般对应的是一个包目录名称。</li>
-<li><strong>Logger</strong>: 壳，每个Logger内部都对应一个LoggerConfig（通过名称来对应）。对日志事件的操作，都交由其对应的LoggerConfig进行处理<br><img src="media/14925249707139/14930134238097.jpg" alt="set up-w666"></li>
+<li><strong>Logger</strong>: 壳，每个Logger内部都对应一个LoggerConfig（通过名称来对应）。对日志事件的操作，都交由其对应的LoggerConfig进行处理<br><img src="/media/14930134238097.jpg" alt="set up-w666"></li>
 </ol>
 <ul>
 <li>在使用日志系统前，首先需要初始化日志系统：解析日志配置信息<code>Configuration</code>，建立日志上下文<code>LoggerContext</code>（属性、Appender、LogerConfig…）</li>
@@ -734,7 +734,7 @@
 <li>在执行日志操作时，会经过多层过滤(Filter)，并且真正的日志操作由LoggerConfig来处理。</li>
 </ul>
 <p>因此下面，将从<strong>这三方面</strong>来分析日志系统。1. 日志系统的初始化；2.获取日志对象；3.日志操作过程。其中，日志系统的初始化较其他两部分稍复杂。</p>
-<h2 id="1-日志系统的初始化过程，获取LoggerContext"><a href="#1-日志系统的初始化过程，获取LoggerContext" class="headerlink" title="1. 日志系统的初始化过程，获取LoggerContext"></a>1. 日志系统的初始化过程，获取LoggerContext</h2><p>初始化的过程关键是 加载并解析配置文件，建立日志上下文。<br>初始化过程的时序图：<br><img src="media/14925250468893/log%E5%88%9D%E5%A7%8B%E5%8C%96%E6%97%B6%E5%BA%8F%E5%9B%BE.png" alt="log初始化时序图"></p>
+<h2 id="1-日志系统的初始化过程，获取LoggerContext"><a href="#1-日志系统的初始化过程，获取LoggerContext" class="headerlink" title="1. 日志系统的初始化过程，获取LoggerContext"></a>1. 日志系统的初始化过程，获取LoggerContext</h2><p>初始化的过程关键是 加载并解析配置文件，建立日志上下文。<br>初始化过程的时序图：<br><img src="/media/log%E5%88%9D%E5%A7%8B%E5%8C%96%E6%97%B6%E5%BA%8F%E5%9B%BE.png" alt="log初始化时序图"></p>
 <p>当应用首次调动<code>LogManager.getLogger</code>方法时，触发日志系统的初始化：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Logger <span class="title">getLogger</span><span class="params">(<span class="keyword">final</span> Class&lt;?&gt; clazz)</span> </span>&#123;</span><br><span class="line">   ...</span><br><span class="line">   <span class="comment">//获取LoggerContext，通过其获取指定类名称的Logger</span></span><br><span class="line">   <span class="keyword">return</span> getContext(clazz.getClassLoader(), <span class="keyword">false</span>).getLogger(clazz.getName());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -796,7 +796,7 @@
 </blockquote>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">PrivateConfig</span><span class="params">(<span class="keyword">final</span> Configuration config, <span class="keyword">final</span> Logger logger)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.config = config;</span><br><span class="line">  <span class="keyword">this</span>.loggerConfig = config.getLoggerConfig(getName());</span><br><span class="line">  <span class="keyword">this</span>.level = <span class="keyword">this</span>.loggerConfig.getLevel();</span><br><span class="line">  <span class="keyword">this</span>.intLevel = <span class="keyword">this</span>.level.intLevel();</span><br><span class="line">  <span class="keyword">this</span>.logger = logger;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//AbstractConfig的getLoggerConfig</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> LoggerConfig <span class="title">getLoggerConfig</span><span class="params">(<span class="keyword">final</span> String name)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">if</span> (loggers.containsKey(name)) &#123;</span><br><span class="line">       <span class="keyword">return</span> loggers.get(name);</span><br><span class="line">   &#125;</span><br><span class="line">   String substr = name;</span><br><span class="line">   <span class="keyword">while</span> ((substr = NameUtil.getSubName(substr)) != <span class="keyword">null</span>) &#123;</span><br><span class="line">       <span class="keyword">if</span> (loggers.containsKey(substr)) &#123;</span><br><span class="line">           <span class="keyword">return</span> loggers.get(substr);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> root;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p><img src="media/14925249707139/14930152428677.jpg" alt="set up-w666"></p>
+<p><img src="/media/14930152428677.jpg" alt="set up-w666"></p>
 <p>最终就完成了Logger对象的创建。</p>
 <h2 id="3-触发日志事件"><a href="#3-触发日志事件" class="headerlink" title="3. 触发日志事件"></a>3. 触发日志事件</h2><p>下面将从一条日志语句出发，分析进行日志操作的过程中，经过了哪些过程。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">logger.info(<span class="string">"Hello World"</span>);</span><br></pre></td></tr></table></figure>
@@ -823,7 +823,7 @@
 <blockquote>
 <p>事实上，在PluginManger初始化时，其属性 pluginRegistry（单例）初始化时，会调用<code>decodeCacheFiles</code>方法用于从META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat文件中加载并解析所有的插件类型对象，并按类别存储。目前共有6中类型插件：converter,lookup,core,configurationfactory,fileconverter,typeconverter</p>
 </blockquote>
-<h3 id="PatternLayout的特殊处理"><a href="#PatternLayout的特殊处理" class="headerlink" title="PatternLayout的特殊处理"></a>PatternLayout的特殊处理</h3><p>在对配置文件解析时，一件有意思的事是，对日志输出样式的处理。<br>在日志系统初始化阶段，会对字符串形式的输出样式进行解析，将其转换为convetor的列表。在日志输出时，只需要顺序调用这些转换器，拼接返回结果得到输出内容。这样使得日志输出效率高。<br><img src="media/14932659149539/14933065402517.jpg" alt="set up-w888"></p>
+<h3 id="PatternLayout的特殊处理"><a href="#PatternLayout的特殊处理" class="headerlink" title="PatternLayout的特殊处理"></a>PatternLayout的特殊处理</h3><p>在对配置文件解析时，一件有意思的事是，对日志输出样式的处理。<br>在日志系统初始化阶段，会对字符串形式的输出样式进行解析，将其转换为convetor的列表。在日志输出时，只需要顺序调用这些转换器，拼接返回结果得到输出内容。这样使得日志输出效率高。<br><img src="/media/14933065402517.jpg" alt="set up-w888"></p>
 <p>[TOC]</p>
 <p>参考：</p>
 <ol>
@@ -999,7 +999,7 @@
 <li>当LoggerConfig配置了additivity=”true” 会将日志事件传递给父节点LoggerConfig</li>
 </ol>
 <p>LogerConfig会根据name来建立一个关系树，root是根节点。如下图：<br>additivity（是否可叠加） 用于控制：子LogConfig里的日志事件是否往父LogConfig中传递。</p>
-<h2 id="3-LogConfig继承关系图"><a href="#3-LogConfig继承关系图" class="headerlink" title="3. LogConfig继承关系图"></a>3. LogConfig继承关系图</h2><p><img src="media/14925249707139/14931361439660.jpg" alt="set up-w400"></p>
+<h2 id="3-LogConfig继承关系图"><a href="#3-LogConfig继承关系图" class="headerlink" title="3. LogConfig继承关系图"></a>3. LogConfig继承关系图</h2><p><img src="/media/14931361439660.jpg" alt="set up-w400"></p>
 <p>参考：</p>
 <ol>
 <li><a href="http://logging.apache.org/log4j/2.x/manual/layouts.html" target="_blank" rel="noopener">Layouts</a></li>
@@ -1218,29 +1218,29 @@
 <li>首先<strong>寻找日志工厂类</strong>：<br>通过检查系统属性、执行路径文件和用户配置文件，看是否定义了相应的日志工程类。若有则加载此类，并通过其来生成日志对象；否则选择默认的日志工厂：<code>org.apache.commons.logging.impl.LogFactoryImpl</code></li>
 <li>默认日志工厂获取日志适配器的过程：首先去寻找用户是否自己配置了日志适配器。若有则加载此类并初始化返回；若没有，则按一个固定的顺序来尝试来实例化日志适配器，若实例化成功则返回。</li>
 </ol>
-<h3 id="2-SLF4J-桥接"><a href="#2-SLF4J-桥接" class="headerlink" title="2. SLF4J 桥接"></a>2. SLF4J 桥接</h3><p>下图展示的是SLF4J和其他实现日志框架的桥接示意图：<br>可以看到通过jar包和其他日志实现框架起桥梁作用。这些起桥接作用的jar包是怎么起作用的呢？<br><img src="media/14925249628414/14928715112128.jpg" alt="set up-w520"></p>
+<h3 id="2-SLF4J-桥接"><a href="#2-SLF4J-桥接" class="headerlink" title="2. SLF4J 桥接"></a>2. SLF4J 桥接</h3><p>下图展示的是SLF4J和其他实现日志框架的桥接示意图：<br>可以看到通过jar包和其他日志实现框架起桥梁作用。这些起桥接作用的jar包是怎么起作用的呢？<br><img src="/media/14928715112128.jpg" alt="set up-w520"></p>
 <p>是因为<code>StaticLoggerBinder</code>的作用！<br>从SLF4J的入口来寻找答案：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Logger <span class="title">getLogger</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//获取日志工厂</span></span><br><span class="line">   ILoggerFactory iLoggerFactory = getILoggerFactory();</span><br><span class="line">   <span class="keyword">return</span> iLoggerFactory.getLogger(name);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ILoggerFactory <span class="title">getILoggerFactory</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   ...</span><br><span class="line">    <span class="comment">//加载StaticLoggerBinder类</span></span><br><span class="line">    performInitialization();</span><br><span class="line">   ...</span><br><span class="line">           <span class="comment">//初始化StaticLoggerBinder，并获取其初始化的日志工厂</span></span><br><span class="line">           <span class="keyword">return</span> StaticLoggerBinder.getSingleton().getLoggerFactory();</span><br><span class="line">           ...</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>performInitialization 初始化日志系统， 通过加载项目中引入的桥接jar包中的StaticLoggerBinder，绑定特定日志实现框架的作用。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">performInitialization</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//绑定操作</span></span><br><span class="line">   bind();</span><br><span class="line">   ...</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">bind</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="keyword">try</span> &#123;</span><br><span class="line">       Set&lt;URL&gt; staticLoggerBinderPathSet = <span class="keyword">null</span>;</span><br><span class="line">       <span class="keyword">if</span> (!isAndroid()) &#123;</span><br><span class="line">       <span class="comment">//获取项目中所有的“org/slf4j/impl/StaticLoggerBinder.class”文件</span></span><br><span class="line">           staticLoggerBinderPathSet = findPossibleStaticLoggerBinderPathSet();</span><br><span class="line">           <span class="comment">//当检测到有多个StaticLoggerBinder，会发出警告信息</span></span><br><span class="line">           reportMultipleBindingAmbiguity(staticLoggerBinderPathSet);</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// 实现绑定</span></span><br><span class="line">       StaticLoggerBinder.getSingleton();</span><br><span class="line">       INITIALIZATION_STATE = SUCCESSFUL_INITIALIZATION;</span><br><span class="line">       reportActualBinding(staticLoggerBinderPathSet);</span><br><span class="line">       fixSubstituteLoggers();</span><br><span class="line">       replayEvents();</span><br><span class="line">       <span class="comment">// release all resources in SUBST_FACTORY</span></span><br><span class="line">       SUBST_FACTORY.clear();</span><br><span class="line">   &#125; <span class="keyword">catch</span> (NoClassDefFoundError ncde) &#123;</span><br><span class="line">       ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> String STATIC_LOGGER_BINDER_PATH = <span class="string">"org/slf4j/impl/StaticLoggerBinder.class"</span>;</span><br><span class="line"><span class="function"><span class="keyword">static</span> Set&lt;URL&gt; <span class="title">findPossibleStaticLoggerBinderPathSet</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   Set&lt;URL&gt; staticLoggerBinderPathSet = <span class="keyword">new</span> LinkedHashSet&lt;URL&gt;();</span><br><span class="line">   <span class="keyword">try</span> &#123;</span><br><span class="line">       ClassLoader loggerFactoryClassLoader = LoggerFactory<span class="class">.<span class="keyword">class</span>.<span class="title">getClassLoader</span>()</span>;</span><br><span class="line">       Enumeration&lt;URL&gt; paths;</span><br><span class="line">       <span class="keyword">if</span> (loggerFactoryClassLoader == <span class="keyword">null</span>) &#123;</span><br><span class="line">           paths = ClassLoader.getSystemResources(STATIC_LOGGER_BINDER_PATH);</span><br><span class="line">       &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       <span class="comment">//获取项目中所有"org/slf4j/impl/StaticLoggerBinder.class"文件</span></span><br><span class="line">           paths = loggerFactoryClassLoader.getResources(STATIC_LOGGER_BINDER_PATH);</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">while</span> (paths.hasMoreElements()) &#123;</span><br><span class="line">           URL path = paths.nextElement();</span><br><span class="line">           staticLoggerBinderPathSet.add(path);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125; <span class="keyword">catch</span> (IOException ioe) &#123;</span><br><span class="line">       Util.report(<span class="string">"Error getting resources from path"</span>, ioe);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> staticLoggerBinderPathSet;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>与SLF4J相关的桥接包里都有<code>org/slf4j/impl/StaticLoggerBinder</code>类，同时所有的<code>StaticLoggerBinder</code>都实现了<code>LoggerFactoryBinder</code>接口，方法<code>getLoggerFactory()</code>用于返回桥接包内的具体工厂对象(这些工厂对象都在StaticLoggerBinder对象的构造函数中进行了初始化)，比如Log4jLoggerFactory、JDK14LoggerFactory、JDK14LoggerFactory…</p>
-<p><img src="media/14925249628414/log.jpg" alt="log"></p>
-<p>SLF4j官方给出了通过SLF4J桥接其他日志实现框架所依赖的jar。这些包文件中无一例外地包含类<code>StaticLoggerBinder</code><br><img src="media/14925249628414/14925649741957.jpg" alt="set up-w888"></p>
+<p><img src="/media/log.jpg" alt="log"></p>
+<p>SLF4j官方给出了通过SLF4J桥接其他日志实现框架所依赖的jar。这些包文件中无一例外地包含类<code>StaticLoggerBinder</code><br><img src="/media/14925649741957.jpg" alt="set up-w888"></p>
 <p>总结：</p>
 <ol>
 <li>SLF4j是通过<code>StaticLoggerBinder</code>来与具体日志实现框架进行桥接的。</li>
 <li>当SLF4J扫描到有多个<code>StaticLoggerBinder</code>的实现时，会发出报警。同时会随机选一个。因此应该尽量杜绝这种情况发生。</li>
 </ol>
-<p>另外，SLF4J也给出了在业务代码中也使用了其他日志API的情况下，桥接到SLF4J所依赖的包。<br>其<strong>原理</strong>是：在这些包内部(log4j-over-slf4j…)实现相应日志API的类（相同的类名称）。比如<code>log4j-over-slf4j</code> 实现了和log4j1同类名的<code>org.apache.log4j.LogManager</code>，而在<code>log4j-over-slf4j</code>的<code>LogManager</code>里就实现了桥接SLF4J。<br><img src="media/14925249628414/14925647803336.jpg" alt="set up-w888"></p>
-<h3 id="3-补充说Log4j2的桥接"><a href="#3-补充说Log4j2的桥接" class="headerlink" title="3. 补充说Log4j2的桥接"></a>3. 补充说Log4j2的桥接</h3><p>Log4j2的特殊是因为Log4j2在SLF4j和Common-logging等之后诞生，而Log4j2为了适配这些通用日志接口，不得不做配合它们的适配工作。<br>下图展示的是 通过其他日志接口桥接到日志实现框架Log4j2所需要引入的依赖。<br><img src="media/14925249628414/14930140754811.jpg" alt="set up-w580"></p>
+<p>另外，SLF4J也给出了在业务代码中也使用了其他日志API的情况下，桥接到SLF4J所依赖的包。<br>其<strong>原理</strong>是：在这些包内部(log4j-over-slf4j…)实现相应日志API的类（相同的类名称）。比如<code>log4j-over-slf4j</code> 实现了和log4j1同类名的<code>org.apache.log4j.LogManager</code>，而在<code>log4j-over-slf4j</code>的<code>LogManager</code>里就实现了桥接SLF4J。<br><img src="/media/14925647803336.jpg" alt="set up-w888"></p>
+<h3 id="3-补充说Log4j2的桥接"><a href="#3-补充说Log4j2的桥接" class="headerlink" title="3. 补充说Log4j2的桥接"></a>3. 补充说Log4j2的桥接</h3><p>Log4j2的特殊是因为Log4j2在SLF4j和Common-logging等之后诞生，而Log4j2为了适配这些通用日志接口，不得不做配合它们的适配工作。<br>下图展示的是 通过其他日志接口桥接到日志实现框架Log4j2所需要引入的依赖。<br><img src="/media/14930140754811.jpg" alt="set up-w580"></p>
 <p>从图中可以看出：</p>
 <ol>
 <li><p>Log4j2为了桥接Common-logging 提供了Log4j-jcl.jar，资源文件：META-INF/services/org.apache.commons.logging.LogFactory内容:</p>
  <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">org.apache.logging.log4j.jcl.LogFactoryImpl</span><br></pre></td></tr></table></figure>
-<p> 对应的即为 上文 Common-logging包 getFactory()方法的第二步。<br> <img src="media/14925249628414/14931740155318.jpg" alt="set up-w520"></p>
+<p> 对应的即为 上文 Common-logging包 getFactory()方法的第二步。<br> <img src="/media/14931740155318.jpg" alt="set up-w520"></p>
 </li>
 <li><p>Log4j2为了桥接SLF4j 也提供了log4j-slf4j-impl.jar。其包内容如下：提供了org.slf4j.impl.StaticLoggerBinder.class；以起到桥接的作用。</p>
-<p> <img src="media/14925249628414/14931744694782.jpg" alt="set up-w520"></p>
+<p> <img src="/media/14931744694782.jpg" alt="set up-w520"></p>
 </li>
 </ol>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>简化：</p>
@@ -1360,7 +1360,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">10</span>
+                      
+                    
+                    <span class="site-state-item-count">11</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -1417,9 +1419,7 @@
                     
                       
                     
-                      
-                    
-                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-count">22</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -1429,6 +1429,28 @@
 
           
 
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/DorgenJones" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:dblpfilter@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/u/1938368215" target="_blank" title="Weibo">
+                      
+                        <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                  </span>
+                
+            </div>
           
 
           

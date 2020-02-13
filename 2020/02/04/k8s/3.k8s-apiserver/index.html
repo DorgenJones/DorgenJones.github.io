@@ -110,14 +110,15 @@
 <meta property="og:site_name" content="Zamperini">
 <meta property="og:description" content="1. kube-apiserver（@v1.17.2）[TOC] ApiServer是K8S服务调度的核心，其同时负责与外界的交互、集群内其他组件的交互，也是K8S中唯一与持久化存储Etcd交互的组件。 下面将从以下几点来解析 ApiSever：  启动过程 Scheme构建过程   路由构建过程 认证、授权、准入构建过程   请求过程 读写请求过程 watch机制   其他组件与其交互过程 in">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://dorgenjones.github.io/2020/02/04/k8s/3.k8s-apiserver/media/15645672183579/15810695608846.jpg">
-<meta property="og:image" content="https://dorgenjones.github.io/2020/02/04/k8s/3.k8s-apiserver/media/15645672183579/15810696269545.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/media/15815943647079.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/media/15810695608846.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/media/15810696269545.jpg">
 <meta property="article:published_time" content="2020-02-03T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-02-13T11:02:32.588Z">
+<meta property="article:modified_time" content="2020-02-13T12:08:32.817Z">
 <meta property="article:author" content="Zamperini">
 <meta property="article:tag" content="k8s">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://dorgenjones.github.io/2020/02/04/k8s/3.k8s-apiserver/media/15645672183579/15810695608846.jpg">
+<meta name="twitter:image" content="https://dorgenjones.github.io/media/15815943647079.jpg">
 
 
 
@@ -526,7 +527,9 @@
 </ol>
 </li>
 </ol>
-<p>总结其运行图如下：<br><img src="./media/15645672183579/15810695608846.jpg" alt=""></p>
+<p>总结其运行图如下：</p>
+<p><img src="/media/15815943647079.jpg" alt=""></p>
+<p><img src="/media/15810695608846.jpg" alt=""></p>
 <blockquote>
 <p>k8s现阶段，API一共分为13个Group：Core、apps、authentication、authorization、autoscaling、batch、certificates、componentconfig、extensions、imagepolicy、policy、rbac、storage。</p>
 </blockquote>
@@ -551,7 +554,7 @@
 <li>需要特别说明的一点是：对于修改操作，同时会将<code>Admit</code>传入<code>RouteFunction</code>中，为了在操作前进行准入的控制；</li>
 <li>最后，将每种<code>route</code>加入到<code>WebService</code>中。</li>
 </ol>
-<h2 id="单次请求过程"><a href="#单次请求过程" class="headerlink" title="单次请求过程"></a>单次请求过程</h2><p>下面本节将以创建一个<code>deployment</code>为例来讲解请求执行过程：<br>首先通过<code>kubectl</code>向<code>k8s-apiserver</code>发起创建<code>deployment</code>命令，<code>kubectl create -f nginx-deployment.yaml</code>。<br>其执行流程如下图：<br><img src="media/15645672183579/15810696269545.jpg" alt=""></p>
+<h2 id="单次请求过程"><a href="#单次请求过程" class="headerlink" title="单次请求过程"></a>单次请求过程</h2><p>下面本节将以创建一个<code>deployment</code>为例来讲解请求执行过程：<br>首先通过<code>kubectl</code>向<code>k8s-apiserver</code>发起创建<code>deployment</code>命令，<code>kubectl create -f nginx-deployment.yaml</code>。<br>其执行流程如下图：<br><img src="/media/15810696269545.jpg" alt=""></p>
 <p>总结起来，其过程如下：</p>
 <ol>
 <li>首先经过过滤链进行处理，包括认证、准入等通用的功能链；</li>
@@ -576,6 +579,35 @@
 
     
 
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>您的支持是我创作源源不断的动力</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="Zamperini 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="Zamperini 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
     
 
     
@@ -716,7 +748,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">10</span>
+                      
+                    
+                    <span class="site-state-item-count">11</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -773,9 +807,7 @@
                     
                       
                     
-                      
-                    
-                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-count">22</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -785,6 +817,28 @@
 
           
 
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/DorgenJones" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:dblpfilter@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/u/1938368215" target="_blank" title="Weibo">
+                      
+                        <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                  </span>
+                
+            </div>
           
 
           

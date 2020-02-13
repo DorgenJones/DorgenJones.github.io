@@ -110,16 +110,16 @@
 <meta property="og:site_name" content="Zamperini">
 <meta property="og:description" content="#Hystrix原理浅析 [TOC] 带着问题看原理：  执行流程 如何做到信号量隔离和线程隔离 动态配置的实现 如何记录信号量数据 如何实现断路器 如何实现合并请求  1. Hystrix类结构以及命令执行流程1. Hystrix类结构Hystrix的命令实现主体部分是在抽象类AbstractCommnd中，HystrixCommand、HystrixObservableCommand是其的实现">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://dorgenjones.github.io/2017/08/15/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/4.hystrix-%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/media/15014667235538/15016865706319.jpg">
-<meta property="og:image" content="https://dorgenjones.github.io/2017/08/15/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/4.hystrix-%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/media/15014667235538/15016377167267.png">
-<meta property="og:image" content="https://dorgenjones.github.io/2017/08/15/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/4.hystrix-%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/media/15014667235538/15017765433249.jpg">
-<meta property="og:image" content="https://dorgenjones.github.io/2017/08/15/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/4.hystrix-%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/media/15014667235538/15018055405460.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/media/15016865706319.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/media/15016377167267.png">
+<meta property="og:image" content="https://dorgenjones.github.io/media/15017765433249.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/media/15018055405460.jpg">
 <meta property="article:published_time" content="2017-08-14T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-02-13T11:09:44.392Z">
+<meta property="article:modified_time" content="2020-02-13T12:01:24.523Z">
 <meta property="article:author" content="Zamperini">
 <meta property="article:tag" content="hystrix">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://dorgenjones.github.io/2017/08/15/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/4.hystrix-%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/media/15014667235538/15016865706319.jpg">
+<meta name="twitter:image" content="https://dorgenjones.github.io/media/15016865706319.jpg">
 
 
 
@@ -383,7 +383,7 @@
 <li>如何实现断路器</li>
 <li>如何实现合并请求</li>
 </ol>
-<h2 id="1-Hystrix类结构以及命令执行流程"><a href="#1-Hystrix类结构以及命令执行流程" class="headerlink" title="1. Hystrix类结构以及命令执行流程"></a>1. Hystrix类结构以及命令执行流程</h2><h3 id="1-Hystrix类结构"><a href="#1-Hystrix类结构" class="headerlink" title="1. Hystrix类结构"></a>1. Hystrix类结构</h3><p>Hystrix的命令实现主体部分是在抽象类<code>AbstractCommnd</code>中，<code>HystrixCommand</code>、<code>HystrixObservableCommand</code>是其的实现类。<br><img src="media/15014667235538/15016865706319.jpg" alt="set up-w600"></p>
+<h2 id="1-Hystrix类结构以及命令执行流程"><a href="#1-Hystrix类结构以及命令执行流程" class="headerlink" title="1. Hystrix类结构以及命令执行流程"></a>1. Hystrix类结构以及命令执行流程</h2><h3 id="1-Hystrix类结构"><a href="#1-Hystrix类结构" class="headerlink" title="1. Hystrix类结构"></a>1. Hystrix类结构</h3><p>Hystrix的命令实现主体部分是在抽象类<code>AbstractCommnd</code>中，<code>HystrixCommand</code>、<code>HystrixObservableCommand</code>是其的实现类。<br><img src="/media/15016865706319.jpg" alt="set up-w600"></p>
 <p><strong>HystrixCommand</strong>:<br>最终的执行主体是在方法<code>AbstractCommnd.toObservable()</code>中。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> R <span class="title">execute</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="keyword">try</span> &#123;</span><br><span class="line">       <span class="keyword">return</span> queue().get();</span><br><span class="line">   &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">       <span class="keyword">throw</span> Exceptions.sneakyThrow(decomposeException(e));</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> Future&lt;R&gt; <span class="title">queue</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">   <span class="comment">//第一步执行</span></span><br><span class="line">   <span class="keyword">final</span> Future&lt;R&gt; delegate = **toObservable()**.toBlocking().toFuture();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><strong>HystrixObservableCommand</strong>:</p>
@@ -396,7 +396,7 @@
 <li>第四步执行业务逻辑，如果此时业务逻辑抛出异常或者超市则会调用降级逻辑或…，并记录此次事件。</li>
 <li>当正常运行结束后也会记录执行成功的事件和运行的时延等信息，一是供断路器使用、二是提供实时监控数据输出</li>
 </ol>
-<p><img src="media/15014667235538/15016377167267.png" alt=""></p>
+<p><img src="/media/15016377167267.png" alt=""></p>
 <p>整个执行过程：将每个步骤都放在一个监听器（<code>Action~</code>）里。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Observable&lt;R&gt; <span class="title">toObservable</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="keyword">final</span> AbstractCommand&lt;R&gt; _cmd = <span class="keyword">this</span>;</span><br><span class="line">   <span class="comment">//命令结束的清理工作：发送命令执行结束清理事件</span></span><br><span class="line">   <span class="keyword">final</span> Action0 terminateCommandCleanup = <span class="keyword">new</span> Action0() &#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">           <span class="keyword">if</span> (_cmd.commandState.compareAndSet(CommandState.OBSERVABLE_CHAIN_CREATED, CommandState.TERMINAL)) &#123;</span><br><span class="line">               handleCommandEnd(<span class="keyword">false</span>); <span class="comment">//user code never ran</span></span><br><span class="line">           &#125; <span class="keyword">else</span> <span class="keyword">if</span> (_cmd.commandState.compareAndSet(CommandState.USER_CODE_EXECUTED, CommandState.TERMINAL)) &#123;</span><br><span class="line">               handleCommandEnd(<span class="keyword">true</span>); <span class="comment">//user code did run</span></span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;;</span><br><span class="line">   <span class="comment">//命令被取消时执行的逻辑。ps:虽然命令取消，但还是会命令还是会被执行完成。只是调用者不再等待</span></span><br><span class="line">   <span class="keyword">final</span> Action0 unsubscribeCommandCleanup = <span class="keyword">new</span> Action0() &#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">           handleCommandEnd(<span class="keyword">true</span>|<span class="keyword">false</span>); <span class="comment">//user code did run</span></span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;;</span><br><span class="line">   <span class="comment">//执行主体</span></span><br><span class="line">   <span class="keyword">final</span> Func0&lt;Observable&lt;R&gt;&gt; applyHystrixSemantics = <span class="keyword">new</span> Func0&lt;Observable&lt;R&gt;&gt;() &#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> Observable&lt;R&gt; <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">           <span class="keyword">if</span> (commandState.get().equals(CommandState.UNSUBSCRIBED)) &#123;</span><br><span class="line">               <span class="keyword">return</span> Observable.never();</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="comment">//命令执行主体</span></span><br><span class="line">           <span class="keyword">return</span> applyHystrixSemantics(_cmd);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">   <span class="keyword">return</span> Observable.defer(<span class="keyword">new</span> Func0&lt;Observable&lt;R&gt;&gt;() &#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> Observable&lt;R&gt; <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">           commandStartTimestamp = System.currentTimeMillis();</span><br><span class="line">            <span class="comment">//判断缓存是否开启</span></span><br><span class="line">           <span class="keyword">final</span> <span class="keyword">boolean</span> requestCacheEnabled = isRequestCachingEnabled();</span><br><span class="line">           <span class="keyword">final</span> String cacheKey = getCacheKey();</span><br><span class="line">            <span class="comment">//尝试从缓存中获取数据</span></span><br><span class="line">           <span class="keyword">if</span> (requestCacheEnabled) &#123;</span><br><span class="line">               HystrixCommandResponseFromCache&lt;R&gt; fromCache = (HystrixCommandResponseFromCache&lt;R&gt;) requestCache.get(cacheKey);</span><br><span class="line">               <span class="keyword">if</span> (fromCache != <span class="keyword">null</span>) &#123;</span><br><span class="line">                   isResponseFromCache = <span class="keyword">true</span>;</span><br><span class="line">                   <span class="keyword">return</span> handleRequestCacheHitAndEmitValues(fromCache, _cmd);</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">            <span class="comment">//执行命令</span></span><br><span class="line">           Observable&lt;R&gt; hystrixObservable =</span><br><span class="line">                   Observable.defer(applyHystrixSemantics)</span><br><span class="line">                           .map(wrapWithAllOnNextHooks);</span><br><span class="line"></span><br><span class="line">           Observable&lt;R&gt; afterCache;</span><br><span class="line">            <span class="comment">//执行完成后将结果放到缓存中</span></span><br><span class="line">           <span class="keyword">if</span> (requestCacheEnabled &amp;&amp; cacheKey != <span class="keyword">null</span>) &#123;</span><br><span class="line">               <span class="comment">// wrap it for caching</span></span><br><span class="line">               HystrixCachedObservable&lt;R&gt; toCache = HystrixCachedObservable.from(hystrixObservable, _cmd);</span><br><span class="line">               HystrixCommandResponseFromCache&lt;R&gt; fromCache = (HystrixCommandResponseFromCache&lt;R&gt;) requestCache.putIfAbsent(cacheKey, toCache);</span><br><span class="line">               <span class="comment">//...</span></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               afterCache = hystrixObservable;</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="comment">//...</span></span><br><span class="line">       &#125;</span><br><span class="line">   &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><strong>执行命令</strong>：</p>
@@ -437,13 +437,13 @@
 <li><strong>消费命令信息</strong><br>下面以<code>HealthCountsStream</code>为例来介绍其是怎么消费命令执行信息，并输出可供断路器使用的信息的：</li>
 </ul>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="title">HealthCountsStream</span><span class="params">(<span class="keyword">final</span> HystrixCommandKey commandKey, <span class="keyword">final</span> <span class="keyword">int</span> numBuckets, <span class="keyword">final</span> <span class="keyword">int</span> bucketSizeInMs,</span></span></span><br><span class="line"><span class="function"><span class="params">                               Func2&lt;<span class="keyword">long</span>[], HystrixCommandCompletion, <span class="keyword">long</span>[]&gt; reduceCommandCompletion)</span> </span>&#123;</span><br><span class="line"><span class="comment">//获取某个命令的`HystrixCommandCompletionStream`作为数据源</span></span><br><span class="line"><span class="keyword">super</span>(HystrixCommandCompletionStream.getInstance(commandKey), numBuckets, bucketSizeInMs, reduceCommandCompletion, healthCheckAccumulator);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Func2&lt;HealthCounts, <span class="keyword">long</span>[], HealthCounts&gt; healthCheckAccumulator = <span class="keyword">new</span> Func2&lt;HealthCounts, <span class="keyword">long</span>[], HealthCounts&gt;() &#123;</span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> HealthCounts <span class="title">call</span><span class="params">(HealthCounts healthCounts, <span class="keyword">long</span>[] bucketEventCounts)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> healthCounts.plus(bucketEventCounts);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<p><img src="media/15014667235538/15017765433249.jpg" alt="set up-w500"><br>跟进其父类<code>BucketedCounterStream</code> 和<code>BucketedRollingCounterStream</code>，可以看到命令完成事件数据流是怎么被消费的。</p>
+<p><img src="/media/15017765433249.jpg" alt="set up-w500"><br>跟进其父类<code>BucketedCounterStream</code> 和<code>BucketedRollingCounterStream</code>，可以看到命令完成事件数据流是怎么被消费的。</p>
 <p>首先，<code>BucketedCounterStream</code>是用来按指定的时间片段长度来生成Bucketed数据流（保留一个时间片段内的所有执行结果类型命令请求数）。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="title">BucketedCounterStream</span><span class="params">(<span class="keyword">final</span> HystrixEventStream&lt;Event&gt; inputEventStream, <span class="keyword">final</span> <span class="keyword">int</span> numBuckets, <span class="keyword">final</span> <span class="keyword">int</span> bucketSizeInMs,</span></span></span><br><span class="line"><span class="function"><span class="params">                                    <span class="keyword">final</span> Func2&lt;Bucket, Event, Bucket&gt; appendRawEventToBucket)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">this</span>.numBuckets = numBuckets;</span><br><span class="line">   <span class="keyword">this</span>.reduceBucketToSummary = <span class="keyword">new</span> Func1&lt;Observable&lt;Event&gt;, Observable&lt;Bucket&gt;&gt;() &#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> Observable&lt;Bucket&gt; <span class="title">call</span><span class="params">(Observable&lt;Event&gt; eventBucket)</span> </span>&#123;</span><br><span class="line">           <span class="comment">//叠加操作</span></span><br><span class="line">           <span class="keyword">return</span> eventBucket.reduce(getEmptyBucketSummary(), appendRawEventToBucket);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;;</span><br><span class="line">   <span class="keyword">this</span>.bucketedStream = Observable.defer(<span class="keyword">new</span> Func0&lt;Observable&lt;Bucket&gt;&gt;() &#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> Observable&lt;Bucket&gt; <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">           <span class="keyword">return</span> hystrixCommandCompletionStream</span><br><span class="line">                   .observe()</span><br><span class="line">                   <span class="comment">//关键！RxJava.window 以bucketSizeInMs时间大小为一个窗口发射数据</span></span><br><span class="line">                   .window(bucketSizeInMs, TimeUnit.MILLISECONDS)</span><br><span class="line">                   <span class="comment">// 将所有的命令请求聚合成一个总的结果：(每个命令执行结果类型的数量)</span></span><br><span class="line">                   .flatMap(reduceBucketToSummary)                </span><br><span class="line">                   .startWith(emptyEventCountsToStart);           </span><br><span class="line">       &#125;</span><br><span class="line">   &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><code>BucketedRollingCounterStream</code> 会订阅<code>BucketedCounterStream</code>生成的<strong>bucketedStream</strong>流，并基于此做了滑动窗口的功能，并聚合欢动窗口内的所有命令执行结果类型计量信息。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="title">BucketedRollingCounterStream</span><span class="params">(HystrixEventStream&lt;Event&gt; stream, <span class="keyword">final</span> <span class="keyword">int</span> numBuckets, <span class="keyword">int</span> bucketSizeInMs,</span></span></span><br><span class="line"><span class="function"><span class="params">                                           <span class="keyword">final</span> Func2&lt;Bucket, Event, Bucket&gt; appendRawEventToBucket,</span></span></span><br><span class="line"><span class="function"><span class="params">                                           <span class="keyword">final</span> Func2&lt;Output, Bucket, Output&gt; reduceBucket)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//此处 appendRawEventToBucket是实现`HealthCounts`相加的函数                                    </span></span><br><span class="line">   <span class="keyword">super</span>(stream, numBuckets, bucketSizeInMs, appendRawEventToBucket);</span><br><span class="line">   Func1&lt;Observable&lt;Bucket&gt;, Observable&lt;Output&gt;&gt; reduceWindowToSummary = <span class="keyword">new</span> Func1&lt;Observable&lt;Bucket&gt;, Observable&lt;Output&gt;&gt;() &#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> Observable&lt;Output&gt; <span class="title">call</span><span class="params">(Observable&lt;Bucket&gt; window)</span> </span>&#123;</span><br><span class="line">           <span class="keyword">return</span> window.scan(getEmptyOutputValue(), reduceBucket).skip(numBuckets);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;;</span><br><span class="line">   <span class="keyword">this</span>.sourceStream = bucketedStream</span><br><span class="line">            <span class="comment">//滑动窗口功能</span></span><br><span class="line">           .window(numBuckets, <span class="number">1</span>)          </span><br><span class="line">           .flatMap(reduceWindowToSummary)<span class="comment">//...          </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>再回过头来看断路器逻辑中，它监听的即是<code>BucketedRollingCounterStream</code>中的<code>sourceStream</code>。它向外推送<code>appendRawEventToBucket</code>的结果数据。</p>
-<h2 id="HystrixCollapser"><a href="#HystrixCollapser" class="headerlink" title="HystrixCollapser:"></a><strong>HystrixCollapser</strong>:</h2><p>Collapser的原理是：将一个时间窗内的所有请求合并批量发送到依赖方进行请求返回。<br><img src="media/15014667235538/15018055405460.jpg" alt="set up-w500"><br><code>HystrixCollapser</code>有两种域范围：用户请求范围、全局范围。用户请求范围只会把用户请求范围内的请求合并，全局范围则会合并所有请求<br>整个过程的时序图如下：</p>
+<h2 id="HystrixCollapser"><a href="#HystrixCollapser" class="headerlink" title="HystrixCollapser:"></a><strong>HystrixCollapser</strong>:</h2><p>Collapser的原理是：将一个时间窗内的所有请求合并批量发送到依赖方进行请求返回。<br><img src="/media/15018055405460.jpg" alt="set up-w500"><br><code>HystrixCollapser</code>有两种域范围：用户请求范围、全局范围。用户请求范围只会把用户请求范围内的请求合并，全局范围则会合并所有请求<br>整个过程的时序图如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">HystrixCollapser-&gt;RequestCollapser: toObservable</span><br><span class="line">RequestCollapser-&gt;HystrixTimer: submitRequest</span><br><span class="line">Note right of HystrixTimer: 第一次提交请求时，会创建HystrixTimer，并开启定时任务(**addTimerListener**)</span><br><span class="line">HystrixCollapser-&gt;RequestBatch: offer，将请求加到RequestBatch队列中（如果队列中已经有了此请求且设置了请求缓存，则直接返回之前的；当队列的大小大于批量的上界时执行任务，并重新开启下一个批量），执行线程阻塞。</span><br><span class="line">HystrixCollapser-&gt;HystrixCollapser: createNewBatchAndExecutePreviousIfNeeded，当时间窗口时间到达，或者到达最大请求时，则执行批量请求</span><br><span class="line">HystrixCollapser-&gt;RequestBatch: executeBatchIfNotAlreadyStarted，创建批量请求命令，提交请求。执行完成后并将结果映射会原有请求</span><br></pre></td></tr></table></figure>
 
 
@@ -458,6 +458,35 @@
 
     
 
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>您的支持是我创作源源不断的动力</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="Zamperini 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="Zamperini 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
     
 
     
@@ -598,7 +627,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">10</span>
+                      
+                    
+                    <span class="site-state-item-count">11</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -655,9 +686,7 @@
                     
                       
                     
-                      
-                    
-                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-count">22</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -667,6 +696,28 @@
 
           
 
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/DorgenJones" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:dblpfilter@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/u/1938368215" target="_blank" title="Weibo">
+                      
+                        <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                  </span>
+                
+            </div>
           
 
           

@@ -110,11 +110,13 @@
 <meta property="og:site_name" content="Zamperini">
 <meta property="og:description" content="k8s简介k8s 是谷歌开源的容器集群管理系统，主要功能包括：  基于容器的应用部署、维护和滚动升级  负载均衡和服务发现  跨机器和跨地区的集群调度  自动伸缩  无状态服务和有状态服务  广泛的 Volume 支持  插件机制保证扩展性现如今，k8s 发展非常迅速，已经成为容器编排领域的领导者。k8s由以下重要组件组成  ETCD ：是用来存储所有 Kubernetes 的集群状态的，它除了具">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://dorgenjones.github.io/media/15816008802835.jpg">
 <meta property="article:published_time" content="2020-02-02T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-02-13T11:03:30.999Z">
+<meta property="article:modified_time" content="2020-02-13T13:34:45.741Z">
 <meta property="article:author" content="Zamperini">
 <meta property="article:tag" content="k8s">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://dorgenjones.github.io/media/15816008802835.jpg">
 
 
 
@@ -398,6 +400,8 @@
 </ol>
 <p>其代码结构如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">| 目录 | 说明 |</span><br><span class="line">| ----------- | ---------------------------------------- |</span><br><span class="line">| api | 输出接口文档用 |</span><br><span class="line">| build | 构建脚本 |</span><br><span class="line">| cluster | 适配不同I层的云，例如亚马逊AWS，微软Azure，谷歌GCE的集群启动脚本 |</span><br><span class="line">| cmd | 所有的二进制可执行文件入口代码，例如apiserver&#x2F;scheduler&#x2F;kubelet |</span><br><span class="line">| contrib | 项目贡献者 |</span><br><span class="line">| docs | 文档，包括了用户文档、管理员文档、设计、新功能提议 |</span><br><span class="line">| example | 使用案例 |</span><br><span class="line">| Godeps | 项目中依赖使用的Go第三方包，例如docker客户端SDK，rest等 |</span><br><span class="line">| hack | 工具箱，各种编译、构建、测试、校验的脚本都在这里面 |</span><br><span class="line">| hooks | git提交前后触发的脚本 |</span><br><span class="line">| pkg | 项目代码主目录，cmd的只是个入口，这里是所有的具体实现 |</span><br><span class="line">| plugin | 插件，k8s认为调度器是插件的一部分，所以调度器的代码在这里 |</span><br><span class="line">| release | 应该是Google发版本用的？ |</span><br><span class="line">| test | 测试相关的工具 |</span><br><span class="line">| third_party | 一些第三方工具，应该不是强依赖的？ |</span><br><span class="line">| www | UI，不过已经被移动到新项目了 |</span><br><span class="line"></span><br><span class="line">可以看到，关键实现代码都放在pkg这个目录下。对于apiserver这种跨度很广的组件而言，唯一有效的阅读方式估计就是</span><br><span class="line">遍历pkg下所有的目录，概览大概知道这个目录是干啥的</span><br><span class="line">从cmd这个入口来看apiserver的代码，然后一点点由浅入深，看apiserver的大致实现</span><br><span class="line">分特性，看具体某个大的特性是怎么实现的，例如安全，例如和etcd存储对接</span><br><span class="line">在上面这几步的过程中可以看看别人的代码阅读文档，能有效的节省时间</span><br></pre></td></tr></table></figure>
+
+<p><img src="/media/15816008802835.jpg" alt=""></p>
 <p>本系列文章，将分五节来介绍<code>k8s</code>组件：</p>
 <ol start="0">
 <li>本地调试</li>

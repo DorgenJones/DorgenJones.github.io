@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="rocketmq,store," />
+
+
+<meta name="description" content="3. store[TOC] 存储是RocketMQ中至关重要的一部分。DefaultMessageStore是RocketMQ中用于存储消息的入口。一条消息存储过程大致如图所示：首先通过调用CommitLog.putMessage方法将消息追加到MappedFile文件中，然后再以异步的形式进行构建ConsumeQueue，如果用户设置了Key则同时进行构建Index。 我们将从DefaultMe">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RocketMQ 存储">
+<meta property="og:url" content="https://dorgenjones.github.io/2018/03/19/mq/3.rocketmq-%E5%AD%98%E5%82%A8/index.html">
+<meta property="og:site_name" content="Zamperini">
+<meta property="og:description" content="3. store[TOC] 存储是RocketMQ中至关重要的一部分。DefaultMessageStore是RocketMQ中用于存储消息的入口。一条消息存储过程大致如图所示：首先通过调用CommitLog.putMessage方法将消息追加到MappedFile文件中，然后再以异步的形式进行构建ConsumeQueue，如果用户设置了Key则同时进行构建Index。 我们将从DefaultMe">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://dorgenjones.github.io/2018/03/19/mq/3.rocketmq-%E5%AD%98%E5%82%A8/media/15262074232992/15262276039412.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2018/03/19/mq/3.rocketmq-%E5%AD%98%E5%82%A8/media/15262074232992/15262783557950.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2018/03/19/mq/3.rocketmq-%E5%AD%98%E5%82%A8/media/15262074232992/15262824950550.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2018/03/19/mq/3.rocketmq-%E5%AD%98%E5%82%A8/media/15262074232992/15262826812253.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2018/03/19/mq/3.rocketmq-%E5%AD%98%E5%82%A8/media/15261834789353/15263460992712.jpg">
+<meta property="article:published_time" content="2018-03-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-02-13T11:04:59.069Z">
+<meta property="article:author" content="Zamperini">
+<meta property="article:tag" content="rocketmq">
+<meta property="article:tag" content="store">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://dorgenjones.github.io/2018/03/19/mq/3.rocketmq-%E5%AD%98%E5%82%A8/media/15262074232992/15262276039412.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/2018/03/19/mq/3.rocketmq-存储/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>RocketMQ 存储 | Zamperini</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zamperini</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2018/03/19/mq/3.rocketmq-%E5%AD%98%E5%82%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">RocketMQ 存储</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-19T00:00:00+08:00">2018-03-19</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/rocketmq/" itemprop="url" rel="index"><span itemprop="name">rocketmq</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="3-store"><a href="#3-store" class="headerlink" title="3. store"></a>3. store</h1><p>[TOC]</p>
+<p>存储是<code>RocketMQ</code>中至关重要的一部分。<br><code>DefaultMessageStore</code>是<code>RocketMQ</code>中用于存储消息的入口。一条消息存储过程大致如图所示：<br><img src="media/15262074232992/15262276039412.jpg" alt=""><br>首先通过调用<code>CommitLog.putMessage</code>方法将消息追加到<code>MappedFile</code>文件中，然后再以异步的形式进行构建<code>ConsumeQueue</code>，如果用户设置了Key则同时进行构建<code>Index</code>。</p>
+<p>我们将从<code>DefaultMessageStore</code>的初始化和其追加消息来分析其工作原理。</p>
+<h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><p>首先进行成员变量的初始化：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">DefaultMessageStore</span><span class="params">(<span class="keyword">final</span> MessageStoreConfig messageStoreConfig, <span class="keyword">final</span> BrokerStatsManager brokerStatsManager,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">final</span> MessageArrivingListener messageArrivingListener, <span class="keyword">final</span> BrokerConfig brokerConfig)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">   <span class="comment">//当有新消息来时触发监听器（后面再讲Consumer的长轮询的时候会讲到）</span></span><br><span class="line">   <span class="keyword">this</span>.messageArrivingListener = messageArrivingListener;</span><br><span class="line">   <span class="keyword">this</span>.brokerConfig = brokerConfig;</span><br><span class="line">   <span class="keyword">this</span>.messageStoreConfig = messageStoreConfig;</span><br><span class="line">   <span class="comment">//状态管理</span></span><br><span class="line">   <span class="keyword">this</span>.brokerStatsManager = brokerStatsManager;</span><br><span class="line">   <span class="comment">//MapppedFile文件空间申请服务</span></span><br><span class="line">   <span class="keyword">this</span>.allocateMappedFileService = <span class="keyword">new</span> AllocateMappedFileService(<span class="keyword">this</span>);</span><br><span class="line">   <span class="comment">//提交日志，用于存放消息的地方，最关键的部分</span></span><br><span class="line">   <span class="keyword">this</span>.commitLog = <span class="keyword">new</span> CommitLog(<span class="keyword">this</span>);</span><br><span class="line">   <span class="comment">//消费队列表，用于保存每个topic下，每个queue的消费进度</span></span><br><span class="line">   <span class="keyword">this</span>.consumeQueueTable = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;(<span class="number">32</span>);</span><br><span class="line">   <span class="comment">//负责将消费队列表进行刷盘的服务</span></span><br><span class="line">   <span class="keyword">this</span>.flushConsumeQueueService = <span class="keyword">new</span> FlushConsumeQueueService();</span><br><span class="line">   <span class="comment">//负责定时清理旧消息文件的后台服务</span></span><br><span class="line">   <span class="keyword">this</span>.cleanCommitLogService = <span class="keyword">new</span> CleanCommitLogService();</span><br><span class="line">   <span class="comment">//负责定时清理旧消费队列文件的后台服务</span></span><br><span class="line">   <span class="keyword">this</span>.cleanConsumeQueueService = <span class="keyword">new</span> CleanConsumeQueueService();</span><br><span class="line">   <span class="comment">// 存储状态的服务</span></span><br><span class="line">   <span class="keyword">this</span>.storeStatsService = <span class="keyword">new</span> StoreStatsService();</span><br><span class="line">   <span class="comment">//索引服务</span></span><br><span class="line">   <span class="keyword">this</span>.indexService = <span class="keyword">new</span> IndexService(<span class="keyword">this</span>);</span><br><span class="line">   <span class="comment">// 主从同步服务</span></span><br><span class="line">   <span class="keyword">this</span>.haService = <span class="keyword">new</span> HAService(<span class="keyword">this</span>);</span><br><span class="line">   <span class="comment">//重放消息线程服务，用于从CommitLog中构建新增消息的ConsumeQueue并构建Index</span></span><br><span class="line">   <span class="keyword">this</span>.reputMessageService = <span class="keyword">new</span> ReputMessageService();</span><br><span class="line">   <span class="comment">//延时消息服务</span></span><br><span class="line">   <span class="keyword">this</span>.scheduleMessageService = <span class="keyword">new</span> ScheduleMessageService(<span class="keyword">this</span>);</span><br><span class="line">   <span class="comment">// 内存字节缓冲区</span></span><br><span class="line">   <span class="keyword">this</span>.transientStorePool = <span class="keyword">new</span> TransientStorePool(messageStoreConfig);</span><br><span class="line">   <span class="keyword">if</span> (messageStoreConfig.isTransientStorePoolEnable()) &#123;</span><br><span class="line">       <span class="keyword">this</span>.transientStorePool.init();</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">//开启文件分配后台线程</span></span><br><span class="line">   <span class="keyword">this</span>.allocateMappedFileService.start();</span><br><span class="line">   <span class="keyword">this</span>.indexService.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>CommitLog</code>是消息存储中最重要的部分，因为其他损失了可以根据此部分来补齐。<code>CommitLog</code>内部也需要实例化成员变量</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">CommitLog</span><span class="params">(<span class="keyword">final</span> DefaultMessageStore defaultMessageStore)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">this</span>.mappedFileQueue = <span class="keyword">new</span> MappedFileQueue(defaultMessageStore.getMessageStoreConfig().getStorePathCommitLog(),</span><br><span class="line">       defaultMessageStore.getMessageStoreConfig().getMapedFileSizeCommitLog(), defaultMessageStore.getAllocateMappedFileService());</span><br><span class="line">   <span class="keyword">this</span>.defaultMessageStore = defaultMessageStore;</span><br><span class="line">   <span class="comment">// 当开始同步刷盘时，使用GroupCommitService，非同步时使用FlushRealTimeService。</span></span><br><span class="line">   <span class="keyword">if</span> (FlushDiskType.SYNC_FLUSH == defaultMessageStore.getMessageStoreConfig().getFlushDiskType()) &#123;</span><br><span class="line">       <span class="keyword">this</span>.flushCommitLogService = <span class="keyword">new</span> GroupCommitService();</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       <span class="keyword">this</span>.flushCommitLogService = <span class="keyword">new</span> FlushRealTimeService();</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">//当开启内存字节缓冲区时，使用此服务进行刷盘</span></span><br><span class="line">   <span class="keyword">this</span>.commitLogService = <span class="keyword">new</span> CommitRealTimeService();</span><br><span class="line">   <span class="comment">// 日志写入详细内容</span></span><br><span class="line">   <span class="keyword">this</span>.appendMessageCallback = <span class="keyword">new</span> DefaultAppendMessageCallback(defaultMessageStore.getMessageStoreConfig().getMaxMessageSize());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>初始化完成员变量后，会执行一次<code>load()</code>方法。判断是否有历史文件，如果有则加载历史文件。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">load</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="keyword">boolean</span> result = <span class="keyword">true</span>;</span><br><span class="line">   <span class="comment">// 判断是否已经有文件存在，即判断是否是重启</span></span><br><span class="line">   <span class="keyword">boolean</span> lastExitOK = !<span class="keyword">this</span>.isTempFileExist();</span><br><span class="line">   log.info(<span class="string">"last shutdown &#123;&#125;"</span>, lastExitOK ? <span class="string">"normally"</span> : <span class="string">"abnormally"</span>);</span><br><span class="line">   <span class="comment">// 延时消息加载</span></span><br><span class="line">   <span class="keyword">if</span> (<span class="keyword">null</span> != scheduleMessageService) &#123;</span><br><span class="line">       result = result &amp;&amp; <span class="keyword">this</span>.scheduleMessageService.load();</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="comment">// load Commit Log</span></span><br><span class="line">   result = result &amp;&amp; <span class="keyword">this</span>.commitLog.load();</span><br><span class="line"></span><br><span class="line">   <span class="comment">// load Consume Queue</span></span><br><span class="line">   result = result &amp;&amp; <span class="keyword">this</span>.loadConsumeQueue(); <span class="comment">// TODO 待读</span></span><br><span class="line">   <span class="comment">//</span></span><br><span class="line">   <span class="keyword">if</span> (result) &#123;</span><br><span class="line">       <span class="keyword">this</span>.storeCheckpoint =</span><br><span class="line">               <span class="keyword">new</span> StoreCheckpoint(StorePathConfigHelper.getStoreCheckpoint(<span class="keyword">this</span>.messageStoreConfig.getStorePathRootDir()));</span><br><span class="line">       <span class="comment">//加载Index文件</span></span><br><span class="line">       <span class="keyword">this</span>.indexService.load(lastExitOK);</span><br><span class="line">        <span class="comment">//重新计算FlushOffset、CommittedOffset</span></span><br><span class="line">       <span class="keyword">this</span>.recover(lastExitOK);</span><br><span class="line">       log.info(<span class="string">"load over, and the max phy offset = &#123;&#125;"</span>, <span class="keyword">this</span>.getMaxPhyOffset());</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">if</span> (!result) &#123;</span><br><span class="line">       <span class="keyword">this</span>.allocateMappedFileService.shutdown();</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>初始化并加载完后，开启后台保障线程：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">   <span class="comment">//开始消费队列表刷盘服务</span></span><br><span class="line">   <span class="keyword">this</span>.flushConsumeQueueService.start();</span><br><span class="line">   <span class="comment">// 开始后台消息日志刷盘服务（同步和异步）</span></span><br><span class="line">   <span class="keyword">this</span>.commitLog.start();</span><br><span class="line">   <span class="keyword">this</span>.storeStatsService.start();</span><br><span class="line">   <span class="comment">//开启 延时消息</span></span><br><span class="line">   <span class="keyword">if</span> (<span class="keyword">this</span>.scheduleMessageService != <span class="keyword">null</span> &amp;&amp; SLAVE != messageStoreConfig.getBrokerRole()) &#123;</span><br><span class="line">       <span class="keyword">this</span>.scheduleMessageService.start();</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">//开启消息重放服务，建立Index和ConsumeQueue</span></span><br><span class="line">   <span class="keyword">if</span> (<span class="keyword">this</span>.getMessageStoreConfig().isDuplicationEnable()) &#123;</span><br><span class="line">       <span class="keyword">this</span>.reputMessageService.setReputFromOffset(<span class="keyword">this</span>.commitLog.getConfirmOffset());</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       <span class="keyword">this</span>.reputMessageService.setReputFromOffset(<span class="keyword">this</span>.commitLog.getMaxOffset());</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">this</span>.reputMessageService.start();</span><br><span class="line">   <span class="comment">//开启主从同步服务</span></span><br><span class="line">   <span class="keyword">this</span>.haService.start();</span><br><span class="line">   <span class="keyword">this</span>.createTempFile();</span><br><span class="line">   <span class="comment">//开启周期性清理旧文件服务</span></span><br><span class="line">   <span class="keyword">this</span>.addScheduleTask();</span><br><span class="line">   <span class="keyword">this</span>.shutdown = <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再细看，<code>CommitLog</code>的<code>start</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="comment">//开启后台刷盘服务</span></span><br><span class="line">   <span class="keyword">this</span>.flushCommitLogService.start();</span><br><span class="line">   <span class="comment">// 只有开启内存字节缓冲区时，才会开始commitLogService</span></span><br><span class="line">   <span class="keyword">if</span> (defaultMessageStore.getMessageStoreConfig().isTransientStorePoolEnable()) &#123;</span><br><span class="line">       <span class="keyword">this</span>.commitLogService.start();</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>初始化过程到此就结束了。</p>
+<h2 id="消息存储"><a href="#消息存储" class="headerlink" title="消息存储"></a>消息存储</h2><p>消息存储入口在<code>DefaultMessageStore.putMessage</code>中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> PutMessageResult <span class="title">putMessage</span><span class="params">(<span class="keyword">final</span> MessageExtBrokerInner msg)</span> </span>&#123;</span><br><span class="line">   msg.setStoreTimestamp(System.currentTimeMillis());</span><br><span class="line">   <span class="comment">// crc校验码，防止文件破损</span></span><br><span class="line">   msg.setBodyCRC(UtilAll.crc32(msg.getBody()));</span><br><span class="line">   AppendMessageResult result = <span class="keyword">null</span>;</span><br><span class="line">   StoreStatsService storeStatsService = <span class="keyword">this</span>.defaultMessageStore.getStoreStatsService();</span><br><span class="line">   String topic = msg.getTopic();</span><br><span class="line">   <span class="keyword">int</span> queueId = msg.getQueueId();</span><br><span class="line">   <span class="comment">// 定时消息处理</span></span><br><span class="line">   <span class="keyword">final</span> <span class="keyword">int</span> tranType = MessageSysFlag.getTransactionValue(msg.getSysFlag());</span><br><span class="line">   <span class="keyword">if</span> (tranType == MessageSysFlag.TRANSACTION_NOT_TYPE<span class="comment">//</span></span><br><span class="line">       || tranType == MessageSysFlag.TRANSACTION_COMMIT_TYPE) &#123;</span><br><span class="line">       <span class="comment">//延迟消息放到 SCHEDULE_TOPIC_XXXX topic的队列中</span></span><br><span class="line">       <span class="keyword">if</span> (msg.getDelayTimeLevel() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">           <span class="keyword">if</span> (msg.getDelayTimeLevel() &gt; <span class="keyword">this</span>.defaultMessageStore.getScheduleMessageService().getMaxDelayLevel()) &#123;</span><br><span class="line">               msg.setDelayTimeLevel(<span class="keyword">this</span>.defaultMessageStore.getScheduleMessageService().getMaxDelayLevel());</span><br><span class="line">           &#125;</span><br><span class="line">           topic = ScheduleMessageService.SCHEDULE_TOPIC;</span><br><span class="line">           <span class="comment">// 对于不同延时级别的消息放到不同的队列中 1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h</span></span><br><span class="line">           queueId = ScheduleMessageService.delayLevel2QueueId(msg.getDelayTimeLevel());</span><br><span class="line">           <span class="comment">// Backup real topic, queueId</span></span><br><span class="line">           MessageAccessor.putProperty(msg, MessageConst.PROPERTY_REAL_TOPIC, msg.getTopic());</span><br><span class="line">           MessageAccessor.putProperty(msg, MessageConst.PROPERTY_REAL_QUEUE_ID, String.valueOf(msg.getQueueId()));</span><br><span class="line">           msg.setPropertiesString(MessageDecoder.messageProperties2String(msg.getProperties()));</span><br><span class="line">           msg.setTopic(topic);</span><br><span class="line">           msg.setQueueId(queueId);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">// 获取写入映射文件</span></span><br><span class="line">   MappedFile mappedFile = <span class="keyword">this</span>.mappedFileQueue.getLastMappedFile();</span><br><span class="line">   <span class="comment">// 获取写入锁</span></span><br><span class="line">   lockForPutMessage(); <span class="comment">//spin...</span></span><br><span class="line">   <span class="keyword">try</span> &#123;</span><br><span class="line">       <span class="keyword">long</span> beginLockTimestamp = <span class="keyword">this</span>.defaultMessageStore.getSystemClock().now();</span><br><span class="line">       <span class="keyword">this</span>.beginTimeInLock = beginLockTimestamp;</span><br><span class="line">       <span class="comment">// beginLockTimestamp 为了保证一个全局的有序性</span></span><br><span class="line">       msg.setStoreTimestamp(beginLockTimestamp);</span><br><span class="line">       <span class="comment">// 当不存在映射文件时，进行创建</span></span><br><span class="line">       <span class="keyword">if</span> (<span class="keyword">null</span> == mappedFile || mappedFile.isFull()) &#123;</span><br><span class="line">           mappedFile = <span class="keyword">this</span>.mappedFileQueue.getLastMappedFile(<span class="number">0</span>); <span class="comment">// Mark: NewFile may be cause noise</span></span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// 存储消息，调用DefaultAppendMessageCallback将msg以RocketMQ要求的格式存入MappedFile 的Buffer(writeBuffer或者mappedByteBuffer)中</span></span><br><span class="line">       result = mappedFile.appendMessage(msg, <span class="keyword">this</span>.appendMessageCallback);</span><br><span class="line">       <span class="keyword">switch</span> (result.getStatus()) &#123;</span><br><span class="line">           <span class="keyword">case</span> PUT_OK:</span><br><span class="line">               <span class="keyword">break</span>;</span><br><span class="line">           <span class="keyword">case</span> END_OF_FILE: <span class="comment">// 当文件尾时，获取新的映射文件，并进行插入</span></span><br><span class="line">               <span class="comment">// Create a new file, re-write the message</span></span><br><span class="line">               mappedFile = <span class="keyword">this</span>.mappedFileQueue.getLastMappedFile(<span class="number">0</span>);</span><br><span class="line">               <span class="keyword">if</span> (<span class="keyword">null</span> == mappedFile) &#123;</span><br><span class="line">                   <span class="comment">// <span class="doctag">XXX:</span> warn and notify me</span></span><br><span class="line">                   log.error(<span class="string">"create maped file2 error, topic: "</span> + msg.getTopic() + <span class="string">" clientAddr: "</span> + msg.getBornHostString());</span><br><span class="line">                   beginTimeInLock = <span class="number">0</span>;</span><br><span class="line">                   <span class="keyword">return</span> <span class="keyword">new</span> PutMessageResult(PutMessageStatus.CREATE_MAPEDFILE_FAILED, result);</span><br><span class="line">               &#125;</span><br><span class="line">               result = mappedFile.appendMessage(msg, <span class="keyword">this</span>.appendMessageCallback);</span><br><span class="line">               <span class="keyword">break</span>;</span><br><span class="line">           <span class="keyword">case</span> ...;</span><br><span class="line">       &#125;</span><br><span class="line">       eclipseTimeInLock = <span class="keyword">this</span>.defaultMessageStore.getSystemClock().now() - beginLockTimestamp;</span><br><span class="line">       beginTimeInLock = <span class="number">0</span>;</span><br><span class="line">   &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">       <span class="comment">// 释放写入锁</span></span><br><span class="line">       releasePutMessageLock();</span><br><span class="line">   &#125;</span><br><span class="line">   PutMessageResult putMessageResult = <span class="keyword">new</span> PutMessageResult(PutMessageStatus.PUT_OK, result);</span><br><span class="line">   <span class="comment">// 进行同步||异步 flush||commit</span></span><br><span class="line">   GroupCommitRequest request = <span class="keyword">null</span>;</span><br><span class="line">   <span class="keyword">if</span> (FlushDiskType.SYNC_FLUSH == <span class="keyword">this</span>.defaultMessageStore.getMessageStoreConfig().getFlushDiskType()) &#123;</span><br><span class="line">       <span class="comment">// 同步刷新，将buffer中的内容刷新到磁盘</span></span><br><span class="line">       <span class="keyword">final</span> GroupCommitService service = (GroupCommitService) <span class="keyword">this</span>.flushCommitLogService;</span><br><span class="line">       <span class="keyword">if</span> (msg.isWaitStoreMsgOK()) &#123;</span><br><span class="line">           request = <span class="keyword">new</span> GroupCommitRequest(result.getWroteOffset() + result.getWroteBytes());</span><br><span class="line">           service.putRequest(request);</span><br><span class="line">           <span class="comment">//同步等待刷新完成</span></span><br><span class="line">           <span class="keyword">boolean</span> flushOK = request.waitForFlush(<span class="keyword">this</span>.defaultMessageStore.getMessageStoreConfig().getSyncFlushTimeout());</span><br><span class="line">           <span class="keyword">if</span> (!flushOK) &#123;</span><br><span class="line">               log.error(<span class="string">"do groupcommit, wait for flush failed, topic: "</span> + msg.getTopic() + <span class="string">" tags: "</span> + msg.getTags()</span><br><span class="line">                   + <span class="string">" client address: "</span> + msg.getBornHostString());</span><br><span class="line">               putMessageResult.setPutMessageStatus(PutMessageStatus.FLUSH_DISK_TIMEOUT);</span><br><span class="line">           &#125;</span><br><span class="line">       &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">           service.wakeup();</span><br><span class="line">       &#125;</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123; <span class="comment">// 异步刷新</span></span><br><span class="line">       <span class="keyword">if</span> (!<span class="keyword">this</span>.defaultMessageStore.getMessageStoreConfig().isTransientStorePoolEnable()) &#123;</span><br><span class="line">           flushCommitLogService.wakeup(); <span class="comment">// important：唤醒commitLog线程，进行flush</span></span><br><span class="line">       &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">           <span class="comment">//这一步是因为用了缓存池，所以需要先将缓存池的内容写入fileChannel中，再刷到磁盘</span></span><br><span class="line">           commitLogService.wakeup();</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">// 如果是同步Master，同步到从节点</span></span><br><span class="line">   <span class="keyword">if</span> (BrokerRole.SYNC_MASTER == <span class="keyword">this</span>.defaultMessageStore.getMessageStoreConfig().getBrokerRole()) &#123;</span><br><span class="line">       HAService service = <span class="keyword">this</span>.defaultMessageStore.getHaService();</span><br><span class="line">       <span class="keyword">if</span> (msg.isWaitStoreMsgOK()) &#123;</span><br><span class="line">           <span class="keyword">if</span> (service.isSlaveOK(result.getWroteOffset() + result.getWroteBytes())) &#123;</span><br><span class="line">               <span class="keyword">if</span> (<span class="keyword">null</span> == request) &#123;</span><br><span class="line">                   request = <span class="keyword">new</span> GroupCommitRequest(result.getWroteOffset() + result.getWroteBytes());</span><br><span class="line">               &#125;</span><br><span class="line">               service.putRequest(request);</span><br><span class="line">               <span class="comment">// 唤醒WriteSocketService</span></span><br><span class="line">               service.getWaitNotifyObject().wakeupAll();</span><br><span class="line">               <span class="keyword">boolean</span> flushOK = request.waitForFlush(<span class="keyword">this</span>.defaultMessageStore.getMessageStoreConfig().getSyncFlushTimeout());</span><br><span class="line">               <span class="keyword">if</span> (!flushOK) &#123;</span><br><span class="line">                   log.error(<span class="string">"do sync transfer other node, wait return, but failed, topic: "</span> + msg.getTopic() + <span class="string">" tags: "</span></span><br><span class="line">                       + msg.getTags() + <span class="string">" client address: "</span> + msg.getBornHostString());</span><br><span class="line">                   putMessageResult.setPutMessageStatus(PutMessageStatus.FLUSH_SLAVE_TIMEOUT);</span><br><span class="line">               &#125;</span><br><span class="line">           &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               putMessageResult.setPutMessageStatus(PutMessageStatus.SLAVE_NOT_AVAILABLE);</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> putMessageResult;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>mappedFile.appendMessage</code>操作只是将消息写入<code>buffer</code>中，而<code>FlushCommitLogService</code>负责将<code>buffer</code>内容刷到磁盘中。<br><code>FlushCommitLogService</code>有三种实现：<br><img src="media/15262074232992/15262783557950.jpg" alt=""></p>
+<ul>
+<li><strong>GroupCommitService</strong>: 负责同步刷盘；</li>
+<li><strong>CommitRealTimeService</strong>: 执行周期200ms，将字节缓存区的字节写到<code>mappedFile</code>对应的<code>FileChannel</code>中<code>(PageCache)</code>中(FileChannel.write(buffer))；</li>
+<li><strong>FlushRealTimeService</strong>:执行周期500ms，将<code>PageCache</code>中的内容刷新到磁盘<ul>
+<li><code>mappedByteBuffer.fore()</code>(没有字节缓存去时)</li>
+<li><code>this.fileChannel.force(false)</code>（有字节缓存区时）</li>
+</ul>
+</li>
+</ul>
+<h3 id="消息回放"><a href="#消息回放" class="headerlink" title="消息回放"></a>消息回放</h3><p>写完日志后，再继续看如何构建<code>ConsumeQueue</code>和<code>IndexFile</code>:</p>
+<p>构建<code>ConsumeQueue</code>和<code>IndexFile</code>是由<code>ReputMessageService</code>服务发起，从字面意思也可理解：<code>重放消息服务</code>，意思是重新从<code>CommitLog</code>中捞起消息消费。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">doReput</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">boolean</span> doNext = <span class="keyword">true</span>; <span class="keyword">this</span>.isCommitLogAvailable() &amp;&amp; doNext; ) &#123;</span><br><span class="line">      <span class="comment">//</span></span><br><span class="line">      <span class="keyword">if</span> (DefaultMessageStore.<span class="keyword">this</span>.getMessageStoreConfig().isDuplicationEnable()</span><br><span class="line">          &amp;&amp; <span class="keyword">this</span>.reputFromOffset &gt;= DefaultMessageStore.<span class="keyword">this</span>.getConfirmOffset()) &#123;</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 获取上一次回放偏移reputFromOffset之后的日志内容</span></span><br><span class="line">      SelectMappedBufferResult result = DefaultMessageStore.<span class="keyword">this</span>.commitLog.getData(reputFromOffset);</span><br><span class="line">      <span class="keyword">if</span> (result != <span class="keyword">null</span>) &#123;</span><br><span class="line">          <span class="keyword">try</span> &#123;</span><br><span class="line">              <span class="keyword">this</span>.reputFromOffset = result.getStartOffset();</span><br><span class="line">              <span class="comment">// 遍历MappedByteBuffer</span></span><br><span class="line">              <span class="keyword">for</span> (<span class="keyword">int</span> readSize = <span class="number">0</span>; readSize &lt; result.getSize() &amp;&amp; doNext; ) &#123;</span><br><span class="line">                  <span class="comment">// 一条条取出消息，并提取日志信息，如偏移，日志大小，存储时间，tagCode 等</span></span><br><span class="line">                  DispatchRequest dispatchRequest = DefaultMessageStore.<span class="keyword">this</span>.commitLog.checkMessageAndReturnSize(result.getByteBuffer(), <span class="keyword">false</span>, <span class="keyword">false</span>);</span><br><span class="line">                  <span class="keyword">int</span> size = dispatchRequest.getMsgSize(); <span class="comment">// 消息长度</span></span><br><span class="line">                  <span class="comment">// 根据请求的结果处理</span></span><br><span class="line">                  <span class="keyword">if</span> (dispatchRequest.isSuccess()) &#123; <span class="comment">// 读取成功</span></span><br><span class="line">                      <span class="keyword">if</span> (size &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                          <span class="comment">// 执行调用请求，将消息的偏移等信息追加到ConsumeQueue中，并建立索引</span></span><br><span class="line">                          DefaultMessageStore.<span class="keyword">this</span>.doDispatch(dispatchRequest);</span><br><span class="line">                          <span class="comment">// 通知有新消息</span></span><br><span class="line">                          <span class="keyword">if</span> (BrokerRole.SLAVE != DefaultMessageStore.<span class="keyword">this</span>.getMessageStoreConfig().getBrokerRole()</span><br><span class="line">                              &amp;&amp; DefaultMessageStore.<span class="keyword">this</span>.brokerConfig.isLongPollingEnable()) &#123;</span><br><span class="line">                              <span class="comment">//通知有心的消息到达</span></span><br><span class="line">                              DefaultMessageStore.<span class="keyword">this</span>.messageArrivingListener.arriving(dispatchRequest.getTopic(),</span><br><span class="line">                                  dispatchRequest.getQueueId(), dispatchRequest.getConsumeQueueOffset() + <span class="number">1</span>,</span><br><span class="line">                                  dispatchRequest.getTagsCode());</span><br><span class="line">                          &#125;</span><br><span class="line">                          <span class="comment">// FIXED BUG By shijia</span></span><br><span class="line">                          <span class="keyword">this</span>.reputFromOffset += size;</span><br><span class="line">                          readSize += size;</span><br><span class="line">                          <span class="comment">// 统计</span></span><br><span class="line">                          <span class="keyword">if</span> (DefaultMessageStore.<span class="keyword">this</span>.getMessageStoreConfig().getBrokerRole() == BrokerRole.SLAVE) &#123;</span><br><span class="line">                              DefaultMessageStore.<span class="keyword">this</span>.storeStatsService</span><br><span class="line">                                  .getSinglePutMessageTopicTimesTotal(dispatchRequest.getTopic()).incrementAndGet();</span><br><span class="line">                              DefaultMessageStore.<span class="keyword">this</span>.storeStatsService</span><br><span class="line">                                  .getSinglePutMessageTopicSizeTotal(dispatchRequest.getTopic())</span><br><span class="line">                                  .addAndGet(dispatchRequest.getMsgSize());</span><br><span class="line">                          &#125;</span><br><span class="line">                      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (size == <span class="number">0</span>) &#123; <span class="comment">// 读取到MappedFile文件尾</span></span><br><span class="line">                          <span class="keyword">this</span>.reputFromOffset = DefaultMessageStore.<span class="keyword">this</span>.commitLog.rollNextFile(<span class="keyword">this</span>.reputFromOffset);</span><br><span class="line">                          readSize = result.getSize();</span><br><span class="line">                      &#125;</span><br><span class="line">                  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!dispatchRequest.isSuccess()) &#123; <span class="comment">// 读取失败</span></span><br><span class="line">                      <span class="keyword">if</span> (size &gt; <span class="number">0</span>) &#123; <span class="comment">// 读取到Message却不是Message</span></span><br><span class="line">                          log.error(<span class="string">"[BUG]read total count not equals msg total size. reputFromOffset=&#123;&#125;"</span>, reputFromOffset);</span><br><span class="line">                          <span class="keyword">this</span>.reputFromOffset += size;</span><br><span class="line">                      &#125; <span class="keyword">else</span> &#123; <span class="comment">// 读取到Blank却不是Blank</span></span><br><span class="line">                          doNext = <span class="keyword">false</span>;</span><br><span class="line">                          <span class="keyword">if</span> (DefaultMessageStore.<span class="keyword">this</span>.brokerConfig.getBrokerId() == MixAll.MASTER_ID) &#123;</span><br><span class="line">                              log.error(<span class="string">"[BUG]the master dispatch message to consume queue error, COMMITLOG OFFSET: &#123;&#125;"</span>,</span><br><span class="line">                                  <span class="keyword">this</span>.reputFromOffset);</span><br><span class="line"></span><br><span class="line">                              <span class="keyword">this</span>.reputFromOffset += result.getSize() - readSize;</span><br><span class="line">                          &#125;</span><br><span class="line">                      &#125;</span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;</span><br><span class="line">          &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">              result.release();</span><br><span class="line">          &#125;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          doNext = <span class="keyword">false</span>;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>取出<code>reputFromOffset</code>之后的日志，调用<code>doDispatch()</code>方法进行调度请求：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doDispatch</span><span class="params">(DispatchRequest req)</span> </span>&#123;</span><br><span class="line">   <span class="comment">//当消息为非事务或者事务中提交阶段时，构建ConsumeQueue</span></span><br><span class="line">   <span class="keyword">final</span> <span class="keyword">int</span> tranType = MessageSysFlag.getTransactionValue(req.getSysFlag());</span><br><span class="line">   <span class="keyword">switch</span> (tranType) &#123;</span><br><span class="line">       <span class="keyword">case</span> MessageSysFlag.TRANSACTION_NOT_TYPE:</span><br><span class="line">       <span class="keyword">case</span> MessageSysFlag.TRANSACTION_COMMIT_TYPE:            DefaultMessageStore.<span class="keyword">this</span>.putMessagePositionInfo(req.getTopic(), req.getQueueId(), req.getCommitLogOffset(), req.getMsgSize(),</span><br><span class="line">               req.getTagsCode(), req.getStoreTimestamp(), req.getConsumeQueueOffset());</span><br><span class="line">           <span class="keyword">break</span>;</span><br><span class="line">       <span class="keyword">case</span> MessageSysFlag.TRANSACTION_PREPARED_TYPE:</span><br><span class="line">       <span class="keyword">case</span> MessageSysFlag.TRANSACTION_ROLLBACK_TYPE:</span><br><span class="line">           <span class="keyword">break</span>;</span><br><span class="line">   &#125;    </span><br><span class="line">   <span class="keyword">if</span> (DefaultMessageStore.<span class="keyword">this</span>.getMessageStoreConfig().isMessageIndexEnable()) &#123;</span><br><span class="line">    <span class="comment">// 创建索引   DefaultMessageStore.this.indexService.buildIndex(req);</span></span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//将消息位置信息追加到ConsumeQueue中</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">putMessagePositionInfo</span><span class="params">(String topic, <span class="keyword">int</span> queueId, <span class="keyword">long</span> offset, <span class="keyword">int</span> size, <span class="keyword">long</span> tagsCode, <span class="keyword">long</span> storeTimestamp,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">long</span> logicOffset)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//通过topic和queueId查找ConsumeQueue，没找到时创建</span></span><br><span class="line">   ConsumeQueue cq = <span class="keyword">this</span>.findConsumeQueue(topic, queueId);</span><br><span class="line">   cq.putMessagePositionInfoWrapper(offset, size, tagsCode, storeTimestamp, logicOffset);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看出一个topic下的每个queue为一个文件独立存储。这样读取的时候即为顺序读取。<br><img src="media/15262074232992/15262824950550.jpg" alt=""></p>
+<p>对于索引<code>IndexFile</code>，<code>RocketMQ</code>保存的结构如下：<br><img src="media/15262074232992/15262826812253.jpg" alt=""></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">putKey</span><span class="params">(<span class="keyword">final</span> String key, <span class="keyword">final</span> <span class="keyword">long</span> phyOffset, <span class="keyword">final</span> <span class="keyword">long</span> storeTimestamp)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.indexHeader.getIndexCount() &lt; <span class="keyword">this</span>.indexNum) &#123;</span><br><span class="line">       <span class="comment">//生成key的hash值</span></span><br><span class="line">       <span class="keyword">int</span> keyHash = indexKeyHashMethod(key);</span><br><span class="line">       <span class="comment">//根据hash值获取其所对应的槽位slot</span></span><br><span class="line">       <span class="keyword">int</span> slotPos = keyHash % <span class="keyword">this</span>.hashSlotNum;</span><br><span class="line">       <span class="comment">//计算slot在磁盘上的物理位移</span></span><br><span class="line">       <span class="keyword">int</span> absSlotPos = IndexHeader.INDEX_HEADER_SIZE + slotPos * hashSlotSize;</span><br><span class="line">       FileLock fileLock = <span class="keyword">null</span>;</span><br><span class="line">       <span class="comment">//获取上一个插入的在同一个槽中的索引信息所在位置值</span></span><br><span class="line">       <span class="keyword">int</span> slotValue = <span class="keyword">this</span>.mappedByteBuffer.getInt(absSlotPos);</span><br><span class="line">       <span class="keyword">if</span> (slotValue &lt;= invalidIndex || slotValue &gt; <span class="keyword">this</span>.indexHeader.getIndexCount()) &#123;</span><br><span class="line">           slotValue = invalidIndex;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">long</span> timeDiff = storeTimestamp - <span class="keyword">this</span>.indexHeader.getBeginTimestamp();</span><br><span class="line">       timeDiff = timeDiff / <span class="number">1000</span>;</span><br><span class="line">       <span class="keyword">if</span> (<span class="keyword">this</span>.indexHeader.getBeginTimestamp() &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">           timeDiff = <span class="number">0</span>;</span><br><span class="line">       &#125; <span class="keyword">else</span> <span class="keyword">if</span> (timeDiff &gt; Integer.MAX_VALUE) &#123;</span><br><span class="line">           timeDiff = Integer.MAX_VALUE;</span><br><span class="line">       &#125; <span class="keyword">else</span> <span class="keyword">if</span> (timeDiff &lt; <span class="number">0</span>) &#123;</span><br><span class="line">           timeDiff = <span class="number">0</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// 获得当前可写入值的位置</span></span><br><span class="line">       <span class="keyword">int</span> absIndexPos =</span><br><span class="line">               IndexHeader.INDEX_HEADER_SIZE + <span class="keyword">this</span>.hashSlotNum * hashSlotSize</span><br><span class="line">                       + <span class="keyword">this</span>.indexHeader.getIndexCount() * indexSize;</span><br><span class="line">       <span class="comment">//写入索引值</span></span><br><span class="line">       <span class="keyword">this</span>.mappedByteBuffer.putInt(absIndexPos, keyHash);</span><br><span class="line">       <span class="keyword">this</span>.mappedByteBuffer.putLong(absIndexPos + <span class="number">4</span>, phyOffset);</span><br><span class="line">       <span class="keyword">this</span>.mappedByteBuffer.putInt(absIndexPos + <span class="number">4</span> + <span class="number">8</span>, (<span class="keyword">int</span>) timeDiff);</span><br><span class="line">       <span class="keyword">this</span>.mappedByteBuffer.putInt(absIndexPos + <span class="number">4</span> + <span class="number">8</span> + <span class="number">4</span>, slotValue);</span><br><span class="line">       <span class="comment">// 将当前记录的索引号替换到之前在hash中的槽值</span></span><br><span class="line">       <span class="keyword">this</span>.mappedByteBuffer.putInt(absSlotPos, <span class="keyword">this</span>.indexHeader.getIndexCount());</span><br><span class="line">       <span class="keyword">if</span> (<span class="keyword">this</span>.indexHeader.getIndexCount() &lt;= <span class="number">1</span>) &#123;</span><br><span class="line">           <span class="keyword">this</span>.indexHeader.setBeginPhyOffset(phyOffset);</span><br><span class="line">           <span class="keyword">this</span>.indexHeader.setBeginTimestamp(storeTimestamp);</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">this</span>.indexHeader.incHashSlotCount();</span><br><span class="line">       <span class="keyword">this</span>.indexHeader.incIndexCount();</span><br><span class="line">       <span class="keyword">this</span>.indexHeader.setEndPhyOffset(phyOffset);</span><br><span class="line">       <span class="keyword">this</span>.indexHeader.setEndTimestamp(storeTimestamp);</span><br><span class="line">       <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="消息读取"><a href="#消息读取" class="headerlink" title="消息读取"></a>消息读取</h2><p><code>DefaultMessageStore</code>的<code>getMessage</code>用于读消息。<br>给定查询<code>offset</code>，首先去<code>ConsumeQueue</code>去查询出<code>offset</code>后所有的查询的Queue的消息对应的位移记录。然后通过这些位移信息去<code>CommitLog</code>中一条条将结果取出并返回。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> GetMessageResult <span class="title">getMessage</span><span class="params">(<span class="keyword">final</span> String group, <span class="keyword">final</span> String topic, <span class="keyword">final</span> <span class="keyword">int</span> queueId, <span class="keyword">final</span> <span class="keyword">long</span> offset, <span class="keyword">final</span> <span class="keyword">int</span> maxMsgNums,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">final</span> SubscriptionData subscriptionData)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">long</span> beginTime = <span class="keyword">this</span>.getSystemClock().now();</span><br><span class="line">   GetMessageStatus status = GetMessageStatus.NO_MESSAGE_IN_QUEUE;</span><br><span class="line">   <span class="keyword">long</span> nextBeginOffset = offset;</span><br><span class="line">   <span class="keyword">long</span> minOffset = <span class="number">0</span>;</span><br><span class="line">   <span class="keyword">long</span> maxOffset = <span class="number">0</span>;</span><br><span class="line">   GetMessageResult getResult = <span class="keyword">new</span> GetMessageResult();</span><br><span class="line">   <span class="keyword">final</span> <span class="keyword">long</span> maxOffsetPy = <span class="keyword">this</span>.commitLog.getMaxOffset();</span><br><span class="line">   <span class="comment">// 根据Topic和queueId找到ConsumeQueue</span></span><br><span class="line">   ConsumeQueue consumeQueue = findConsumeQueue(topic, queueId);</span><br><span class="line">   minOffset = consumeQueue.getMinOffsetInQueue(); <span class="comment">// 消费队列 最小队列编号</span></span><br><span class="line">   maxOffset = consumeQueue.getMaxOffsetInQueue(); <span class="comment">// 消费队列 最大队列编号</span></span><br><span class="line">   <span class="comment">//跟据消费offSet找到该offSet后的所有消费队列buffer</span></span><br><span class="line">   SelectMappedBufferResult bufferConsumeQueue = consumeQueue.getIndexBuffer(offset);</span><br><span class="line">   <span class="keyword">if</span> (bufferConsumeQueue != <span class="keyword">null</span>) &#123;</span><br><span class="line">       <span class="keyword">try</span> &#123;</span><br><span class="line">           status = GetMessageStatus.NO_MATCHED_MESSAGE;</span><br><span class="line">           <span class="keyword">long</span> nextPhyFileStartOffset = Long.MIN_VALUE;</span><br><span class="line">           <span class="keyword">long</span> maxPhyOffsetPulling = <span class="number">0</span>;</span><br><span class="line">           <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">           <span class="keyword">final</span> <span class="keyword">int</span> maxFilterMessageCount = <span class="number">16000</span>;</span><br><span class="line">           <span class="keyword">final</span> <span class="keyword">boolean</span> diskFallRecorded = <span class="keyword">this</span>.messageStoreConfig.isDiskFallRecorded();</span><br><span class="line">           <span class="keyword">for</span> (; i &lt; bufferConsumeQueue.getSize() &amp;&amp; i &lt; maxFilterMessageCount; i += ConsumeQueue.CQ_STORE_UNIT_SIZE) &#123;</span><br><span class="line">               <span class="comment">// 从消费队列中一条条取出消息位置信息 【物理offset、消息长度、消息tagsCode】</span></span><br><span class="line">               <span class="keyword">long</span> offsetPy = bufferConsumeQueue.getByteBuffer().getLong();</span><br><span class="line">               <span class="keyword">int</span> sizePy = bufferConsumeQueue.getByteBuffer().getInt();</span><br><span class="line">               <span class="keyword">long</span> tagsCode = bufferConsumeQueue.getByteBuffer().getLong();</span><br><span class="line">               maxPhyOffsetPulling = offsetPy;</span><br><span class="line">               <span class="keyword">if</span> (nextPhyFileStartOffset != Long.MIN_VALUE) &#123;</span><br><span class="line">                   <span class="keyword">if</span> (offsetPy &lt; nextPhyFileStartOffset)</span><br><span class="line">                       <span class="keyword">continue</span>;</span><br><span class="line">               &#125;</span><br><span class="line">               <span class="keyword">boolean</span> isInDisk = checkInDiskByCommitOffset(offsetPy, maxOffsetPy);</span><br><span class="line">               <span class="keyword">if</span> (<span class="keyword">this</span>.isTheBatchFull(sizePy, maxMsgNums, getResult.getBufferTotalSize(), getResult.getMessageCount(), isInDisk)) &#123;</span><br><span class="line">                   <span class="keyword">break</span>;</span><br><span class="line">               &#125;</span><br><span class="line">               <span class="comment">//筛选出consumer需要的</span></span><br><span class="line">               <span class="keyword">if</span> (<span class="keyword">this</span>.messageFilter.isMessageMatched(subscriptionData, tagsCode)) &#123;</span><br><span class="line">                   <span class="comment">//从CommitLog中根据位移取出消息</span></span><br><span class="line">                   SelectMappedBufferResult selectResult = <span class="keyword">this</span>.commitLog.getMessage(offsetPy, sizePy);</span><br><span class="line">                   <span class="keyword">if</span> (selectResult != <span class="keyword">null</span>) &#123;</span><br><span class="line">                       <span class="keyword">this</span>.storeStatsService.getGetMessageTransferedMsgCount().incrementAndGet();</span><br><span class="line">                       getResult.addMessage(selectResult);</span><br><span class="line">                       status = GetMessageStatus.FOUND;</span><br><span class="line">                       nextPhyFileStartOffset = Long.MIN_VALUE;</span><br><span class="line">                   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                       <span class="keyword">if</span> (getResult.getBufferTotalSize() == <span class="number">0</span>) &#123;</span><br><span class="line">                           status = GetMessageStatus.MESSAGE_WAS_REMOVING;</span><br><span class="line">                       &#125;</span><br><span class="line">                       nextPhyFileStartOffset = <span class="keyword">this</span>.commitLog.rollNextFile(offsetPy);</span><br><span class="line">                   &#125;</span><br><span class="line">               &#125; <span class="comment">//...</span></span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">if</span> (diskFallRecorded) &#123;</span><br><span class="line">               <span class="keyword">long</span> fallBehind = maxOffsetPy - maxPhyOffsetPulling;</span><br><span class="line">               brokerStatsManager.recordDiskFallBehindSize(group, topic, queueId, fallBehind);</span><br><span class="line">           &#125;</span><br><span class="line">           nextBeginOffset = offset + (i / ConsumeQueue.CQ_STORE_UNIT_SIZE);</span><br><span class="line">           <span class="keyword">long</span> diff = maxOffsetPy - maxPhyOffsetPulling;</span><br><span class="line">           <span class="keyword">long</span> memory = (<span class="keyword">long</span>) (StoreUtil.TOTAL_PHYSICAL_MEMORY_SIZE * (<span class="keyword">this</span>.messageStoreConfig.getAccessMessageInMemoryMaxRatio() / <span class="number">100.0</span>));</span><br><span class="line">           getResult.setSuggestPullingFromSlave(diff &gt; memory);</span><br><span class="line">       &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">           bufferConsumeQueue.release();</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">// 设置返回结果</span></span><br><span class="line">   getResult.setStatus(status);</span><br><span class="line">   getResult.setNextBeginOffset(nextBeginOffset);</span><br><span class="line">   getResult.setMaxOffset(maxOffset);</span><br><span class="line">   getResult.setMinOffset(minOffset);</span><br><span class="line">   <span class="keyword">return</span> getResult;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>下图中，</strong> 粉红色的线即代表消息读取的过程；绿线代码消息存储的过程。<br><img src="media/15261834789353/15263460992712.jpg" alt=""></p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li><a href="https://zhuanlan.zhihu.com/p/22231319" target="_blank" rel="noopener">RocketMQ源码阅读1</a>（借用图）</li>
+<li><a href="https://zhuanlan.zhihu.com/p/22619643" target="_blank" rel="noopener">RocketMQ源码阅读2</a>（借用图）</li>
+<li><a href="http://www.iocoder.cn/RocketMQ/message-store/" target="_blank" rel="noopener">RocketMQ 源码分析 —— Message 存储</a></li>
+<li><a href="http://alibaba.github.io/RocketMQ-docs/document/design/RocketMQ_design.pdf" target="_blank" rel="noopener">RocketMQ 原理简介</a></li>
+<li><a href="https://blog.csdn.net/yfkiss/article/details/6661266" target="_blank" rel="noopener">存储方式与介质对性能的影响</a></li>
+<li><a href="https://www.linuxjournal.com/article/6345" target="_blank" rel="noopener">Zero Copy</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/rocketmq/" rel="tag"># rocketmq</a>
+          
+            <a href="/tags/store/" rel="tag"># store</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/18/mq/2.rocketmq-%E9%80%9A%E4%BF%A1/" rel="next" title="RocketMQ 通信">
+                <i class="fa fa-chevron-left"></i> RocketMQ 通信
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/19/database/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" rel="prev" title="分布式事务">
+                分布式事务 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#3-store"><span class="nav-number">1.</span> <span class="nav-text">3. store</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#初始化"><span class="nav-number">1.1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消息存储"><span class="nav-number">1.2.</span> <span class="nav-text">消息存储</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#消息回放"><span class="nav-number">1.2.1.</span> <span class="nav-text">消息回放</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消息读取"><span class="nav-number">1.3.</span> <span class="nav-text">消息读取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">1.4.</span> <span class="nav-text">Reference</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

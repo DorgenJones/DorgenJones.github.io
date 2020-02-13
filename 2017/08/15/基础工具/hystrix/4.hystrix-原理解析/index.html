@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="hystrix," />
+
+
+<meta name="description" content="#Hystrix原理浅析 [TOC] 带着问题看原理：  执行流程 如何做到信号量隔离和线程隔离 动态配置的实现 如何记录信号量数据 如何实现断路器 如何实现合并请求  1. Hystrix类结构以及命令执行流程1. Hystrix类结构Hystrix的命令实现主体部分是在抽象类AbstractCommnd中，HystrixCommand、HystrixObservableCommand是其的实现">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hystrix-原理解析">
+<meta property="og:url" content="https://dorgenjones.github.io/2017/08/15/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/4.hystrix-%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="Zamperini">
+<meta property="og:description" content="#Hystrix原理浅析 [TOC] 带着问题看原理：  执行流程 如何做到信号量隔离和线程隔离 动态配置的实现 如何记录信号量数据 如何实现断路器 如何实现合并请求  1. Hystrix类结构以及命令执行流程1. Hystrix类结构Hystrix的命令实现主体部分是在抽象类AbstractCommnd中，HystrixCommand、HystrixObservableCommand是其的实现">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://dorgenjones.github.io/2017/08/15/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/4.hystrix-%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/media/15014667235538/15016865706319.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2017/08/15/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/4.hystrix-%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/media/15014667235538/15016377167267.png">
+<meta property="og:image" content="https://dorgenjones.github.io/2017/08/15/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/4.hystrix-%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/media/15014667235538/15017765433249.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2017/08/15/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/4.hystrix-%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/media/15014667235538/15018055405460.jpg">
+<meta property="article:published_time" content="2017-08-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-02-13T11:09:44.392Z">
+<meta property="article:author" content="Zamperini">
+<meta property="article:tag" content="hystrix">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://dorgenjones.github.io/2017/08/15/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/4.hystrix-%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/media/15014667235538/15016865706319.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/2017/08/15/基础工具/hystrix/4.hystrix-原理解析/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>Hystrix-原理解析 | Zamperini</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zamperini</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2017/08/15/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/4.hystrix-%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Hystrix-原理解析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-15T00:00:00+08:00">2017-08-15</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/hystrix/" itemprop="url" rel="index"><span itemprop="name">hystrix</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>#Hystrix原理浅析</p>
+<p>[TOC]</p>
+<p>带着问题看原理：</p>
+<ol>
+<li>执行流程</li>
+<li>如何做到信号量隔离和线程隔离</li>
+<li>动态配置的实现</li>
+<li>如何记录信号量数据</li>
+<li>如何实现断路器</li>
+<li>如何实现合并请求</li>
+</ol>
+<h2 id="1-Hystrix类结构以及命令执行流程"><a href="#1-Hystrix类结构以及命令执行流程" class="headerlink" title="1. Hystrix类结构以及命令执行流程"></a>1. Hystrix类结构以及命令执行流程</h2><h3 id="1-Hystrix类结构"><a href="#1-Hystrix类结构" class="headerlink" title="1. Hystrix类结构"></a>1. Hystrix类结构</h3><p>Hystrix的命令实现主体部分是在抽象类<code>AbstractCommnd</code>中，<code>HystrixCommand</code>、<code>HystrixObservableCommand</code>是其的实现类。<br><img src="media/15014667235538/15016865706319.jpg" alt="set up-w600"></p>
+<p><strong>HystrixCommand</strong>:<br>最终的执行主体是在方法<code>AbstractCommnd.toObservable()</code>中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> R <span class="title">execute</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="keyword">try</span> &#123;</span><br><span class="line">       <span class="keyword">return</span> queue().get();</span><br><span class="line">   &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">       <span class="keyword">throw</span> Exceptions.sneakyThrow(decomposeException(e));</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> Future&lt;R&gt; <span class="title">queue</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">   <span class="comment">//第一步执行</span></span><br><span class="line">   <span class="keyword">final</span> Future&lt;R&gt; delegate = **toObservable()**.toBlocking().toFuture();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>HystrixObservableCommand</strong>:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Observable&lt;R&gt; <span class="title">observe</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        ReplaySubject&lt;R&gt; subject = ReplaySubject.create();</span><br><span class="line">        <span class="keyword">final</span> Subscription sourceSubscription = **toObservable()**.subscribe(subject);</span><br><span class="line">        <span class="keyword">return</span> subject.doOnUnsubscribe(<span class="keyword">new</span> Action0() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                sourceSubscription.unsubscribe();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-执行流程"><a href="#2-执行流程" class="headerlink" title="2. 执行流程"></a>2. 执行流程</h3><p>执行过程分为以下几个步骤：</p>
+<ol>
+<li>首先判断是否开启缓存，如果缓存开启，且可以从缓存中直接查询到结果则直接返回。否则进入下一步；</li>
+<li>第二步 进行断路器判断逻辑：断路器通过健康统计信息来判断是否打开断路器，如果打开则调用降级方法或向外告知调用者，否则继续下一步；</li>
+<li>第三步 隔离控制判断：当请求的数量达到阈值（信号隔离）或者达到线程池上界则拒绝请求调用降级方法或向外告知调用者；并记录此次事件。</li>
+<li>第四步执行业务逻辑，如果此时业务逻辑抛出异常或者超市则会调用降级逻辑或…，并记录此次事件。</li>
+<li>当正常运行结束后也会记录执行成功的事件和运行的时延等信息，一是供断路器使用、二是提供实时监控数据输出</li>
+</ol>
+<p><img src="media/15014667235538/15016377167267.png" alt=""></p>
+<p>整个执行过程：将每个步骤都放在一个监听器（<code>Action~</code>）里。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Observable&lt;R&gt; <span class="title">toObservable</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="keyword">final</span> AbstractCommand&lt;R&gt; _cmd = <span class="keyword">this</span>;</span><br><span class="line">   <span class="comment">//命令结束的清理工作：发送命令执行结束清理事件</span></span><br><span class="line">   <span class="keyword">final</span> Action0 terminateCommandCleanup = <span class="keyword">new</span> Action0() &#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">           <span class="keyword">if</span> (_cmd.commandState.compareAndSet(CommandState.OBSERVABLE_CHAIN_CREATED, CommandState.TERMINAL)) &#123;</span><br><span class="line">               handleCommandEnd(<span class="keyword">false</span>); <span class="comment">//user code never ran</span></span><br><span class="line">           &#125; <span class="keyword">else</span> <span class="keyword">if</span> (_cmd.commandState.compareAndSet(CommandState.USER_CODE_EXECUTED, CommandState.TERMINAL)) &#123;</span><br><span class="line">               handleCommandEnd(<span class="keyword">true</span>); <span class="comment">//user code did run</span></span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;;</span><br><span class="line">   <span class="comment">//命令被取消时执行的逻辑。ps:虽然命令取消，但还是会命令还是会被执行完成。只是调用者不再等待</span></span><br><span class="line">   <span class="keyword">final</span> Action0 unsubscribeCommandCleanup = <span class="keyword">new</span> Action0() &#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">           handleCommandEnd(<span class="keyword">true</span>|<span class="keyword">false</span>); <span class="comment">//user code did run</span></span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;;</span><br><span class="line">   <span class="comment">//执行主体</span></span><br><span class="line">   <span class="keyword">final</span> Func0&lt;Observable&lt;R&gt;&gt; applyHystrixSemantics = <span class="keyword">new</span> Func0&lt;Observable&lt;R&gt;&gt;() &#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> Observable&lt;R&gt; <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">           <span class="keyword">if</span> (commandState.get().equals(CommandState.UNSUBSCRIBED)) &#123;</span><br><span class="line">               <span class="keyword">return</span> Observable.never();</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="comment">//命令执行主体</span></span><br><span class="line">           <span class="keyword">return</span> applyHystrixSemantics(_cmd);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">   <span class="keyword">return</span> Observable.defer(<span class="keyword">new</span> Func0&lt;Observable&lt;R&gt;&gt;() &#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> Observable&lt;R&gt; <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">           commandStartTimestamp = System.currentTimeMillis();</span><br><span class="line">            <span class="comment">//判断缓存是否开启</span></span><br><span class="line">           <span class="keyword">final</span> <span class="keyword">boolean</span> requestCacheEnabled = isRequestCachingEnabled();</span><br><span class="line">           <span class="keyword">final</span> String cacheKey = getCacheKey();</span><br><span class="line">            <span class="comment">//尝试从缓存中获取数据</span></span><br><span class="line">           <span class="keyword">if</span> (requestCacheEnabled) &#123;</span><br><span class="line">               HystrixCommandResponseFromCache&lt;R&gt; fromCache = (HystrixCommandResponseFromCache&lt;R&gt;) requestCache.get(cacheKey);</span><br><span class="line">               <span class="keyword">if</span> (fromCache != <span class="keyword">null</span>) &#123;</span><br><span class="line">                   isResponseFromCache = <span class="keyword">true</span>;</span><br><span class="line">                   <span class="keyword">return</span> handleRequestCacheHitAndEmitValues(fromCache, _cmd);</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">            <span class="comment">//执行命令</span></span><br><span class="line">           Observable&lt;R&gt; hystrixObservable =</span><br><span class="line">                   Observable.defer(applyHystrixSemantics)</span><br><span class="line">                           .map(wrapWithAllOnNextHooks);</span><br><span class="line"></span><br><span class="line">           Observable&lt;R&gt; afterCache;</span><br><span class="line">            <span class="comment">//执行完成后将结果放到缓存中</span></span><br><span class="line">           <span class="keyword">if</span> (requestCacheEnabled &amp;&amp; cacheKey != <span class="keyword">null</span>) &#123;</span><br><span class="line">               <span class="comment">// wrap it for caching</span></span><br><span class="line">               HystrixCachedObservable&lt;R&gt; toCache = HystrixCachedObservable.from(hystrixObservable, _cmd);</span><br><span class="line">               HystrixCommandResponseFromCache&lt;R&gt; fromCache = (HystrixCommandResponseFromCache&lt;R&gt;) requestCache.putIfAbsent(cacheKey, toCache);</span><br><span class="line">               <span class="comment">//...</span></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               afterCache = hystrixObservable;</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="comment">//...</span></span><br><span class="line">       &#125;</span><br><span class="line">   &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>执行命令</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Observable&lt;R&gt; <span class="title">applyHystrixSemantics</span><span class="params">(<span class="keyword">final</span> AbstractCommand&lt;R&gt; _cmd)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//断路器判断逻辑</span></span><br><span class="line">   <span class="keyword">if</span> (circuitBreaker.attemptExecution()) &#123;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">final</span> TryableSemaphore executionSemaphore = getExecutionSemaphore();</span><br><span class="line">       <span class="keyword">final</span> AtomicBoolean semaphoreHasBeenReleased = <span class="keyword">new</span> AtomicBoolean(<span class="keyword">false</span>);</span><br><span class="line">       <span class="keyword">final</span> Action0 singleSemaphoreRelease = <span class="keyword">new</span> Action0() &#123;</span><br><span class="line">           <span class="meta">@Override</span></span><br><span class="line">           <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">               <span class="keyword">if</span> (semaphoreHasBeenReleased.compareAndSet(<span class="keyword">false</span>, <span class="keyword">true</span>)) &#123;</span><br><span class="line">                   executionSemaphore.release();</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;;</span><br><span class="line">        <span class="comment">// 信号量隔离逻辑：</span></span><br><span class="line">        <span class="comment">// 当为线程隔离时: 其信号量实现类为 *TryableSemaphoreNoOp* 它会通过所有请求；</span></span><br><span class="line">        <span class="comment">// 当为信号量隔离时：实现类为 *TryableSemaphoreActual*，它内部维护AtomicInteger 利用CAS的方式来进行信号量控制</span></span><br><span class="line">       <span class="keyword">if</span> (executionSemaphore.tryAcquire()) &#123;</span><br><span class="line">           <span class="keyword">try</span> &#123;</span><br><span class="line">               <span class="comment">//executionResult用来保存执行上下文，比如执行开始时间、结束时间、是否成功等，是记录命令执行情况的依据。</span></span><br><span class="line">               executionResult = executionResult.setInvocationStartTime(System.currentTimeMillis());</span><br><span class="line">               <span class="keyword">return</span> executeCommandAndObserve(_cmd)</span><br><span class="line">                       .doOnError(markExceptionThrown)</span><br><span class="line">                       .doOnTerminate(singleSemaphoreRelease)</span><br><span class="line">                       .doOnUnsubscribe(singleSemaphoreRelease);</span><br><span class="line">           &#125; <span class="keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line">               <span class="keyword">return</span> Observable.error(e);</span><br><span class="line">           &#125;</span><br><span class="line">       &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">//信号量拒绝降级</span></span><br><span class="line">           <span class="keyword">return</span> handleSemaphoreRejectionViaFallback();</span><br><span class="line">       &#125;</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">//进行断路器降级</span></span><br><span class="line">       <span class="keyword">return</span> handleShortCircuitViaFallback();</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Observable&lt;R&gt; <span class="title">executeCommandWithSpecifiedIsolation</span><span class="params">(<span class="keyword">final</span> AbstractCommand&lt;R&gt; _cmd)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">if</span> (properties.executionIsolationStrategy().get() == ExecutionIsolationStrategy.THREAD) &#123;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">return</span> Observable.defer(<span class="keyword">new</span> Func0&lt;Observable&lt;R&gt;&gt;() &#123;</span><br><span class="line">           <span class="meta">@Override</span></span><br><span class="line">           <span class="function"><span class="keyword">public</span> Observable&lt;R&gt; <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">               executionResult = executionResult.setExecutionOccurred();</span><br><span class="line">               <span class="keyword">if</span> (threadState.compareAndSet(ThreadState.NOT_USING_THREAD, ThreadState.STARTED)) &#123;</span><br><span class="line">                   threadPool.markThreadExecution();</span><br><span class="line">                   <span class="comment">// store the command that is being run</span></span><br><span class="line">                   endCurrentThreadExecutingCommand = Hystrix.startCurrentThreadExecutingCommand(getCommandKey());</span><br><span class="line">                   executionResult = executionResult.setExecutedInThread();</span><br><span class="line"></span><br><span class="line">                   <span class="keyword">try</span> &#123;</span><br><span class="line">                       <span class="comment">//...</span></span><br><span class="line">                       <span class="comment">//** 执行用户定义的业务代码，对于HystrixCommand和HystrixObservableCommand实现不同</span></span><br><span class="line">                       <span class="keyword">return</span> getUserExecutionObservable(_cmd);</span><br><span class="line">                   &#125; <span class="keyword">catch</span> (Throwable ex) &#123;</span><br><span class="line">                       <span class="keyword">return</span> Observable.error(ex);</span><br><span class="line">                   &#125;</span><br><span class="line">               &#125;...</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="comment">// RxJava帮我们做了线程切换，此处就是线程切换的地方</span></span><br><span class="line">       &#125;).**subscribeOn**(threadPool.getScheduler(<span class="keyword">new</span> Func0&lt;Boolean&gt;() &#123;</span><br><span class="line">           <span class="meta">@Override</span></span><br><span class="line">           <span class="function"><span class="keyword">public</span> Boolean <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">               <span class="keyword">return</span> properties.executionIsolationThreadInterruptOnTimeout().get() &amp;&amp; _cmd.isCommandTimedOut.get() == TimedOutStatus.TIMED_OUT;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;));</span><br><span class="line"></span><br><span class="line">       <span class="comment">// HystrixObservableCommand默认是信号量隔离</span></span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       <span class="keyword">return</span> Observable.defer(<span class="keyword">new</span> Func0&lt;Observable&lt;R&gt;&gt;() &#123;</span><br><span class="line">           <span class="meta">@Override</span></span><br><span class="line">           <span class="function"><span class="keyword">public</span> Observable&lt;R&gt; <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">               executionResult = executionResult.setExecutionOccurred();</span><br><span class="line">               <span class="comment">//...</span></span><br><span class="line">               <span class="keyword">try</span> &#123;</span><br><span class="line">                   executionHook.onRunStart(_cmd);</span><br><span class="line">                   executionHook.onExecutionStart(_cmd);</span><br><span class="line">                   <span class="keyword">return</span> getUserExecutionObservable(_cmd);  </span><br><span class="line">               &#125;...</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>AbstractCommand</strong>中有四大关键功能属性：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//配置</span></span><br><span class="line">HystrixCommandProperties properties;</span><br><span class="line"><span class="comment">//断路器</span></span><br><span class="line">HystrixCircuitBreaker circuitBreaker;</span><br><span class="line"><span class="comment">//命令服务指标计量器</span></span><br><span class="line">HystrixCommandMetrics metrics;</span><br><span class="line"><span class="comment">//线程池</span></span><br><span class="line">HystrixThreadPool threadPool;</span><br></pre></td></tr></table></figure>
+
+<h3 id="怎样实现动态配置？"><a href="#怎样实现动态配置？" class="headerlink" title="怎样实现动态配置？"></a>怎样实现动态配置？</h3><p>先来看怎么动态配置属性（这是Netflix形成的一套体系，不用注解、反射 ）：<br>看Hystrix中线程池的🌰：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">HystrixThreadPoolDefault</span> <span class="keyword">implements</span> <span class="title">HystrixThreadPool</span> </span>&#123;</span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LoggerFactory.getLogger(HystrixThreadPoolDefault<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">final</span> HystrixThreadPoolProperties properties;</span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">final</span> BlockingQueue&lt;Runnable&gt; queue;</span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">final</span> ThreadPoolExecutor threadPool;</span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">final</span> HystrixThreadPoolMetrics metrics;</span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> queueSize;</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">touchConfig</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//拉取最新配置信息</span></span><br><span class="line">       <span class="keyword">final</span> <span class="keyword">int</span> dynamicCoreSize = properties.coreSize().get();</span><br><span class="line">       <span class="keyword">final</span> <span class="keyword">int</span> configuredMaximumSize = properties.maximumSize().get();</span><br><span class="line">       <span class="keyword">int</span> dynamicMaximumSize = properties.actualMaximumSize();</span><br><span class="line">       <span class="keyword">final</span> <span class="keyword">boolean</span> allowSizesToDiverge = properties.getAllowMaximumSizeToDivergeFromCoreSize().get();</span><br><span class="line">       <span class="keyword">boolean</span> maxTooLow = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">if</span> (allowSizesToDiverge &amp;&amp; configuredMaximumSize &lt; dynamicCoreSize) &#123;</span><br><span class="line">           dynamicMaximumSize = dynamicCoreSize;</span><br><span class="line">           maxTooLow = <span class="keyword">true</span>;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">if</span> (threadPool.getCorePoolSize() != dynamicCoreSize || (allowSizesToDiverge &amp;&amp; threadPool.getMaximumPoolSize() != dynamicMaximumSize)) &#123;</span><br><span class="line">           <span class="comment">//设置属性</span></span><br><span class="line">           threadPool.setCorePoolSize(dynamicCoreSize);</span><br><span class="line">           threadPool.setMaximumPoolSize(dynamicMaximumSize);</span><br><span class="line">       &#125;</span><br><span class="line">       threadPool.setKeepAliveTime(properties.keepAliveTimeMinutes().get(), TimeUnit.MINUTES);</span><br><span class="line">   &#125;</span><br><span class="line">    <span class="comment">//每次使用线程池时，会去重新加载下线程池的配置，并对线程池属性进行修改</span></span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> ThreadPoolExecutor <span class="title">getExecutor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       touchConfig();</span><br><span class="line">       <span class="keyword">return</span> threadPool;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p><strong>每次获取线程池之前会刷新一次线程池的配置</strong></p>
+<p><strong>HystrixThreadPoolProperties</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">HystrixProperty&lt;Integer&gt; corePoolSize;</span><br><span class="line">HystrixProperty&lt;Integer&gt; maximumPoolSize;</span><br><span class="line">HystrixProperty&lt;Integer&gt; keepAliveTime;</span><br><span class="line">HystrixProperty&lt;Integer&gt; maxQueueSize;</span><br><span class="line">HystrixProperty&lt;Integer&gt; queueSizeRejectionThreshold;</span><br><span class="line">HystrixProperty&lt;Boolean&gt; allowMaximumSizeToDivergeFromCoreSize;</span><br><span class="line">HystrixProperty&lt;Integer&gt; threadPoolRollingNumberStatisticalWindowInMilliseconds;</span><br><span class="line">HystrixProperty&lt;Integer&gt; threadPoolRollingNumberStatisticalWindowBuckets;</span><br></pre></td></tr></table></figure>
+
+<p>Hystrix 默认使用 <code>Archaius</code>来实现属性的配置：<br><code>HystrixProperty&lt;R&gt;</code>的实现是<code>ArchaiusDynamicProperty</code>的子类（<code>StringDynamicProperty</code>、<code>IntegerDynamicProperty</code>、<code>LongDynamicProperty</code>、<code>BooleanDynamicProperty</code>）。<br><code>ArchaiusDynamicProperty</code>有个静态容器：<code>final static ConcurrentHashMap&lt;String, DynamicProperty&gt; ALL_PROPS</code> 其用来包含所有动态属性。</p>
+<ul>
+<li><strong>属性获取</strong>：<br>当通过<code>HystrixProperty&lt;R&gt;.getValue(name)</code>获取配置值时，会先去<code>ALL_PROPS</code>中寻找动态配置的值，如果没有设置则会使用<code>ArchaiusDynamicProperty</code>中初始化时设置的默认值。</li>
+<li><strong>属性修改</strong>：<br>当我们使用<code>ConfigurationManager</code>去修改配置值时，会通过<code>name</code>去<code>ALL_PROPS</code>中找到<code>DynamicProperty</code>并设置值即可生效。</li>
+</ul>
+<h3 id="HystrixCircuitBreaker"><a href="#HystrixCircuitBreaker" class="headerlink" title="HystrixCircuitBreaker:"></a><strong>HystrixCircuitBreaker</strong>:</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">attemptExecution</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (properties.circuitBreakerForceOpen().get()) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (properties.circuitBreakerForceClosed().get()) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//此处是关键 断路器打开的时间。</span></span><br><span class="line">  <span class="keyword">if</span> (circuitOpened.get() == -<span class="number">1</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">//若休眠时间已过，则会放过一次请求，如果放过的请求没成功则会继续封禁，且会调整断路器打开时间为当前时间，延长断路器时间。</span></span><br><span class="line">      <span class="keyword">if</span> (isAfterSleepWindow()) &#123;</span><br><span class="line">          <span class="keyword">if</span> (status.compareAndSet(Status.OPEN, Status.HALF_OPEN)) &#123;</span><br><span class="line">              <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isAfterSleepWindow</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">final</span> <span class="keyword">long</span> circuitOpenTime = circuitOpened.get();</span><br><span class="line">  <span class="keyword">final</span> <span class="keyword">long</span> currentTime = System.currentTimeMillis();</span><br><span class="line">  <span class="comment">//如果当前时间已经大于休眠时间</span></span><br><span class="line">  <span class="keyword">final</span> <span class="keyword">long</span> sleepWindowTime = properties.circuitBreakerSleepWindowInMilliseconds().get();</span><br><span class="line">  <span class="keyword">return</span> currentTime &gt; circuitOpenTime + sleepWindowTime;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> Subscription <span class="title">subscribeToStream</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">//订阅Metrics中的**HealthCountsStream**数据流产出的HealthCounts数据</span></span><br><span class="line">  <span class="keyword">return</span> metrics.getHealthCountsStream()</span><br><span class="line">          .observe()</span><br><span class="line">          .subscribe(<span class="keyword">new</span> Subscriber&lt;HealthCounts&gt;() &#123;</span><br><span class="line">              <span class="meta">@Override</span></span><br><span class="line">              <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNext</span><span class="params">(HealthCounts hc)</span> </span>&#123;</span><br><span class="line">              <span class="comment">//当总请求量到达一定程度的时候才会进行后续的判断：冷启动</span></span><br><span class="line">                  <span class="keyword">if</span> (hc.getTotalRequests() &lt; properties.circuitBreakerRequestVolumeThreshold().get()) &#123;</span><br><span class="line">                  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                  <span class="comment">//当错误率到达一定程度的时候，将断路器设置为打开状态</span></span><br><span class="line">                      <span class="keyword">if</span> (hc.getErrorPercentage() &lt; properties.circuitBreakerErrorThresholdPercentage().get()) &#123;</span><br><span class="line">                      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                          <span class="keyword">if</span> (status.compareAndSet(Status.CLOSED, Status.OPEN)) &#123;</span><br><span class="line">                              circuitOpened.set(System.currentTimeMillis());</span><br><span class="line">                          &#125;</span><br><span class="line">                      &#125;</span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;);</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">HealthCounts</span> </span>&#123;</span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">long</span> totalCount;</span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">long</span> errorCount;</span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> errorPercentage;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="HystrixCommandMetrics："><a href="#HystrixCommandMetrics：" class="headerlink" title="HystrixCommandMetrics："></a><strong>HystrixCommandMetrics</strong>：</h3><p><code>HystrixCommandMetrics</code>是Hystrix中比较精彩的一部分：<br>它定义了如下几个事件流：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//健康数量流（滑动窗口）</span></span><br><span class="line">HealthCountsStream healthCountsStream;</span><br><span class="line"><span class="comment">//事件数量流（滑动窗口）</span></span><br><span class="line">RollingCommandEventCounterStream rollingCommandEventCounterStream;</span><br><span class="line"><span class="comment">//事件数量流（从VM启动开始的数据）</span></span><br><span class="line">CumulativeCommandEventCounterStream cumulativeCommandEventCounterStream;</span><br><span class="line"><span class="comment">//命令执行延时分布流（滑动窗口）</span></span><br><span class="line">RollingCommandLatencyDistributionStream rollingCommandLatencyDistributionStream;</span><br><span class="line"><span class="comment">//命令执行延时分布流（滑动窗口）</span></span><br><span class="line">RollingCommandUserLatencyDistributionStream rollingCommandUserLatencyDistributionStream;</span><br><span class="line"><span class="comment">//最大并发流（滑动窗口）</span></span><br><span class="line">RollingCommandMaxConcurrencyStream rollingCommandMaxConcurrencyStream;</span><br></pre></td></tr></table></figure>
+<p>下面，本文将以<code>HealthCountsStream</code>为例来介绍它是怎样获取命令执行信息，并通过滑动窗口的形式聚合信息成供断路器使用的<code>HealthCounts</code>：</p>
+<ul>
+<li><strong>获取命令执行信息</strong>：<br>在每个命令执行完成（成功或失败）后，都会执行<strong>handleCommandEnd</strong>方法。此方法会记录命令执行时长信息到执行结果<code>ExecutionResult</code>中，并把<code>ExecutionResult</code>告诉<strong>Metrics</strong>。</li>
+</ul>
+<p><strong>Metrics</strong>会调用<code>HystrixThreadEventStream.executionDone()</code>方法创建一个命令执行完成对象<code>HystrixCommandCompletion</code>，并把这个对象写入事件流<code>HystrixCommandCompletionStream</code>中（对于每个命令，Hystrix都会保存此命令的唯一<code>HystrixCommandCompletionStream</code>用于接受和发送命令完成事件的流）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">handleCommandEnd</span><span class="params">(<span class="keyword">boolean</span> commandExecutionStarted)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//记录命令执行时间</span></span><br><span class="line">   <span class="keyword">long</span> userThreadLatency = System.currentTimeMillis() - commandStartTimestamp;</span><br><span class="line">   <span class="comment">// executionResult:为命令的执行结果：包含命令状态信息（成功、失败、超时...）</span></span><br><span class="line">   executionResult = executionResult.markUserThreadCompletion((<span class="keyword">int</span>) userThreadLatency);</span><br><span class="line">   <span class="comment">//告诉Metrics记录命令执行完成</span></span><br><span class="line">   metrics.markCommandDone(executionResult, commandKey, threadPoolKey, commandExecutionStarted);</span><br><span class="line">   <span class="comment">//...   </span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">HystrixCommandCompletion event = HystrixCommandCompletion.from(executionResult, commandKey, threadPoolKey);</span><br><span class="line">HystrixCommandCompletionStream commandStream = HystrixCommandCompletionStream.getInstance(commandKey);</span><br><span class="line">commandStream.write(event);</span><br></pre></td></tr></table></figure>
+<p>此时，所有需要获取命令执行信息，只需要成为<code>HystrixCommandCompletionStream</code>的订阅者即可。</p>
+<blockquote>
+<p><code>HystrixCommandCompletionStream</code>中通过<code>SerializedSubject</code>来保证多线程并发写不会引起乱序等问题。<code>new SerializedSubject&lt;HystrixCommandCompletion, HystrixCommandCompletion&gt;(PublishSubject.&lt;HystrixCommandCompletion&gt;create())</code>。</p>
+</blockquote>
+<ul>
+<li><strong>消费命令信息</strong><br>下面以<code>HealthCountsStream</code>为例来介绍其是怎么消费命令执行信息，并输出可供断路器使用的信息的：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="title">HealthCountsStream</span><span class="params">(<span class="keyword">final</span> HystrixCommandKey commandKey, <span class="keyword">final</span> <span class="keyword">int</span> numBuckets, <span class="keyword">final</span> <span class="keyword">int</span> bucketSizeInMs,</span></span></span><br><span class="line"><span class="function"><span class="params">                               Func2&lt;<span class="keyword">long</span>[], HystrixCommandCompletion, <span class="keyword">long</span>[]&gt; reduceCommandCompletion)</span> </span>&#123;</span><br><span class="line"><span class="comment">//获取某个命令的`HystrixCommandCompletionStream`作为数据源</span></span><br><span class="line"><span class="keyword">super</span>(HystrixCommandCompletionStream.getInstance(commandKey), numBuckets, bucketSizeInMs, reduceCommandCompletion, healthCheckAccumulator);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Func2&lt;HealthCounts, <span class="keyword">long</span>[], HealthCounts&gt; healthCheckAccumulator = <span class="keyword">new</span> Func2&lt;HealthCounts, <span class="keyword">long</span>[], HealthCounts&gt;() &#123;</span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> HealthCounts <span class="title">call</span><span class="params">(HealthCounts healthCounts, <span class="keyword">long</span>[] bucketEventCounts)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> healthCounts.plus(bucketEventCounts);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><img src="media/15014667235538/15017765433249.jpg" alt="set up-w500"><br>跟进其父类<code>BucketedCounterStream</code> 和<code>BucketedRollingCounterStream</code>，可以看到命令完成事件数据流是怎么被消费的。</p>
+<p>首先，<code>BucketedCounterStream</code>是用来按指定的时间片段长度来生成Bucketed数据流（保留一个时间片段内的所有执行结果类型命令请求数）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="title">BucketedCounterStream</span><span class="params">(<span class="keyword">final</span> HystrixEventStream&lt;Event&gt; inputEventStream, <span class="keyword">final</span> <span class="keyword">int</span> numBuckets, <span class="keyword">final</span> <span class="keyword">int</span> bucketSizeInMs,</span></span></span><br><span class="line"><span class="function"><span class="params">                                    <span class="keyword">final</span> Func2&lt;Bucket, Event, Bucket&gt; appendRawEventToBucket)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">this</span>.numBuckets = numBuckets;</span><br><span class="line">   <span class="keyword">this</span>.reduceBucketToSummary = <span class="keyword">new</span> Func1&lt;Observable&lt;Event&gt;, Observable&lt;Bucket&gt;&gt;() &#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> Observable&lt;Bucket&gt; <span class="title">call</span><span class="params">(Observable&lt;Event&gt; eventBucket)</span> </span>&#123;</span><br><span class="line">           <span class="comment">//叠加操作</span></span><br><span class="line">           <span class="keyword">return</span> eventBucket.reduce(getEmptyBucketSummary(), appendRawEventToBucket);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;;</span><br><span class="line">   <span class="keyword">this</span>.bucketedStream = Observable.defer(<span class="keyword">new</span> Func0&lt;Observable&lt;Bucket&gt;&gt;() &#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> Observable&lt;Bucket&gt; <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">           <span class="keyword">return</span> hystrixCommandCompletionStream</span><br><span class="line">                   .observe()</span><br><span class="line">                   <span class="comment">//关键！RxJava.window 以bucketSizeInMs时间大小为一个窗口发射数据</span></span><br><span class="line">                   .window(bucketSizeInMs, TimeUnit.MILLISECONDS)</span><br><span class="line">                   <span class="comment">// 将所有的命令请求聚合成一个总的结果：(每个命令执行结果类型的数量)</span></span><br><span class="line">                   .flatMap(reduceBucketToSummary)                </span><br><span class="line">                   .startWith(emptyEventCountsToStart);           </span><br><span class="line">       &#125;</span><br><span class="line">   &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>BucketedRollingCounterStream</code> 会订阅<code>BucketedCounterStream</code>生成的<strong>bucketedStream</strong>流，并基于此做了滑动窗口的功能，并聚合欢动窗口内的所有命令执行结果类型计量信息。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="title">BucketedRollingCounterStream</span><span class="params">(HystrixEventStream&lt;Event&gt; stream, <span class="keyword">final</span> <span class="keyword">int</span> numBuckets, <span class="keyword">int</span> bucketSizeInMs,</span></span></span><br><span class="line"><span class="function"><span class="params">                                           <span class="keyword">final</span> Func2&lt;Bucket, Event, Bucket&gt; appendRawEventToBucket,</span></span></span><br><span class="line"><span class="function"><span class="params">                                           <span class="keyword">final</span> Func2&lt;Output, Bucket, Output&gt; reduceBucket)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//此处 appendRawEventToBucket是实现`HealthCounts`相加的函数                                    </span></span><br><span class="line">   <span class="keyword">super</span>(stream, numBuckets, bucketSizeInMs, appendRawEventToBucket);</span><br><span class="line">   Func1&lt;Observable&lt;Bucket&gt;, Observable&lt;Output&gt;&gt; reduceWindowToSummary = <span class="keyword">new</span> Func1&lt;Observable&lt;Bucket&gt;, Observable&lt;Output&gt;&gt;() &#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> Observable&lt;Output&gt; <span class="title">call</span><span class="params">(Observable&lt;Bucket&gt; window)</span> </span>&#123;</span><br><span class="line">           <span class="keyword">return</span> window.scan(getEmptyOutputValue(), reduceBucket).skip(numBuckets);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;;</span><br><span class="line">   <span class="keyword">this</span>.sourceStream = bucketedStream</span><br><span class="line">            <span class="comment">//滑动窗口功能</span></span><br><span class="line">           .window(numBuckets, <span class="number">1</span>)          </span><br><span class="line">           .flatMap(reduceWindowToSummary)<span class="comment">//...          </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再回过头来看断路器逻辑中，它监听的即是<code>BucketedRollingCounterStream</code>中的<code>sourceStream</code>。它向外推送<code>appendRawEventToBucket</code>的结果数据。</p>
+<h2 id="HystrixCollapser"><a href="#HystrixCollapser" class="headerlink" title="HystrixCollapser:"></a><strong>HystrixCollapser</strong>:</h2><p>Collapser的原理是：将一个时间窗内的所有请求合并批量发送到依赖方进行请求返回。<br><img src="media/15014667235538/15018055405460.jpg" alt="set up-w500"><br><code>HystrixCollapser</code>有两种域范围：用户请求范围、全局范围。用户请求范围只会把用户请求范围内的请求合并，全局范围则会合并所有请求<br>整个过程的时序图如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">HystrixCollapser-&gt;RequestCollapser: toObservable</span><br><span class="line">RequestCollapser-&gt;HystrixTimer: submitRequest</span><br><span class="line">Note right of HystrixTimer: 第一次提交请求时，会创建HystrixTimer，并开启定时任务(**addTimerListener**)</span><br><span class="line">HystrixCollapser-&gt;RequestBatch: offer，将请求加到RequestBatch队列中（如果队列中已经有了此请求且设置了请求缓存，则直接返回之前的；当队列的大小大于批量的上界时执行任务，并重新开启下一个批量），执行线程阻塞。</span><br><span class="line">HystrixCollapser-&gt;HystrixCollapser: createNewBatchAndExecutePreviousIfNeeded，当时间窗口时间到达，或者到达最大请求时，则执行批量请求</span><br><span class="line">HystrixCollapser-&gt;RequestBatch: executeBatchIfNotAlreadyStarted，创建批量请求命令，提交请求。执行完成后并将结果映射会原有请求</span><br></pre></td></tr></table></figure>
+
+
+<p><strong>HystrixCommandProperties命令列表：</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">HystrixProperty&lt;Integer&gt; circuitBreakerRequestVolumeThreshold; <span class="comment">// number of requests that must be made within a statisticalWindow before open/close decisions are made using stats</span></span><br><span class="line">HystrixProperty&lt;Integer&gt; circuitBreakerSleepWindowInMilliseconds; <span class="comment">// milliseconds after tripping circuit before allowing retry</span></span><br><span class="line">HystrixProperty&lt;Boolean&gt; circuitBreakerEnabled; <span class="comment">// Whether circuit breaker should be enabled.</span></span><br><span class="line">HystrixProperty&lt;Integer&gt; circuitBreakerErrorThresholdPercentage; <span class="comment">// % of 'marks' that must be failed to trip the circuit</span></span><br><span class="line">HystrixProperty&lt;Boolean&gt; circuitBreakerForceOpen; <span class="comment">// a property to allow forcing the circuit open (stopping all requests)</span></span><br><span class="line">HystrixProperty&lt;Boolean&gt; circuitBreakerForceClosed; <span class="comment">// a property to allow ignoring errors and therefore never trip 'open' (ie. allow all traffic through)</span></span><br><span class="line">HystrixProperty&lt;ExecutionIsolationStrategy&gt; executionIsolationStrategy; <span class="comment">// Whether a command should be executed in a separate thread or not.</span></span><br><span class="line">HystrixProperty&lt;Integer&gt; executionTimeoutInMilliseconds; <span class="comment">// Timeout value in milliseconds for a command</span></span><br><span class="line">HystrixProperty&lt;Boolean&gt; executionTimeoutEnabled; <span class="comment">//Whether timeout should be triggered</span></span><br><span class="line">HystrixProperty&lt;String&gt; executionIsolationThreadPoolKeyOverride; <span class="comment">// What thread-pool this command should run in (if running on a separate thread).</span></span><br><span class="line">HystrixProperty&lt;Integer&gt; executionIsolationSemaphoreMaxConcurrentRequests; <span class="comment">// Number of permits for execution semaphore</span></span><br><span class="line">HystrixProperty&lt;Integer&gt; fallbackIsolationSemaphoreMaxConcurrentRequests; <span class="comment">// Number of permits for fallback semaphore</span></span><br><span class="line">HystrixProperty&lt;Boolean&gt; fallbackEnabled; <span class="comment">// Whether fallback should be attempted.</span></span><br><span class="line">HystrixProperty&lt;Boolean&gt; executionIsolationThreadInterruptOnTimeout; <span class="comment">// Whether an underlying Future/Thread (when runInSeparateThread == true) should be interrupted after a timeout</span></span><br><span class="line">HystrixProperty&lt;Boolean&gt; executionIsolationThreadInterruptOnFutureCancel; <span class="comment">// Whether canceling an underlying Future/Thread (when runInSeparateThread == true) should interrupt the execution thread</span></span><br><span class="line">HystrixProperty&lt;Integer&gt; metricsRollingStatisticalWindowInMilliseconds; <span class="comment">// milliseconds back that will be tracked</span></span><br><span class="line">HystrixProperty&lt;Integer&gt; metricsRollingStatisticalWindowBuckets; <span class="comment">// number of buckets in the statisticalWindow</span></span><br><span class="line">HystrixProperty&lt;Boolean&gt; metricsRollingPercentileEnabled; <span class="comment">// Whether monitoring should be enabled (SLA and Tracers).</span></span><br><span class="line">HystrixProperty&lt;Integer&gt; metricsRollingPercentileWindowInMilliseconds; <span class="comment">// number of milliseconds that will be tracked in RollingPercentile</span></span><br><span class="line">HystrixProperty&lt;Integer&gt; metricsRollingPercentileWindowBuckets; <span class="comment">// number of buckets percentileWindow will be divided into</span></span><br><span class="line">HystrixProperty&lt;Integer&gt; metricsRollingPercentileBucketSize; <span class="comment">// how many values will be stored in each percentileWindowBucket</span></span><br><span class="line">HystrixProperty&lt;Integer&gt; metricsHealthSnapshotIntervalInMilliseconds; <span class="comment">// time between health snapshots</span></span><br><span class="line">HystrixProperty&lt;Boolean&gt; requestLogEnabled; <span class="comment">// whether command request logging is enabled.</span></span><br><span class="line">HystrixProperty&lt;Boolean&gt; requestCacheEnabled; <span class="comment">// Whether request caching is enabled.</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/hystrix/" rel="tag"># hystrix</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/08/14/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/3.hystrix-rxjava/" rel="next" title="Hystrix-RxJava入门">
+                <i class="fa fa-chevron-left"></i> Hystrix-RxJava入门
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/08/15/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/5.hystrix-%E6%8F%92%E4%BB%B6/" rel="prev" title="Hystrix-插件">
+                Hystrix-插件 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Hystrix类结构以及命令执行流程"><span class="nav-number">1.</span> <span class="nav-text">1. Hystrix类结构以及命令执行流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Hystrix类结构"><span class="nav-number">1.1.</span> <span class="nav-text">1. Hystrix类结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-执行流程"><span class="nav-number">1.2.</span> <span class="nav-text">2. 执行流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#怎样实现动态配置？"><span class="nav-number">1.3.</span> <span class="nav-text">怎样实现动态配置？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HystrixCircuitBreaker"><span class="nav-number">1.4.</span> <span class="nav-text">HystrixCircuitBreaker:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HystrixCommandMetrics："><span class="nav-number">1.5.</span> <span class="nav-text">HystrixCommandMetrics：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HystrixCollapser"><span class="nav-number">2.</span> <span class="nav-text">HystrixCollapser:</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="hystrix,RxJava," />
+
+
+<meta name="description" content="RxJava入门ReactiveX是Reactive Extensions的缩写，一般简写为Rx，最初是LINQ的一个扩展，由微软的架构师Erik Meijer领导的团队开发，在2012年11月开源，Rx是一个编程模型，目标是提供一致的编程接口，帮助开发者更方便的处理异步数据流，Rx库支持Java、.NET、JavaScript和C++，Rx近几年越来越流行了，现在已经支持几乎全部的流行编程语言了">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hystrix-RxJava入门">
+<meta property="og:url" content="https://dorgenjones.github.io/2017/08/14/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/3.hystrix-rxjava/index.html">
+<meta property="og:site_name" content="Zamperini">
+<meta property="og:description" content="RxJava入门ReactiveX是Reactive Extensions的缩写，一般简写为Rx，最初是LINQ的一个扩展，由微软的架构师Erik Meijer领导的团队开发，在2012年11月开源，Rx是一个编程模型，目标是提供一致的编程接口，帮助开发者更方便的处理异步数据流，Rx库支持Java、.NET、JavaScript和C++，Rx近几年越来越流行了，现在已经支持几乎全部的流行编程语言了">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-08-13T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-02-13T11:00:28.778Z">
+<meta property="article:author" content="Zamperini">
+<meta property="article:tag" content="hystrix">
+<meta property="article:tag" content="RxJava">
+<meta name="twitter:card" content="summary">
+
+
+
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/2017/08/14/基础工具/hystrix/3.hystrix-rxjava/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>Hystrix-RxJava入门 | Zamperini</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zamperini</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2017/08/14/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/3.hystrix-rxjava/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Hystrix-RxJava入门</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-14T00:00:00+08:00">2017-08-14</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/hystrix/" itemprop="url" rel="index"><span itemprop="name">hystrix</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="RxJava入门"><a href="#RxJava入门" class="headerlink" title="RxJava入门"></a>RxJava入门</h1><p>ReactiveX是Reactive Extensions的缩写，一般简写为Rx，最初是LINQ的一个扩展，由微软的架构师Erik Meijer领导的团队开发，在2012年11月开源，Rx是一个编程模型，目标是提供一致的编程接口，帮助开发者更方便的处理异步数据流，Rx库支持Java、.NET、JavaScript和C++，Rx近几年越来越流行了，现在已经支持几乎全部的流行编程语言了，Rx的大部分语言库由ReactiveX这个组织负责维护，比较流行的有RxJava/RxJS/Rx.NET，社区网站是 reactivex.io。</p>
+<p>在ReactiveX中，一个观察者(Observer)订阅一个可观察对象(Observable)。观察者对Observable发射的数据或数据序列作出响应。这种模式可以极大地简化并发操作，因为它创建了一个处于待命状态的观察者哨兵，在未来某个时刻响应Observable的通知，不需要阻塞等待Observable发射数据。</p>
+<p>本文主要聚焦于RxJava<br>先来简单介绍 观察者模式里一些概念：</p>
+<blockquote>
+<p><strong>Observable</strong>：发射源，英文释义“可观察的”，在观察者模式中称为“被观察者”或“可观察对象”；</p>
+<p><strong>Observer</strong>：接收源，英文释义“观察者”，就是观察者模式中的“观察者”，可接收Observable、Subject发射的数据；</p>
+<p><strong>Subject</strong>：Subject是一个比较特殊的对象，既可充当发射源，也可充当接收源。它是消息收发的桥梁。</p>
+<p><strong>Subscriber</strong>：“订阅者”，也是接收源，Subscriber实现了Observer接口，比Observer多了一个方法unsubscribe()，用来取消订阅，当你不再想接收数据了，可以调用unsubscribe()方法停止接收，Observer 在 subscribe() 过程中,最终也会被转换成 Subscriber 对象，一般情况下，建议使用Subscriber作为接收源；</p>
+<p><strong>Subscription</strong> ：Observable调用subscribe( )方法返回的对象，同样有unsubscribe( )方法，可以用来取消订阅事件；</p>
+<p><strong>Action~</strong>：RxJava中的一个接口，<code>Action~</code>是用来代替并简化<code>Subscriber</code>，它只有无返回值的<code>call()</code>方法，对应 <strong>~</strong> 为0<del>9时，它们有0</del>9个入参；</p>
+<p><strong>Func~</strong>：与<code>Action~</code>非常相似，也有call()方法。但是它是有返回值的，同样也有Func0、Func1…Func9;</p>
+</blockquote>
+<p>首先来看RxJva最简单的使用方式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//消息发送者</span></span><br><span class="line">Observable&lt;String&gt; sender = Observable.create(<span class="keyword">new</span> Observable.OnSubscribe&lt;String&gt;() &#123;</span><br><span class="line"> <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">(Subscriber&lt;? <span class="keyword">super</span> String&gt; subscriber)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">while</span>(下载进度&lt;<span class="number">100</span>%) &#123;</span><br><span class="line">        subscriber.onNext(<span class="string">"当前已下载"</span> + 下载进度);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      subscriber.onNext(<span class="string">"Hello World"</span>);  </span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">//消息订阅者</span></span><br><span class="line">Observer&lt;String&gt; receiver = <span class="keyword">new</span> Observer&lt;String&gt;() &#123;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCompleted</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="comment">//数据接收完成时调用</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onError</span><span class="params">(Throwable e)</span> </span>&#123;</span><br><span class="line">      <span class="comment">//发生错误调用</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNext</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 获取页面句柄，渲染后展示给用户看当前下载进度</span></span><br><span class="line">    viewHander.show(s);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//消息订阅</span></span><br><span class="line">sender.subscribe(receiver);</span><br></pre></td></tr></table></figure>
+
+<p>这样就形成RxJava一个简单的用法，sender发射”Hello World!”，将会被receiver的onNext的接收，通过这个例子，这就是 “观察者模式”。RxJava让观察者模式变得更简单和简洁，而RxJava所有的一切都将围绕这两个点展开，一个是发射数据，一个是接收数据。</p>
+<h2 id="1-Observable的创建："><a href="#1-Observable的创建：" class="headerlink" title="1. Observable的创建："></a>1. Observable的创建：</h2><ul>
+<li><code>just( )</code> — 将一个或多个对象转换成发射这些对象的Observable，并触发<code>onNext( )</code>操作</li>
+<li><code>from( )</code> — 将一个Iterable, 一个Future, 或者一个数组转换成一个Observable</li>
+<li><code>repeat( )</code> — 创建一个重复发射指定数据或数据序列的Observable</li>
+<li><code>repeatWhen( )</code> — 创建一个重复发射指定数据或数据序列的Observable，它依赖于另一个Observable发射的数据</li>
+<li><code>create( )</code> — 使用一个函数从头创建一个Observable</li>
+<li><code>defer( )</code> — 只有当订阅者订阅才创建Observable；为每个订阅创建一个新的Observable</li>
+<li><code>range( )</code> — 创建一个发射指定范围的整数序列的Observable</li>
+<li><code>interval( )</code> — 创建一个按照给定的时间间隔发射整数序列的Observable</li>
+<li><code>timer( )</code> — 创建一个在给定的延时之后发射单个数据的Observable</li>
+<li><code>empty( )</code> — 创建一个什么都不做直接通知完成的Observable</li>
+<li><code>error( )</code> — 创建一个什么都不做直接通知错误的Observable</li>
+<li><code>never( )</code> — 创建一个不发射任何数据的Observable</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">Observer&lt;Integer&gt; receiver = <span class="keyword">new</span> Observer&lt;Integer&gt;() &#123;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCompleted</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onError</span><span class="params">(Throwable e)</span> </span>&#123;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNext</span><span class="params">(Integer s)</span> </span>&#123;</span><br><span class="line">      System.out.print(s);  </span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line">observable1 = Observable.just(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);</span><br><span class="line">observable2 = Observable.from(<span class="keyword">new</span> ArrayList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>));</span><br><span class="line">observable3 = Observable.just(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>).repeat(<span class="number">2</span>);<span class="comment">//输出1，2，3，1，2，3</span></span><br><span class="line">deferObservable4 = Observable.defer(<span class="keyword">new</span> Func0&lt;Observable&lt;Integer&gt;&gt;() &#123;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> Observable&lt;Integer&gt; <span class="title">call</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> Observable.just(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);</span><br><span class="line">  &#125;&#125;);</span><br><span class="line">observable5 = Observable.range(<span class="number">1</span>, <span class="number">5</span>);<span class="comment">//输出1，2，3，4，5</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="2-转换操作："><a href="#2-转换操作：" class="headerlink" title="2. 转换操作："></a>2. 转换操作：</h2><ul>
+<li><strong>map( )</strong> — 对序列的每一项都应用一个函数来进行变换</li>
+<li><strong>flatMap( )</strong> 将Observable发射的数据集合变换为Observables集合，然后将这些Observable发射的数据平坦化的放进一个单独的Observable</li>
+<li><code>switchMap( )</code> — 将Observable发射的数据集合变换为Observables集合，然后只发射这些Observables最近发射的数据</li>
+<li><strong>scan( )</strong> — 对Observable发射的每一项数据应用一个函数，然后按顺序依次发射每一个值</li>
+<li><code>groupBy( )</code> — 将Observable分拆为Observable集合，将原始Observable发射的数据按Key分组，每一个Observable发射一组不同的数据</li>
+<li><code>buffer( )</code> — 它定期从Observable收集数据到一个集合，然后把这些数据集合打包发射，而不是一次发射一个</li>
+<li><strong>window( )</strong> — 定期将来自Observable的数据分拆成一些Observable窗口，然后发射这些窗口，而不是在同一个Obserable中发送</li>
+<li><code>cast( )</code> — 在发射之前强制将Observable发射的所有数据转换为指定类型</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">Observable.just(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>)</span><br><span class="line">  <span class="comment">//执行换换</span></span><br><span class="line"> .map(<span class="keyword">new</span> Func1&lt;Integer, String&gt;() &#123;</span><br><span class="line">     <span class="meta">@Override</span></span><br><span class="line">     <span class="function"><span class="keyword">public</span> String <span class="title">call</span><span class="params">(Integer integer)</span> </span>&#123;</span><br><span class="line">         <span class="keyword">return</span> String.valueOf(integer);</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;)</span><br><span class="line"></span><br><span class="line"> <span class="comment">//flatMap</span></span><br><span class="line">Observable.just(<span class="string">"南昌"</span>, <span class="string">"深圳"</span>, <span class="string">"天津"</span>, <span class="string">"北京"</span>).flatMap(<span class="keyword">new</span> Func1&lt;String, Observable&lt;WeatherInfo&gt;&gt;() &#123;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> Observable&lt;WeatherInfo&gt; <span class="title">call</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> getWeather(s);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;).subscribe(<span class="keyword">new</span> Subscriber&lt;WeatherInfo&gt;() &#123;</span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCompleted</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onError</span><span class="params">(Throwable e)</span> </span>&#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNext</span><span class="params">(WeatherInfo weatherInfo)</span> </span>&#123;</span><br><span class="line">      &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// scan方法 输出 1, 2, 6</span></span><br><span class="line">Observable.from(Lists.newArrayList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>)).scan((x, y) -&gt; x * y).subscribe(<span class="keyword">new</span> Action1&lt;Integer&gt;() &#123;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">(Integer integer)</span> </span>&#123;</span><br><span class="line">      System.out.println(integer);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">//window 结果：1，2，3，||4，5，6，||7，8，9，||10，||</span></span><br><span class="line">Observable.range(<span class="number">1</span>, <span class="number">10</span>).window(<span class="number">3</span>).subscribe(<span class="keyword">new</span> Action1&lt;Observable&lt;Integer&gt;&gt;() &#123;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">(Observable&lt;Integer&gt; integerObservable)</span> </span>&#123;</span><br><span class="line">      integerObservable.subscribe(<span class="keyword">new</span> Subscriber&lt;Integer&gt;() &#123;</span><br><span class="line">          <span class="meta">@Override</span></span><br><span class="line">          <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCompleted</span><span class="params">()</span> </span>&#123;</span><br><span class="line">              System.out.print(<span class="string">"||"</span>);</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          <span class="meta">@Override</span></span><br><span class="line">          <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onError</span><span class="params">(Throwable e)</span> </span>&#123;</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          <span class="meta">@Override</span></span><br><span class="line">          <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNext</span><span class="params">(Integer integer)</span> </span>&#123;</span><br><span class="line">              System.out.print(integer + <span class="string">"，"</span>);</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">//window还有更多操作：</span></span><br><span class="line">window(count,skip)、window(timeSpan, TimeUnit)...</span><br></pre></td></tr></table></figure>
+<h2 id="3-过滤操作"><a href="#3-过滤操作" class="headerlink" title="3. 过滤操作"></a>3. 过滤操作</h2><ul>
+<li><code>filter( )</code> — 过滤数据</li>
+<li><code>takeLast( )</code> — 只发射最后的N项数据</li>
+<li><code>last( )</code> — 只发射最后的一项数据</li>
+<li><code>lastOrDefault( )</code> — 只发射最后的一项数据，如果Observable为空就发射默认值</li>
+<li><code>takeLastBuffer( )</code> — 将最后的N项数据当做单个数据发射</li>
+<li><code>skip( )</code> — 跳过开始的N项数据</li>
+<li><code>skipLast( )</code> — 跳过最后的N项数据</li>
+<li><code>take( )</code> — 只发射开始的N项数据</li>
+<li><code>first( )</code> and takeFirst( ) — 只发射第一项数据，或者满足某种条件的第一项数据</li>
+<li><code>firstOrDefault( )</code> — 只发射第一项数据，如果Observable为空就发射默认值</li>
+<li><code>elementAt( )</code> — 发射第N项数据</li>
+<li><code>elementAtOrDefault( )</code> — 发射第N项数据，如果Observable数据少于N项就发射默认值</li>
+<li><code>sample( )</code> or throttleLast( ) — 定期发射Observable最近的数据</li>
+<li><code>throttleFirst( )</code> — 定期发射Observable发射的第一项数据</li>
+<li><code>throttleWithTimeout( )</code> or debounce( ) — 只有当Observable在指定的时间后还没有发射数据时，才发射一个数据</li>
+<li><code>timeout( )</code> — 如果在一个指定的时间段后还没发射数据，就发射一个异常</li>
+<li><code>distinct( )</code> — 过滤掉重复数据</li>
+<li><code>distinctUntilChanged( )</code> — 过滤掉连续重复的数据</li>
+<li><code>ofType( )</code> — 只发射指定类型的数据</li>
+<li><code>ignoreElements( )</code> — 丢弃所有的正常数据，只发射错误或完成通知</li>
+</ul>
+<h2 id="聚合操作"><a href="#聚合操作" class="headerlink" title="聚合操作"></a>聚合操作</h2><ul>
+<li><code>concat( )</code> — 顺序连接多个Observables</li>
+<li><code>count( )</code> and countLong( ) — 计算数据项的个数并发射结果</li>
+<li><code>reduce( )</code> — 对序列使用reduce()函数并发射最终的结果</li>
+<li><code>collect( )</code> — 将原始Observable发射的数据放到一个单一的可变的数据结构中，然后返回一个发射这个数据结构的Observable</li>
+<li><code>toList( )</code> — 收集原始Observable发射的所有数据到一个列表，然后返回这个列表</li>
+<li><code>toSortedList( )</code> — 收集原始Observable发射的所有数据到一个有序列表，然后返回这个列表</li>
+<li><code>toMap( )</code> — 将序列数据转换为一个Map，Map的key是根据一个函数计算的</li>
+<li><code>toMultiMap( )</code> — 将序列数据转换为一个列表，同时也是一个Map，Map的key是根据一个函数计算的</li>
+</ul>
+<h2 id="4-Subject"><a href="#4-Subject" class="headerlink" title="4. Subject"></a>4. Subject</h2><p>上文中介绍<code>Subject</code>是桥梁或者代理，同时充当了Observer和Observable的角色。因为它是一个Observer，它可以订阅一个或多个Observable；又因为它是一个Observable，它可以转发它收到(Observe)的数据，也可以发送新的数据。</p>
+<p><strong>Subject的种类</strong>：</p>
+<ul>
+<li><strong>AsyncSubject</strong>：一个AsyncSubject只在原始Observable完成后，发射来自原始Observable的最后一个值。（如果原始Observable没有发射任何值，AsyncObject也不发射任何值）它会把这最后一个值发射给任何后续的观察者：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">AsyncSubject&lt;String&gt; asyncSubject = AsyncSubject.create();</span><br><span class="line">asyncSubject.onNext(<span class="string">"asyncSubject1"</span>);</span><br><span class="line">asyncSubject.onNext(<span class="string">"asyncSubject2"</span>);</span><br><span class="line">asyncSubject.onNext(<span class="string">"asyncSubject3"</span>);  </span><br><span class="line">asyncSubject.onCompleted();</span><br><span class="line">asyncSubject.subscribe(<span class="keyword">new</span> Observer&lt;String&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCompleted</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onError</span><span class="params">(Throwable e)</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNext</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">        System.out.println(s);<span class="comment">//只输出 asyncSubject3</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>BehaviorSubject</strong>：发射被订阅前的最后一条数据（如果被订阅时还没有发射数据，则发射一个默认值），并继续发射被订阅后接收到到的数据：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"> BehaviorSubject&lt;String&gt; behaviorSubject = BehaviorSubject.create(<span class="string">"default"</span>);</span><br><span class="line"> behaviorSubject.onNext(<span class="string">"behaviorSubject1"</span>);</span><br><span class="line"> behaviorSubject.onNext(<span class="string">"behaviorSubject2"</span>);</span><br><span class="line"> behaviorSubject.subscribe(<span class="keyword">new</span> Observer&lt;String&gt;()&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCompleted</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onError</span><span class="params">(Throwable e)</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNext</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">        System.out.println(s);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"> &#125;);</span><br><span class="line">behaviorSubject.onNext(<span class="string">"behaviorSubject3"</span>);</span><br><span class="line">behaviorSubject.onNext(<span class="string">"behaviorSubject4"</span>);</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">输出：</span></span><br><span class="line"><span class="comment">asyncSubject2</span></span><br><span class="line"><span class="comment">asyncSubject3</span></span><br><span class="line"><span class="comment">asyncSubject4</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>PublishSubject</strong>：其订阅者只会收到订阅时间后，<code>PublishSubject</code>发射的数据：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">PublishSubject&lt;String&gt; publishSubject = PublishSubject.create();</span><br><span class="line">  publishSubject.onNext(<span class="string">"publishSubject1"</span>);</span><br><span class="line">  publishSubject.onNext(<span class="string">"publishSubject2"</span>);</span><br><span class="line">  publishSubject.subscribe(<span class="keyword">new</span> Observer&lt;String&gt;() &#123;</span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCompleted</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onError</span><span class="params">(Throwable e)</span> </span>&#123;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNext</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">           System.out.println(s);</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">  publishSubject.onNext(<span class="string">"publishSubject3"</span>);</span><br><span class="line">  publishSubject.onNext(<span class="string">"publishSubject4"</span>);</span><br><span class="line">  <span class="comment">/*</span></span><br><span class="line"><span class="comment"> 输出：</span></span><br><span class="line"><span class="comment"> asyncSubject3</span></span><br><span class="line"><span class="comment"> asyncSubject4</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>ReplaySubject</strong>：<code>ReplaySubject</code>会发射所有数据给所有订阅者，无论订阅者什么时间点订阅消息。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">ReplaySubject&lt;String&gt;replaySubject = ReplaySubject.create();    </span><br><span class="line">replaySubject.onNext(<span class="string">"replaySubject:pre1"</span>);</span><br><span class="line">replaySubject.onNext(<span class="string">"replaySubject:pre2"</span>);</span><br><span class="line">replaySubject.onNext(<span class="string">"replaySubject:pre3"</span>);</span><br><span class="line">replaySubject.subscribe(<span class="keyword">new</span> Action1&lt;String&gt;() &#123;</span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">          System.out.println(s);</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">replaySubject.onNext(<span class="string">"replaySubject:after1"</span>);</span><br><span class="line">replaySubject.onNext(<span class="string">"replaySubject:after2"</span>);</span><br><span class="line"> <span class="comment">/*</span></span><br><span class="line"><span class="comment"> 输出：</span></span><br><span class="line"><span class="comment"> replaySubject:pre1</span></span><br><span class="line"><span class="comment"> replaySubject:pre2</span></span><br><span class="line"><span class="comment"> replaySubject:pre3</span></span><br><span class="line"><span class="comment"> replaySubject:after1</span></span><br><span class="line"><span class="comment"> replaySubject:after2</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>SerializedSubject</strong>：当多线程往<code>Subject</code>中写数据时，能导致同时（非顺序）调用，这会违反Observable协议，给Subject的结果增加了不确定性。为解决此类问题，只需要将相应的<strong>Subject</strong> 包装在<code>SerializedSubject</code>里。</li>
+</ul>
+<h2 id="5-Scheduler-调度器"><a href="#5-Scheduler-调度器" class="headerlink" title="5. Scheduler 调度器"></a>5. Scheduler 调度器</h2><p>RxJava提供了便捷的线程调度工具<strong>Scheduler</strong>，可以很简便地指定发射源或者订阅者在哪个特定的调度器(Scheduler)上执行。</p>
+<p>RxJava提供<code>ObserveOn</code>和<code>SubscribeOn</code>两种调度方法，<strong>ObserveOn</strong>指示<code>Observable</code>在哪个特定的调度器上调用观察者的<code>onNext</code>, <code>onError</code>和<code>onCompleted</code>方法（指定观察者在哪个调度器上执行逻辑）。<code>SubscribeOn</code>用于指定<code>Observable</code>将全部的处理过程（包括发射数据和通知）放在特定的调度器上执行（<code>Observer</code>内容执行的地方）。</p>
+<p>调度器的种类：</p>
+<table>
+<thead>
+<tr>
+<th>调度器类型</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Schedulers.computation( )</td>
+<td>用于计算任务，如事件循环或和回调处理，不要用于IO操作(IO操作请使用Schedulers.io())；默认线程数等于处理器的数量</td>
+</tr>
+<tr>
+<td>Schedulers.from(executor)</td>
+<td>使用指定的Executor作为调度器</td>
+</tr>
+<tr>
+<td>Schedulers.immediate( )</td>
+<td>在当前线程立即开始执行任务</td>
+</tr>
+<tr>
+<td>Schedulers.io( )</td>
+<td>用于IO密集型任务，如异步阻塞IO操作，这个调度器的线程池会根据需要增长；对于普通的计算任务，请使用Schedulers.computation()；Schedulers.io( )默认是一个CachedThreadScheduler，很像一个有线程缓存的新线程调度器</td>
+</tr>
+<tr>
+<td>Schedulers.newThread( )</td>
+<td>为每个任务创建一个新线程</td>
+</tr>
+<tr>
+<td>Schedulers.trampoline( )</td>
+<td>当其它排队的任务完成后，在当前线程排队开始执行</td>
+</tr>
+</tbody></table>
+<h3 id="5-1-SubscribeOn-and-ObserveOn"><a href="#5-1-SubscribeOn-and-ObserveOn" class="headerlink" title="5.1 SubscribeOn and ObserveOn"></a>5.1 SubscribeOn and ObserveOn</h3><p><code>subscribeOn()</code>方法来用于指定<code>Observable</code>自身在哪个调度器上执行。<br><code>ObserveOn</code>指定一个观察者在哪个调度器上观察找个<code>Observable</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Observable.create(((Observable.OnSubscribe&lt;Integer&gt;) subscriber -&gt; &#123;</span><br><span class="line">  System.out.println(Thread.currentThread().getName());</span><br><span class="line">  subscriber.onNext(<span class="number">1</span>);</span><br><span class="line">  &#125;)).subscribeOn(Schedulers.io())</span><br><span class="line">      .observeOn(Schedulers.computation()).subscribe(<span class="keyword">new</span> Action1&lt;Integer&gt;() &#123;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">(Integer integer)</span> </span>&#123;</span><br><span class="line">      System.out.println(integer + <span class="string">", Thread: "</span> + Thread.currentThread().getName());</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">//输出结果：</span></span><br><span class="line">RxIoScheduler-<span class="number">2</span></span><br><span class="line"><span class="number">1</span>, Thread: RxComputationScheduler-<span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+
+<p>参考：</p>
+<ol>
+<li><a href="http://www.jianshu.com/p/64aa976a46be" target="_blank" rel="noopener">RxJava Home</a><ol>
+<li><a href="https://github.com/ReactiveX/RxJava/wiki/Creating-Observables" target="_blank" rel="noopener">Creating Observables</a>  </li>
+<li><a href="https://github.com/ReactiveX/RxJava/wiki/Transforming-Observables" target="_blank" rel="noopener">Transforming Obserables</a></li>
+<li><a href="https://github.com/ReactiveX/RxJava/wiki/Filtering-Observables" target="_blank" rel="noopener">Filtering Observables</a></li>
+<li><a href="https://github.com/ReactiveX/RxJava/wiki/Filtering-Observables" target="_blank" rel="noopener">Subject</a></li>
+<li><a href="https://github.com/ReactiveX/RxJava/wiki/Scheduler" target="_blank" rel="noopener">Scheduler</a></li>
+</ol>
+</li>
+<li><a href="http://reactivex.io/documentation/operators.html#alphabetical" target="_blank" rel="noopener">ReactiveX Operators </a></li>
+<li><a href="http://www.jianshu.com/p/5e93c9101dc5" target="_blank" rel="noopener">我所理解的RxJava（一）</a></li>
+<li><a href="http://www.jianshu.com/p/240f1c8ebf9d" target="_blank" rel="noopener">我所理解的RxJava（二）</a></li>
+<li><a href="https://www.gitbook.com/book/mcxiaoke/rxdocs/details" target="_blank" rel="noopener">ReactiveX/RxJava中文版</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/hystrix/" rel="tag"># hystrix</a>
+          
+            <a href="/tags/RxJava/" rel="tag"># RxJava</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/08/13/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/2.hystrix-%E5%AE%9E%E8%B7%B5/" rel="next" title="Hystrix-实践">
+                <i class="fa fa-chevron-left"></i> Hystrix-实践
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/08/15/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/4.hystrix-%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/" rel="prev" title="Hystrix-原理解析">
+                Hystrix-原理解析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#RxJava入门"><span class="nav-number">1.</span> <span class="nav-text">RxJava入门</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Observable的创建："><span class="nav-number">1.1.</span> <span class="nav-text">1. Observable的创建：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-转换操作："><span class="nav-number">1.2.</span> <span class="nav-text">2. 转换操作：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-过滤操作"><span class="nav-number">1.3.</span> <span class="nav-text">3. 过滤操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#聚合操作"><span class="nav-number">1.4.</span> <span class="nav-text">聚合操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-Subject"><span class="nav-number">1.5.</span> <span class="nav-text">4. Subject</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-Scheduler-调度器"><span class="nav-number">1.6.</span> <span class="nav-text">5. Scheduler 调度器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-SubscribeOn-and-ObserveOn"><span class="nav-number">1.6.1.</span> <span class="nav-text">5.1 SubscribeOn and ObserveOn</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

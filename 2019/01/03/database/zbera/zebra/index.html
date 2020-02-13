@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="database,zebra,数据库中间件," />
+
+
+<meta name="description" content="Zebra[TOC] Zebra是什么？能干甚么？Zebra是一个在JDBC协议上开发的数据库连接池中间件，它不是真连接池(与DB直接交互的连接池)，而是对连接池做了一层包装。功能：  支持适配目前主流的数据库连接池（如上图） 读写分离、分库分表 支持配置动态修改生效(连接池的配置、用户密码、数据库节点访问路由负载均衡配置) CAT全方位监控（SQL执行情况、数据库连接数、端到端监控） 支持压测(">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据库中间件Zebra">
+<meta property="og:url" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/index.html">
+<meta property="og:site_name" content="Zamperini">
+<meta property="og:description" content="Zebra[TOC] Zebra是什么？能干甚么？Zebra是一个在JDBC协议上开发的数据库连接池中间件，它不是真连接池(与DB直接交互的连接池)，而是对连接池做了一层包装。功能：  支持适配目前主流的数据库连接池（如上图） 读写分离、分库分表 支持配置动态修改生效(连接池的配置、用户密码、数据库节点访问路由负载均衡配置) CAT全方位监控（SQL执行情况、数据库连接数、端到端监控） 支持压测(">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15094449001037/15117842144905.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15094449001037/15117932686716.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15094449001037/15117932921029.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15094449001037/15117945912786.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15094449001037/15117954829456.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15094449001037/15117960397314.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15117967453161/15120548762216.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15117967453161/15118032253780.png">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15117967453161/15118603297936.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15117967453161/15120563275340.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15117967453161/15120563707402.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15117967453161/15120564127233.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15117967453161/15118644696383.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15117967453161/15120566448649.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15117967453161/15118830559654.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15117967453161/15118055319657.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15117967453161/15118052735409.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15117967603675/15119598460937.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15117967603675/15119747197151.jpg">
+<meta property="article:published_time" content="2019-01-03T06:51:53.613Z">
+<meta property="article:modified_time" content="2020-02-13T11:28:24.075Z">
+<meta property="article:author" content="Zamperini">
+<meta property="article:tag" content="database">
+<meta property="article:tag" content="zebra">
+<meta property="article:tag" content="数据库中间件">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/media/15094449001037/15117842144905.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>数据库中间件Zebra | Zamperini</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zamperini</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">数据库中间件Zebra</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-01-03T14:51:53+08:00">2019-01-03</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/database/" itemprop="url" rel="index"><span itemprop="name">database</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Zebra"><a href="#Zebra" class="headerlink" title="Zebra"></a>Zebra</h1><p>[TOC]</p>
+<h2 id="Zebra是什么？能干甚么？"><a href="#Zebra是什么？能干甚么？" class="headerlink" title="Zebra是什么？能干甚么？"></a>Zebra是什么？能干甚么？</h2><p><code>Zebra</code>是一个在JDBC协议上开发的<strong>数据库连接池中间件</strong>，它不是真连接池(与DB直接交互的连接池)，而是对连接池做了一层包装。<br><img src="media/15094449001037/15117842144905.jpg" alt=""><br><strong>功能：</strong></p>
+<ol>
+<li>支持适配目前主流的数据库连接池（如上图）</li>
+<li>读写分离、分库分表</li>
+<li>支持配置动态修改生效(连接池的配置、用户密码、数据库节点访问路由负载均衡配置)</li>
+<li>CAT全方位监控（SQL执行情况、数据库连接数、端到端监控）</li>
+<li>支持压测(改写表名)、SQL限流、黑白名单、SQL改写、<a href="https://wiki-in.sankuai.com/pages/viewpage.action?pageId=1169090716" target="_blank" rel="noopener">SQL审计</a>(日志审计，SQL安全监控)…</li>
+</ol>
+<h2 id="同类产品有哪些，以及比较？"><a href="#同类产品有哪些，以及比较？" class="headerlink" title="同类产品有哪些，以及比较？"></a>同类产品有哪些，以及比较？</h2><table>
+<thead>
+<tr>
+<th>类别</th>
+<th>案例</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>基于代理</td>
+<td>mycat、cobor、atlas、jed</td>
+<td>多语言支持、节省数据库连接</td>
+<td>风险大(链路长)、实现难度大、共享连接时有风险</td>
+</tr>
+<tr>
+<td>基于客户端(jdbc层)</td>
+<td>tddl</td>
+<td>直连数据库(风险较小)、更灵活</td>
+<td>对于每种语言都需要重写sdk、富客户端的常见缺点</td>
+</tr>
+<tr>
+<td><strong>基于代理：</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><img src="media/15094449001037/15117932686716.jpg" alt=""></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p><strong>基于客户端：</strong><br><img src="media/15094449001037/15117932921029.jpg" alt="set up-w500"></p>
+<blockquote>
+<p>公司目前：北京侧 <code>Altas</code>居多，也有<code>Atlas</code>与<code>zebra</code>搭配使用（使用其压测处理、SQL监控特性），上海侧统一使用<code>zebra</code>。趋势是转向<strong>Zebra</strong>。<a href="https://wiki-ini.sankuai.com/pages/viewpage.action?pageId=686244717" target="_blank" rel="noopener">Atlas与Zebra的对比</a>。<strong>zebra秒杀Atlas?</strong><br><a href="https://wiki-ini.sankuai.com/pages/viewpage.action?pageId=1114400138" target="_blank" rel="noopener">数据库中间件比较</a></p>
+</blockquote>
+<p><strong><em>为什么美团一开始没有选择基于sdk的方式，而是基于代理的方式来做的？</em></strong></p>
+<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p><img src="media/15094449001037/15117945912786.jpg" alt=""></p>
+<ul>
+<li>Zebra客户端做读写分离、分库分表、打点、监控</li>
+<li>RDS、DBA管理平台维护配置信息</li>
+<li>Lion监听配置更新，通知客户端生效变更</li>
+<li>MHA保障主库的高可用性</li>
+<li>zebra-monitor(<strong>自研</strong>)保障丛库的高可用性</li>
+</ul>
+<blockquote>
+<p>MHA（Master High Availability）是作为MySQL高可用环境下，操作故障切换、主从提升的一套解决方案。MHA（Master High Availability）目前在MySQL高可用方面是一个相对成熟的解决方案。能做到30内完成故障切换。 <a href="http://ronaldbradford.com/#introduction" target="_blank" rel="noopener">官网</a>。<br>PS: <strong>Atlas</strong>维护主的高可用性也是MHA，且和Zebra是同一个MHA。</p>
+</blockquote>
+<h2 id="高可用"><a href="#高可用" class="headerlink" title="高可用"></a>高可用</h2><h3 id="主库的高可用"><a href="#主库的高可用" class="headerlink" title="主库的高可用"></a>主库的高可用</h3><p>利用MHA进行master节点的可用性监控，在发生故障，master节点不可用时，<strong>MHA进行mysql层的主从切换</strong>，切换成功后通知zebra新master节点的IP，由zebra客户端负责应用访问层的切换。<a href="https://wiki-in.sankuai.com/pages/viewpage.action?pageId=614561285" target="_blank" rel="noopener">官方文档</a><br>切换流程如下：</p>
+<p><img src="media/15094449001037/15117954829456.jpg" alt=""></p>
+<ol>
+<li>MHA对MySQL集群进行监控管理</li>
+<li>当主库发生故障时，MHA通知zebra对主库的写进行关闭，并进行MySQL集群的主从切换（切换期间应用无法写数据）</li>
+<li>zebra禁止掉对故障集群的写操作</li>
+<li>MHA切换成功，通知zebra新的写数据IP</li>
+<li>zebra用新的写IP替换老IP，开放应用访问。</li>
+</ol>
+<h3 id="丛库的高可用"><a href="#丛库的高可用" class="headerlink" title="丛库的高可用"></a>丛库的高可用</h3><p>由<code>zebra-monitor</code>的监控服务负责，实时监控线上MySQL从库的健康状况，如果出现从库“故障”，将会通知zebra将读流量转移到其他可读节点，实现从库的“故障”转移。<br><img src="media/15094449001037/15117960397314.jpg" alt=""></p>
+<p><strong>丛库状态判断</strong>： zebra-monitor监控首先使用<code>select 1</code> 测试是否可以连通数据库，连接没有问题则使用 <code>show slave status</code> 获取到<code>second_behind_master</code>字段来得到该从库上的延迟，从而做出判断：</p>
+<ul>
+<li><p>markdown（故障）</p>
+<ol>
+<li>30s内从库连续ping不通； (从库宕机)</li>
+<li>30s内 second_behind_master取到的延迟为null。 (主从同步中断)</li>
+<li>延迟超过阈值。（可根据每个库的敏感程度进行个性化配置，需要进行另外配置）</li>
+</ol>
+<p><strong>故障处理：</strong>从库markdown，zebra客户端会收到通知动态刷新连接池配置，重建本地数据源配置，流量不会再走到故障丛库，老的数据源会在全部sql执行完成后被close。</p>
+</li>
+<li><p>markup(恢复)</p>
+<ul>
+<li>30s内能够连续ping通并且主从延迟为0.</li>
+</ul>
+</li>
+</ul>
+<p><strong>故障恢复：</strong>丛库恢复时，会通知客户端进行动态刷新数据源。</p>
+<h1 id="Zebra-client"><a href="#Zebra-client" class="headerlink" title="Zebra-client"></a>Zebra-client</h1><p>##总览<br><img src="media/15117967453161/15120548762216.jpg" alt=""></p>
+<h3 id="推荐使用包搭配"><a href="#推荐使用包搭配" class="headerlink" title="推荐使用包搭配"></a>推荐使用包搭配</h3><p><strong>zebra-api</strong>、<strong>zebra-ds-monitor</strong>、<strong>mtrace-zebra</strong></p>
+<h2 id="zebra-api"><a href="#zebra-api" class="headerlink" title="zebra-api"></a>zebra-api</h2><p><strong>ShardDataSource + m x GroupDataSource(Master + n x Slave)</strong><br><img src="media/15117967453161/15118032253780.png" alt="set up-w600"></p>
+<h3 id="SingleDataSource"><a href="#SingleDataSource" class="headerlink" title="SingleDataSource"></a>SingleDataSource</h3><ul>
+<li>屏蔽底层DataSource的差异，通过<strong>C3p0DataSourceAdapter</strong>适配具体连接池配置，并根据配置创建指定类型的连接池。</li>
+</ul>
+<p><img src="media/15117967453161/15118603297936.jpg" alt=""></p>
+<h3 id="GroupDataSource"><a href="#GroupDataSource" class="headerlink" title="GroupDataSource"></a>GroupDataSource</h3><p><strong>GroupDataSource</strong>主要职能 <strong>读写分离、负载均衡与路由</strong>。但还有一个好处就是不需要写死配置(jdbcUrl、user|pwd、连接池配置，且配置修改可实时生效)。</p>
+<p><img src="media/15117967453161/15120563275340.jpg" alt=""></p>
+<p><img src="media/15117967453161/15120563707402.jpg" alt=""></p>
+<p><img src="media/15117967453161/15120564127233.jpg" alt=""></p>
+<p><strong>读写分离策略：</strong> <a href="https://wiki-in.sankuai.com/pages/viewpage.action?pageId=735464033" target="_blank" rel="noopener">官方文档</a>：<br><img src="media/15117967453161/15118644696383.jpg" alt="set up-w460"></p>
+<p><strong>路由策略：</strong> <a href="https://wiki-in.sankuai.com/pages/viewpage.action?pageId=943490395" target="_blank" rel="noopener">官方文档</a>，见代码片段<br><img src="media/15117967453161/15120566448649.jpg" alt="set up-w500"></p>
+<h3 id="ShardDataSource"><a href="#ShardDataSource" class="headerlink" title="ShardDataSource"></a>ShardDataSource</h3><p><code>ShardDataSource</code>的职责是支持<strong>分库分表路由</strong>，除此之外还有并发执行等。<br><img src="media/15117967453161/15118830559654.jpg" alt="set up-w600"></p>
+<h4 id="分片规则："><a href="#分片规则：" class="headerlink" title="分片规则："></a>分片规则：</h4><p>利用脚本语言的灵活性，支持任意维度的分片：支持HASH、时间等，同时也可以使用Groovy内置的函数</p>
+<p>示例脚本：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&lt;shard-dimension dbRule=<span class="string">"(#id#.intValue() % 8).intdiv(2)"</span></span><br><span class="line">	dbIndexes=<span class="string">"id[0-3]"</span></span><br><span class="line">	tbRule=<span class="string">"#id#.intValue() % 2"</span></span><br><span class="line">	tbSuffix=<span class="string">"alldb:[0,7]"</span></span><br><span class="line">	isMaster=<span class="string">"true"</span>&gt;</span><br><span class="line">&lt;/shard-dimension&gt;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RuleEngineBaseImpl</span> <span class="keyword">extends</span> <span class="title">com</span>.<span class="title">dianping</span>.<span class="title">zebra</span>.<span class="title">shard</span>.<span class="title">router</span>.<span class="title">rule</span>.<span class="title">engine</span>.<span class="title">RuleEngineBase</span> &#123;</span></span><br><span class="line">  Object execute(Map context) &#123;</span><br><span class="line">  (context.get(<span class="string">"id"</span>).intValue() % <span class="number">8</span>).intdiv(<span class="number">2</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RuleEngineBaseImpl</span> <span class="keyword">extends</span> <span class="title">com</span>.<span class="title">dianping</span>.<span class="title">zebra</span>.<span class="title">shard</span>.<span class="title">router</span>.<span class="title">rule</span>.<span class="title">engine</span>.<span class="title">RuleEngineBase</span>&#123;</span></span><br><span class="line">  Object execute(Map context) &#123;</span><br><span class="line">    context.get(<span class="string">"id"</span>).intValue() % <span class="number">2</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>SQL解析:</strong>利用<code>Druid</code>的<code>SqlParser</code>解析SQL成语法树，能从中直接获取SQL类型、SQL表名、参数名、Hint等…，以此为基础进行路由分库分表<br><strong>SQL路由:</strong> 根据SQL解析的结果以及配置的规则，通过运行规则运算脚本可以获得应该路由到哪个库的哪个表去执行。<br><strong>SQL改写:</strong>结合SQL解析器解析的结果、SQL路由的结果改写SQL语句(重设表名)<br><strong>并行执行:</strong>当路由结果需要到多个库的多张表中执行，则会使用线程池去并行执行结果并合并结果<br><strong>结果合并:</strong> 客户端将多库返回的所有结果加载到内存，进行合并操作</p>
+</blockquote>
+<h3 id="Filter链-Filter-Chain模式、责任链模式"><a href="#Filter链-Filter-Chain模式、责任链模式" class="headerlink" title="Filter链(Filter-Chain模式、责任链模式)"></a>Filter链(Filter-Chain模式、责任链模式)</h3><p><strong>Filter链</strong>是zebra实现可扩展性的机制。其作用相当于Spring AOP的<code>Interceptor</code>。<br>每个<strong>Filter</strong>可以在SQL执行的各个阶段起作用。比如<code>getConnection</code>、<code>prepareStatement</code>、<code>executeSingleStatement</code>。可以在<strong>Filter</strong>中实现监控连接池状态、SQL执行情况；改写SQL语句；改写SQL表名；SQL流控。</p>
+<p><img src="media/15117967453161/15118055319657.jpg" alt="set up-w600"><br><img src="media/15117967453161/15118052735409.jpg" alt="set up-w600"></p>
+<p>另外，业务方可以完全自行拓展<code>Filter</code>实现SQL执行统计、改写SQL等。（这里的<code>MtraceFilter</code>就是Mtrace的人员开发的。）</p>
+<h4 id="怎么拓展？"><a href="#怎么拓展？" class="headerlink" title="怎么拓展？"></a>怎么拓展？</h4><ol>
+<li>覆盖<strong>DefaultJdbcFilter</strong>，覆盖关注的SQL执行阶段对应的方法。</li>
+<li>在META-INF中添加一个<code>zebra-filter.properties</code>中记录需要加入到<code>Filter链</code>中的自定义<code>Filter</code>:</li>
+</ol>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">zebra.filter.mtrace</span>=<span class="string">com.meituan.mtrace.zebra.filter.MtraceFilter</span></span><br></pre></td></tr></table></figure>
+<h2 id="zebra-dao"><a href="#zebra-dao" class="headerlink" title="zebra-dao"></a>zebra-dao</h2><p><strong>zebra-dao</strong>职责是<strong>异步化</strong>和<strong>物理分页</strong>。是在ORM框架<strong>MyBatis</strong>上做的一层封装（<a href="https://wiki-in.sankuai.com/pages/viewpage.action?pageId=507134914" target="_blank" rel="noopener">接入指南</a>）。</p>
+<p><strong>异步化：</strong><br><code>MyBatis</code>中对每个访问层接口，都会生成一个代理对象，每个代理对象对应的<code>InvocationHandler</code>为<code>MapperProxy</code>。<br>而<code>zebra-dao</code>是在<code>MyBatis.MapperProxy</code>的代理对象上加了又加了一层代理<code>AsyncMapperProxy</code>。在<code>AsyncMapperProxy</code>中实现异步化。</p>
+<blockquote>
+<p>值得注意的是，这里异步化将请求放到线程池去执行，然后通过future.get()的形式，从IO模式上来说也只是阻塞模式，而不是NIO的方式；<br>另外，这里一个进程会共用一个线程池。</p>
+</blockquote>
+<p><strong>分页：</strong></p>
+<ul>
+<li><p>逻辑分页: 先从DB中拿出查询出来的所有的数据，而后再在内存中进行分页；</p>
+</li>
+<li><p>物理分页: 改写SQL，在SQL中加入分页部分的逻辑<code>limit 10,10</code>。</p>
+</li>
+<li><p>高级物理分页：不仅返回分页数据，同时也返回总数</p>
+</li>
+</ul>
+<p><code>zebra-dao</code>实现分页的方式是实现MyBatis的<code>Interceptor</code>(<strong>PageInterceptor</strong>)。<code>Interceptor</code>是MyBatis的插件(另一种拓展性方式)，通过它可以在MyBatis的执行过程中插入一些额外的逻辑。这里<code>PageInterceptor</code>主要是作用针对<code>query</code>方法。具体做法是：    </p>
+<ul>
+<li>改写SQL在尾部添加 limit x,x；</li>
+<li>如果是高级物理分页，则会再进行一次<code>select count(*)</code>查询，然后返回。<br><a href="">见源码片段</a></li>
+</ul>
+<h1 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h1><h2 id="zebra-api-1"><a href="#zebra-api-1" class="headerlink" title="zebra-api"></a>zebra-api</h2><h3 id="GroupDataSource-1"><a href="#GroupDataSource-1" class="headerlink" title="GroupDataSource"></a>GroupDataSource</h3><p><code>GroupDataSource</code>初始化时，会从配置平台读取所有数据库节点的配置信息。然后依据这些信息来创建两种类型的代理数据源d <strong>FailOverDataSource</strong>和<strong>LoadBalancedDataSource</strong>。其中，<code>FailOverDataSource</code>用来连接和管理主节点故障的拒绝写等。<code>LoadBalancedDataSource</code>则是用来连接所有从节点，并负责从节点读流量的路由。</p>
+<h4 id="读写策略"><a href="#读写策略" class="headerlink" title="读写策略"></a>读写策略</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">LoadBalancedDataSource readDataSource;</span><br><span class="line"></span><br><span class="line">FailOverDataSource writeDataSource;</span><br><span class="line"></span><br><span class="line"><span class="function">Connection <span class="title">getRealConnection</span><span class="params">(boolen forceWrite)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//是否进行了强行配置</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.routerType == RouterType.SLAVE_ONLY) &#123;</span><br><span class="line">    	<span class="keyword">return</span> getReadConnection();</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">this</span>.routerType == RouterType.MASTER_ONLY) &#123;</span><br><span class="line">    	<span class="keyword">return</span> getWriteConnection();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//主制度</span></span><br><span class="line">    <span class="keyword">if</span> (forceWrite) &#123;</span><br><span class="line">    	<span class="keyword">return</span> getWriteConnection();</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!autoCommit ||</span><br><span class="line">    <span class="comment">// SQL中带有HINT</span></span><br><span class="line">    StringUtils.trimToEmpty(sql).contains(<span class="string">"/*+zebra:w*/"</span>)</span><br><span class="line">          || StringUtils.trimToEmpty(sql).contains(<span class="string">"/*master*/"</span>)) &#123;</span><br><span class="line">    	<span class="keyword">return</span> getWriteConnection();</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (readWriteStrategy != <span class="keyword">null</span> &amp;&amp; readWriteStrategy.shouldReadFromMaster()) &#123;</span><br><span class="line">    <span class="comment">//即设置了ZebraForceMasterHelper.forceMasterInLocalContext()</span></span><br><span class="line">    	<span class="keyword">return</span> getWriteConnection();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//通过Druid parser解析出SQL的类型</span></span><br><span class="line">    SqlType sqlType = SqlUtils.getSqlType(sql);</span><br><span class="line">    <span class="keyword">if</span> (sqlType.isRead()) &#123;</span><br><span class="line">    	<span class="keyword">return</span> getReadConnection();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    	<span class="keyword">return</span> getWriteConnection();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> Connection <span class="title">getReadConnection</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> readDataSource.getConnection();</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">private</span> Connection getWriteConnection &#123;</span><br><span class="line">    <span class="keyword">return</span> writeDataSource.getConnection();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="路由策略-针对读流量-："><a href="#路由策略-针对读流量-：" class="headerlink" title="路由策略(针对读流量)："></a>路由策略(针对读流量)：</h4><p><strong>LoadBalanceDataSource</strong>中的<code>router</code>负责物理库和表的路由。</p>
+<p>初始化时，会根据用户设置的配置信息(<code>idcAware</code>、..)，创建路由</p>
+<ul>
+<li>先将所有的数据库节点信息按是否与本地机器在同一个区域，分为两个集合 <code>localRegionRouter</code>、<code>remoteRegionRouter</code>；</li>
+<li>跟据配置的路由策略（<code>IdcAwareRouter</code>、<code>CenterWeightRouter</code>、<code>RegionAwareRouter</code>）选择不同的实际路由器。</li>
+<li>(1) 如果设置的只是区域感知的话，则直接按权重路由<code>WeightDataSourceRouter</code></li>
+<li>(2) 如果设置的是<code>CenterAware</code>，则将选择的是<code>CenterAwareRouter</code></li>
+<li>(3) 如果设置的是<code>IdcAware</code>，也是<code>CenterAwareRouter</code>，只是<code>CenterAwareRouter</code>中还有一个<code>IdcAwareRouter</code></li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">RegionAwareRouter</span><span class="params">(Map&lt;String, DataSourceConfig&gt; dataSourceConfigs, String configManagerType,</span></span></span><br><span class="line"><span class="function"><span class="params">			String routerStrategy)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">this</span>.regionManager = ZebraRegionManagerLoader.getRegionManager(configManagerType);</span><br><span class="line"></span><br><span class="line">	Map&lt;String, DataSourceConfig&gt; localRegionDataSourceConfigs = <span class="keyword">new</span> HashMap&lt;String, DataSourceConfig&gt;();</span><br><span class="line">	Map&lt;String, DataSourceConfig&gt; remoteRegionDataSourceConfigs = <span class="keyword">new</span> HashMap&lt;String, DataSourceConfig&gt;();</span><br><span class="line">  <span class="comment">//将所有的数据库节点分为同区域节点、和不同区域节点</span></span><br><span class="line">	<span class="keyword">for</span> (Map.Entry&lt;String, DataSourceConfig&gt; entry : dataSourceConfigs.entrySet()) &#123;</span><br><span class="line">		String dsId = entry.getKey();</span><br><span class="line">		DataSourceConfig config = entry.getValue();</span><br><span class="line"></span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			Matcher matcher = JDBC_URL_PATTERN.matcher(config.getJdbcUrl());</span><br><span class="line">			<span class="keyword">if</span> (matcher.matches()) &#123;</span><br><span class="line">				String url = matcher.group(<span class="number">1</span>);</span><br><span class="line">				String[] urlAndPort = url.split(<span class="string">":"</span>);</span><br><span class="line"></span><br><span class="line">				<span class="keyword">if</span> (urlAndPort != <span class="keyword">null</span> &amp;&amp; urlAndPort.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">					<span class="keyword">if</span> (<span class="keyword">this</span>.regionManager.isInLocalRegion(urlAndPort[<span class="number">0</span>])) &#123;</span><br><span class="line">						localRegionDataSourceConfigs.put(dsId, config);</span><br><span class="line">					&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">						remoteRegionDataSourceConfigs.put(dsId, config);</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				remoteRegionDataSourceConfigs.put(dsId, config);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">			logger.warn(String.format(</span><br><span class="line">					<span class="string">"Cannot recognize the idc for jdbcUrl(%s), so put this datasource in the other region by default."</span>,</span><br><span class="line">					config.getJdbcUrl()));</span><br><span class="line">			remoteRegionDataSourceConfigs.put(dsId, config);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">    <span class="comment">//如果路由策略配置的只是同区域优先，则同区域内部走权重路由</span></span><br><span class="line">	<span class="keyword">if</span> (Constants.ROUTER_STRATEGY_REGION_AWARE_ROUTER.equals(routerStrategy)) &#123;</span><br><span class="line">		<span class="keyword">if</span> (localRegionDataSourceConfigs.size() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">			<span class="keyword">this</span>.localRegionRouter = <span class="keyword">new</span> WeightDataSourceRouter(localRegionDataSourceConfigs);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (remoteRegionDataSourceConfigs.size() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">			<span class="keyword">this</span>.remoteRegionRouter = <span class="keyword">new</span> WeightDataSourceRouter(remoteRegionDataSourceConfigs);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="comment">// 如果设置的是中心感知或机房感知</span></span><br><span class="line">		<span class="keyword">boolean</span> idcAware = <span class="keyword">false</span>;</span><br><span class="line">		<span class="keyword">if</span> (Constants.ROUTER_STRATEGY_IDC_AWARE_ROUTER.equals(routerStrategy)) &#123;</span><br><span class="line">			idcAware = <span class="keyword">true</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (localRegionDataSourceConfigs.size() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">			<span class="keyword">this</span>.localRegionRouter = <span class="keyword">new</span> CenterAwareRouter(localRegionDataSourceConfigs, configManagerType,</span><br><span class="line">					idcAware);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (remoteRegionDataSourceConfigs.size() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">			<span class="keyword">this</span>.remoteRegionRouter = <span class="keyword">new</span> CenterAwareRouter(remoteRegionDataSourceConfigs, configManagerType,</span><br><span class="line">					idcAware);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CenterAwareRouter</span> <span class="keyword">implements</span> <span class="title">DataSourceRouter</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> DataSourceRouter localCenterRouter;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">protected</span> <span class="title">CenterAwareRouter</span><span class="params">(Map&lt;String, DataSourceConfig&gt; dataSourceConfigs, String configManagerType,</span></span></span><br><span class="line"><span class="function"><span class="params">			<span class="keyword">boolean</span> idcAware)</span> </span>&#123;</span><br><span class="line">			...</span><br><span class="line">    	<span class="keyword">if</span> (idcAware) &#123;</span><br><span class="line">    		localCenterSourceConfigs.putAll(localIdcSourceConfigs);</span><br><span class="line">    		<span class="keyword">if</span> (localCenterSourceConfigs.size() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    		<span class="comment">//IdcAwareRouter的节点必定在同中心</span></span><br><span class="line">    			<span class="keyword">this</span>.localCenterRouter = <span class="keyword">new</span> IdcAwareRouter(localCenterSourceConfigs, configManagerType);</span><br><span class="line">    		&#125;</span><br><span class="line">    	&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> RouterTarget <span class="title">select</span><span class="params">(RouterContext routerContext)</span> </span>&#123;</span><br><span class="line">    	RouterTarget routerTarget = <span class="keyword">null</span>;</span><br><span class="line">    	<span class="comment">//存在同机房路由，则有同机房路由</span></span><br><span class="line">    	<span class="keyword">if</span> (localCenterRouter != <span class="keyword">null</span>) &#123;</span><br><span class="line">    		routerTarget = localCenterRouter.select(routerContext);</span><br><span class="line">    	&#125;</span><br><span class="line">    	<span class="keyword">if</span> (routerTarget == <span class="keyword">null</span>) &#123;</span><br><span class="line">    		<span class="keyword">for</span> (WeightDataSourceRouter weightDataSourceRouter : priorityCenterIdcAwareRouters) &#123;</span><br><span class="line">    			routerTarget = weightDataSourceRouter.select(routerContext);</span><br><span class="line">    			<span class="keyword">if</span> (routerTarget != <span class="keyword">null</span>) &#123;</span><br><span class="line">    				<span class="keyword">return</span> routerTarget;</span><br><span class="line">    			&#125;</span><br><span class="line">    		&#125;</span><br><span class="line">    	&#125;</span><br><span class="line">    	<span class="keyword">return</span> routerTarget;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="ShardDataSource-1"><a href="#ShardDataSource-1" class="headerlink" title="ShardDataSource"></a>ShardDataSource</h3><h4 id="分库分表原理"><a href="#分库分表原理" class="headerlink" title="分库分表原理"></a>分库分表原理</h4><p><code>ShardDataSource</code>中的<strong>DefaultShardRouter</strong>负责分库分表：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//路由规则：根据分库分表规则和运行时参数，计算出应该到的库名和表名</span></span><br><span class="line">RouterRule routerRule;</span><br><span class="line"><span class="comment">//负责RouterRule计算的结果改写SQL，形成带有物理表名的SQL</span></span><br><span class="line">SQLRewrite sqlRewrite = <span class="keyword">new</span> DefaultSQLRewrite();</span><br></pre></td></tr></table></figure>
+<p>执行路由的逻辑如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> RouterResult <span class="title">router</span><span class="params">(<span class="keyword">final</span> String sql, List&lt;Object&gt; params)</span> <span class="keyword">throws</span> ShardRouterException, ShardParseException </span>&#123;</span><br><span class="line">	RouterResult routerResult = <span class="keyword">new</span> RouterResult();</span><br><span class="line">	<span class="comment">//解析SQL得出表名等信息</span></span><br><span class="line">	SQLParsedResult parsedResult = SQLParser.parseWithCache(sql);</span><br><span class="line">    <span class="comment">//根据SQL解析结果找出对应表逻辑名的分片规则。</span></span><br><span class="line">	List&lt;TableShardRule&gt; findShardRules = findShardRules(parsedResult.getRouterContext(), params);</span><br><span class="line">	<span class="keyword">if</span> (findShardRules.size() == <span class="number">1</span>) &#123;</span><br><span class="line">		TableShardRule tableShardRule = findShardRules.get(<span class="number">0</span>);</span><br><span class="line">		<span class="comment">//执行逻辑表的分片规则获得物理库和表名</span></span><br><span class="line">		ShardEvalResult shardResult = tableShardRule.eval(<span class="keyword">new</span> ShardEvalContext(parsedResult, params));</span><br><span class="line">		routerResult.setMergeContext(<span class="keyword">new</span> MergeContext(parsedResult.getMergeContext()));</span><br><span class="line">		routerResult.setSqls(buildSqls(shardResult.getDbAndTables(), parsedResult, tableShardRule.getTableName()));</span><br><span class="line">		routerResult.setParams(buildParams(params, routerResult));</span><br><span class="line">		<span class="keyword">return</span> routerResult;</span><br><span class="line">	&#125;...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> ShardEvalResult <span class="title">eval</span><span class="params">(ShardEvalContext matchContext)</span> </span>&#123;</span><br><span class="line">	ShardEvalResult result = <span class="keyword">new</span> ShardEvalResult(matchContext.getTableName());</span><br><span class="line">	<span class="keyword">for</span> (ColumnValue evalContext : matchContext.getColumnValues()) &#123;</span><br><span class="line">		<span class="keyword">if</span> (!evalContext.isUsed()) &#123;</span><br><span class="line">			evalContext.setUsed(<span class="keyword">true</span>);</span><br><span class="line">            <span class="comment">//通过库规则，获得在库的索引号</span></span><br><span class="line">			Object dbObj = dbRuleEngine.eval(evalContext.getValue());</span><br><span class="line">			Number dbPos = (Number)dbObj;</span><br><span class="line">			TableSets tableSet = tablesMappingManager.getTableSetsByPos(dbPos.intValue());</span><br><span class="line">			<span class="comment">//通过表规则，获得表的索引号</span></span><br><span class="line">			Number tablePos = (Number) tableRuleEngine.eval(evalContext.getValue());</span><br><span class="line">			String table = tableSet.getTableSets().get(tablePos.intValue());</span><br><span class="line">			result.addDbAndTable(tableSet.getDbIndex(), table);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="zebra-dao-1"><a href="#zebra-dao-1" class="headerlink" title="zebra-dao"></a>zebra-dao</h2><h3 id="异步化"><a href="#异步化" class="headerlink" title="异步化"></a>异步化</h3><p><strong>MyBatis</strong>中每个DAO都对应一个<code>MapperProxy</code>，zebra-dao中则是<code>AsyncMapperProxy</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AsyncMapperProxy</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">InvocationHandler</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 是否是带有回调的方法</span></span><br><span class="line">        <span class="keyword">if</span> (isCallbackMethod(method, args)) &#123;</span><br><span class="line">        	Method _method = getAnnotationMethod(method);</span><br><span class="line">            <span class="comment">//...</span></span><br><span class="line">        	Object[] newArgs = <span class="keyword">new</span> Object[args.length - <span class="number">1</span>];</span><br><span class="line">        	<span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">        	AsyncDaoCallback callback = <span class="keyword">null</span>;</span><br><span class="line">        	<span class="keyword">for</span> (Object arg : args) &#123;</span><br><span class="line">        		<span class="keyword">if</span> (arg != <span class="keyword">null</span>) &#123;</span><br><span class="line">        			<span class="keyword">if</span> (!AsyncDaoCallback<span class="class">.<span class="keyword">class</span>.<span class="title">isAssignableFrom</span>(<span class="title">arg</span>.<span class="title">getClass</span>())) </span>&#123;</span><br><span class="line">        				newArgs[i++] = arg;</span><br><span class="line">        			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        				callback = (AsyncDaoCallback) arg;</span><br><span class="line">        			&#125;</span><br><span class="line">        		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        			newArgs[i++] = arg;</span><br><span class="line">        		&#125;</span><br><span class="line">        	&#125;</span><br><span class="line">            <span class="comment">//异步执行，并设置回调</span></span><br><span class="line">        	AsyncMapperExecutor.executeRunnable(mapper, _method, newArgs, callback);</span><br><span class="line">        	<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (Future<span class="class">.<span class="keyword">class</span>.<span class="title">isAssignableFrom</span>(<span class="title">method</span>.<span class="title">getReturnType</span>())) </span>&#123;</span><br><span class="line">        <span class="comment">//返回值是Future，则也异步发起请求</span></span><br><span class="line">        	Method _method = getAnnotationMethod(method);       </span><br><span class="line">        	<span class="keyword">if</span> (_method != <span class="keyword">null</span>) &#123;</span><br><span class="line">        		<span class="keyword">return</span> AsyncMapperExecutor.submitCallback(mapper, _method, args);</span><br><span class="line">        	&#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">//直接调用</span></span><br><span class="line">        	<span class="keyword">return</span> method.invoke(mapper, args);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="分页-PageInterceptor"><a href="#分页-PageInterceptor" class="headerlink" title="分页 - PageInterceptor"></a>分页 - PageInterceptor</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">Object[] args = invocation.getArgs();</span><br><span class="line">		Object rowBound = args[<span class="number">2</span>];</span><br><span class="line">MappedStatement ms = (MappedStatement) args[<span class="number">0</span>];</span><br><span class="line"><span class="keyword">if</span> (rowBound != <span class="keyword">null</span>) &#123;</span><br><span class="line">	RowBounds rb = (RowBounds) rowBound;</span><br><span class="line">	<span class="comment">// 无分页信息</span></span><br><span class="line">	<span class="keyword">if</span> (rb.getOffset() == RowBounds.NO_ROW_OFFSET &amp;&amp; rb.getLimit() == RowBounds.NO_ROW_LIMIT) &#123;</span><br><span class="line">		<span class="keyword">return</span> invocation.proceed();</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		BoundSql boundSql = ms.getBoundSql(args[<span class="number">1</span>]);</span><br><span class="line">		<span class="keyword">if</span> (rowBound <span class="keyword">instanceof</span> PageModel) &#123;</span><br><span class="line">			<span class="comment">// 高级物理分页</span></span><br><span class="line">			PageModel pageModel = (PageModel) rowBound;</span><br><span class="line">			<span class="comment">//首先获得次数</span></span><br><span class="line">			Object count = queryCount(invocation, args, ms, boundSql);</span><br><span class="line">			<span class="comment">//获取结果</span></span><br><span class="line">			Object records = queryLimit(invocation, args, ms, boundSql, pageModel);</span><br><span class="line">			pageModel.setRecordCount((Integer) ((List&lt;?&gt;) count).get(<span class="number">0</span>));</span><br><span class="line">			pageModel.setRecords((List&lt;?&gt;) records);</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="comment">// 物理分页</span></span><br><span class="line">			<span class="keyword">return</span> queryLimit(invocation, args, ms, boundSql, rb);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	<span class="comment">// without pagination</span></span><br><span class="line">	<span class="keyword">return</span> invocation.proceed();</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> Object <span class="title">queryCount</span><span class="params">(Invocation invocation, Object[] args, MappedStatement ms, BoundSql boundSql)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//通过原始SQL生成select count(*)语句，通过SQL Parser解析SQL，再拼接SQL</span></span><br><span class="line">    String countSql = dialect.getCountSql(boundSql.getSql());</span><br><span class="line">	<span class="comment">//生成新的SQL</span></span><br><span class="line">	BoundSql newBoundSql = <span class="keyword">new</span> BoundSql(ms.getConfiguration(), countSql, boundSql.getParameterMappings(),</span><br><span class="line">			boundSql.getParameterObject());</span><br><span class="line">	<span class="comment">//生成新的Statement 去执行select count(*)</span></span><br><span class="line">	countRowStatement = buildMappedStatement(ms, <span class="keyword">new</span> SqlSqlSourceWrapper(newBoundSql), ms.getId() + <span class="string">"_COUNT"</span>,</span><br><span class="line">			resultMaps);</span><br><span class="line"></span><br><span class="line">	args[<span class="number">0</span>] = countRowStatement;</span><br><span class="line">	args[<span class="number">2</span>] = <span class="keyword">new</span> RowBounds();</span><br><span class="line">	args[<span class="number">3</span>] = <span class="keyword">null</span>;</span><br><span class="line">	...</span><br><span class="line">    <span class="keyword">return</span> invocation.proceed();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> Object <span class="title">queryLimit</span><span class="params">(Invocation invocation, Object[] args, MappedStatement ms, BoundSql boundSql, RowBounds rb)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//生成带有limit的SQL</span></span><br><span class="line">	String limitSql = dialect.getLimitSql(boundSql.getSql(), rb.getOffset(), rb.getLimit());</span><br><span class="line">	BoundSql newBoundSql = <span class="keyword">new</span> BoundSql(ms.getConfiguration(), limitSql, boundSql.getParameterMappings(),</span><br><span class="line">			boundSql.getParameterObject());</span><br><span class="line">	<span class="comment">//构造新的Statement去执行分页语句</span></span><br><span class="line">	args[<span class="number">0</span>] = buildMappedStatement(ms, <span class="keyword">new</span> SqlSqlSourceWrapper(newBoundSql), ms.getId() + <span class="string">"_LIMIT"</span>,</span><br><span class="line">			ms.getResultMaps());</span><br><span class="line">	args[<span class="number">2</span>] = <span class="keyword">new</span> RowBounds();</span><br><span class="line">	args[<span class="number">3</span>] = <span class="keyword">null</span>;</span><br><span class="line">  	<span class="keyword">return</span> invocation.proceed();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="SQL解析与改写"><a href="#SQL解析与改写" class="headerlink" title="SQL解析与改写"></a>SQL解析与改写</h2><p>Zebra在之前的版本中使用Antlr解析SQL，后来的版本替换成了Druid的 <strong>Sql Parser</strong>。<strong>Druid</strong>是个非常强大的工具，它支持达9种数据库类型SQL(db2|h2|mysql|hive|oracle…)。<br>这里我们以<strong>MySQL</strong>为例来介绍其SQL解析过程。<br><img src="media/15117967603675/15119598460937.jpg" alt=""></p>
+<p>SQL的解析过程，分为<strong>词法分析</strong>和<strong>语法分析</strong>：</p>
+<ul>
+<li><strong>词法分析</strong>用来识别词汇，如关键字等。<code>Lexer</code>就是用于词法分析的词法分析器。每个词法器都有自己的词汇库，<code>KeyWords</code>就是词汇库，且是所有数据库共用的词汇库。<code>MySQLLexer</code>是<code>Lexer</code>的子类。是用来专门解析<code>MySQL</code>的SQL语句。它的词汇库也在<code>KeyWords</code>加上了<code>MySQL</code>特有的关键字<code>LIMIT</code>、<code>IDENTIFIED</code>等；</li>
+<li><strong>语法分析</strong>是在词法分析的基础上进行语法分析。生成一颗AST(<code>abstract syntax tree</code><strong>抽象语法树</strong>)。且其过程中也会判断用户的输入是否符合语法逻辑；</li>
+</ul>
+<p>先来看一个词法分析的例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">String sql = <span class="string">"select * from order where cinema_id = 11 order by id, user_id"</span>;</span><br><span class="line">Lexer lexer = <span class="keyword">new</span> Lexer(sql);</span><br><span class="line"><span class="keyword">for</span> (;;) &#123;</span><br><span class="line">  <span class="comment">//触发下一个词识别，识别过程即在其中。(各种if|switch，有限状态机)</span></span><br><span class="line">  lexer.nextToken();</span><br><span class="line">  <span class="comment">//获取识别的词</span></span><br><span class="line">  Token tok = lexer.token();</span><br><span class="line">  <span class="comment">//标识符</span></span><br><span class="line">  <span class="keyword">if</span> (tok == Token.IDENTIFIER) &#123;</span><br><span class="line">      System.out.println(tok.name() + <span class="string">"\t\t"</span> + lexer.stringVal());</span><br><span class="line">  <span class="comment">//数字</span></span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (tok == Token.LITERAL_INT) &#123;</span><br><span class="line">      System.out.println(tok.name() + <span class="string">"\t\t"</span> + lexer.numberString());</span><br><span class="line">  <span class="comment">//其他类型</span></span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      System.out.println(tok.name() + <span class="string">"\t\t\t"</span> + tok.name);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//条件判断，以及其在SQL中的位置</span></span><br><span class="line">  <span class="keyword">if</span> (tok == Token.WHERE) &#123;</span><br><span class="line">      System.out.println(<span class="string">"where pos : "</span> + lexer.pos());</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//结束标记</span></span><br><span class="line">  <span class="keyword">if</span> (tok == Token.EOF) &#123;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其输出结果是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">SELECT			SELECT</span><br><span class="line">STAR			*</span><br><span class="line">FROM			FROM</span><br><span class="line">ORDER			ORDER</span><br><span class="line">WHERE			WHERE</span><br><span class="line">where pos : <span class="number">25</span></span><br><span class="line">IDENTIFIER		cinema_id</span><br><span class="line">EQ			=</span><br><span class="line">LITERAL_INT		<span class="number">11</span></span><br><span class="line">ORDER			ORDER</span><br><span class="line">BY			BY</span><br><span class="line">IDENTIFIER		id</span><br><span class="line">COMMA			,</span><br><span class="line">IDENTIFIER		user_id</span><br><span class="line">EOF			<span class="keyword">null</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>语法分析器</strong>在进行语法分析时，会根据词法分析器分析出的TOKEN、值来创建不同类型的节点，加到AST树中。<br>例如：</p>
+<blockquote>
+<p><code>SELECT</code> -&gt; <code>SQLSelect</code><br><code>Order by</code> -&gt; <code>SQLOrderBy</code><br><code>*</code> -&gt; <code>SQLSelectItem</code>(每个结果集字段一个SQLSelectItem)<br><code>FROM</code> -&gt; <code>SQLTableSource</code>，SQLExprTableSource或者<code>SQLSelect</code>(嵌套查询)</p>
+</blockquote>
+<p>以下面的例子来说明语法分析生成的结果：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">id</span>, <span class="keyword">name</span>, movie_id <span class="keyword">from</span> <span class="keyword">order</span> <span class="keyword">where</span> cinema_id = <span class="number">11</span> <span class="keyword">order</span> <span class="keyword">by</span> <span class="keyword">id</span>, user_id</span><br></pre></td></tr></table></figure>
+
+<p>生成的语法树如下：<br><img src="media/15117967603675/15119747197151.jpg" alt=""></p>
+<p>对AST树信息的访问，<code>Druid</code>定义一套接口<code>SQLASTVisitor</code>。业务方可以实现接口加入特定信息收集逻辑。调用<code>SQLStatement.accept(visitor)</code>，<code>visitor</code>就会以类先序的顺序访问树上的所有节点。<br>下面给出一个自定义查找SQL中出现了哪些表名：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TableNameASTVisitor</span> <span class="keyword">implements</span> <span class="title">MySqlASTVisitor</span> </span>&#123;</span><br><span class="line">    List&lt;String&gt; tableNames = Lists.newArrayList();</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">visit</span><span class="params">(SQLExprTableSource x)</span> </span>&#123;</span><br><span class="line">        SQLName name = x.getName();</span><br><span class="line">        <span class="keyword">if</span> (name!= <span class="keyword">null</span>) &#123;</span><br><span class="line">            tableNames.add(name.getSimpleName());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">visit</span><span class="params">(SQLSelect x)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">visit</span><span class="params">(SQLSelectStatement astNode)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;String&gt; <span class="title">getTableNames</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> tableNames;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br><span class="line">String sql = <span class="string">"select id, name, movie_id from order where cinema_id = 11 order by id, user_id"</span>;</span><br><span class="line">SQLStatementParser parser = <span class="keyword">new</span> MySqlStatementParser(sql);</span><br><span class="line">SQLStatement statement = parser.parseStatement();</span><br><span class="line">TableNameASTVisitor visitor = <span class="keyword">new</span> TableNameASTVisitor();</span><br><span class="line">statement.accept(visitor);</span><br><span class="line">System.out.println(visitor.getTableNames());</span><br><span class="line"><span class="comment">//输出结果为 [order]</span></span><br></pre></td></tr></table></figure>
+<p><strong>ShardRouter</strong>实现SQL改写的方式就是实现了一个<strong>Visitor</strong>-<strong>SimpleRewriteTableOutputVisitor</strong>，在其内部，将逻辑表名改写为路由后的物理表名：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SimpleRewriteTableOutputVisitor</span> <span class="keyword">extends</span> <span class="title">MySqlOutputVisitor</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Map&lt;String, String&gt; tableMapping;</span><br><span class="line">    <span class="comment">//访问保存表信息的节点</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">visit</span><span class="params">(SQLExprTableSource x)</span> </span>&#123;</span><br><span class="line">		SQLName name = (SQLName) x.getExpr();</span><br><span class="line">		String simpleName = name.getSimpleName();</span><br><span class="line">		<span class="keyword">boolean</span> hasQuote = simpleName.charAt(<span class="number">0</span>) == <span class="string">'`'</span>;</span><br><span class="line">		<span class="comment">//逻辑表名</span></span><br><span class="line">		String tableName = hasQuote ? parseTableName(simpleName) : simpleName;</span><br><span class="line">		<span class="comment">//物理表名</span></span><br><span class="line">		String finalTable = tableMapping.get(tableName);</span><br><span class="line">		...</span><br><span class="line">		print0(<span class="string">"`"</span> + finalTable + <span class="string">"`"</span>);</span><br><span class="line">		...</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/database/" rel="tag"># database</a>
+          
+            <a href="/tags/zebra/" rel="tag"># zebra</a>
+          
+            <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E9%97%B4%E4%BB%B6/" rel="tag"># 数据库中间件</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/26/rpc/dubbo/6.dubbo-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/" rel="next" title="Dubbo 负载均衡">
+                <i class="fa fa-chevron-left"></i> Dubbo 负载均衡
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/10/12/istio/1.istio-%E7%AE%80%E4%BB%8B/" rel="prev" title="Istio 简介">
+                Istio 简介 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Zebra"><span class="nav-number">1.</span> <span class="nav-text">Zebra</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Zebra是什么？能干甚么？"><span class="nav-number">1.1.</span> <span class="nav-text">Zebra是什么？能干甚么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#同类产品有哪些，以及比较？"><span class="nav-number">1.2.</span> <span class="nav-text">同类产品有哪些，以及比较？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构"><span class="nav-number">1.3.</span> <span class="nav-text">架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高可用"><span class="nav-number">1.4.</span> <span class="nav-text">高可用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#主库的高可用"><span class="nav-number">1.4.1.</span> <span class="nav-text">主库的高可用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#丛库的高可用"><span class="nav-number">1.4.2.</span> <span class="nav-text">丛库的高可用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Zebra-client"><span class="nav-number">2.</span> <span class="nav-text">Zebra-client</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#推荐使用包搭配"><span class="nav-number">2.0.1.</span> <span class="nav-text">推荐使用包搭配</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#zebra-api"><span class="nav-number">2.1.</span> <span class="nav-text">zebra-api</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SingleDataSource"><span class="nav-number">2.1.1.</span> <span class="nav-text">SingleDataSource</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GroupDataSource"><span class="nav-number">2.1.2.</span> <span class="nav-text">GroupDataSource</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ShardDataSource"><span class="nav-number">2.1.3.</span> <span class="nav-text">ShardDataSource</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#分片规则："><span class="nav-number">2.1.3.1.</span> <span class="nav-text">分片规则：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Filter链-Filter-Chain模式、责任链模式"><span class="nav-number">2.1.4.</span> <span class="nav-text">Filter链(Filter-Chain模式、责任链模式)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#怎么拓展？"><span class="nav-number">2.1.4.1.</span> <span class="nav-text">怎么拓展？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#zebra-dao"><span class="nav-number">2.2.</span> <span class="nav-text">zebra-dao</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#工作原理"><span class="nav-number">3.</span> <span class="nav-text">工作原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#zebra-api-1"><span class="nav-number">3.1.</span> <span class="nav-text">zebra-api</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#GroupDataSource-1"><span class="nav-number">3.1.1.</span> <span class="nav-text">GroupDataSource</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#读写策略"><span class="nav-number">3.1.1.1.</span> <span class="nav-text">读写策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#路由策略-针对读流量-："><span class="nav-number">3.1.1.2.</span> <span class="nav-text">路由策略(针对读流量)：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ShardDataSource-1"><span class="nav-number">3.1.2.</span> <span class="nav-text">ShardDataSource</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#分库分表原理"><span class="nav-number">3.1.2.1.</span> <span class="nav-text">分库分表原理</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#zebra-dao-1"><span class="nav-number">3.2.</span> <span class="nav-text">zebra-dao</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#异步化"><span class="nav-number">3.2.1.</span> <span class="nav-text">异步化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分页-PageInterceptor"><span class="nav-number">3.2.2.</span> <span class="nav-text">分页 - PageInterceptor</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SQL解析与改写"><span class="nav-number">3.3.</span> <span class="nav-text">SQL解析与改写</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

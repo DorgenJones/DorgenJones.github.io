@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="istio,servicemesh," />
+
+
+<meta name="description" content="PilotPilot是Istio的控制中枢，它负责sidecar的生命周期管理并负责向Sidecar下发控制数据。 [TOC] 下面将从以下几个方面来分析Pilot:  整体架构 启动过程 Sidecar 初始拉取过程 &amp; 信息下发过程 拓展性  整体架构Pilot 内部整体架构如下：  实现 Grpc Server 对Envoy提供查询配置以及服务发现服务； 支持配置控制器、服务控制器">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Istio Pilot">
+<meta property="og:url" content="https://dorgenjones.github.io/2019/10/14/istio/2.istio-pilot/index.html">
+<meta property="og:site_name" content="Zamperini">
+<meta property="og:description" content="PilotPilot是Istio的控制中枢，它负责sidecar的生命周期管理并负责向Sidecar下发控制数据。 [TOC] 下面将从以下几个方面来分析Pilot:  整体架构 启动过程 Sidecar 初始拉取过程 &amp; 信息下发过程 拓展性  整体架构Pilot 内部整体架构如下：  实现 Grpc Server 对Envoy提供查询配置以及服务发现服务； 支持配置控制器、服务控制器">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/10/14/istio/2.istio-pilot/media/15769230772008/15769864174743.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/10/14/istio/2.istio-pilot/media/15762032316330/15766110366375.jpg">
+<meta property="article:published_time" content="2019-10-13T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-02-13T11:04:42.605Z">
+<meta property="article:author" content="Zamperini">
+<meta property="article:tag" content="istio">
+<meta property="article:tag" content="servicemesh">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://dorgenjones.github.io/2019/10/14/istio/2.istio-pilot/media/15769230772008/15769864174743.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/2019/10/14/istio/2.istio-pilot/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>Istio Pilot | Zamperini</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zamperini</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2019/10/14/istio/2.istio-pilot/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Istio Pilot</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-14T00:00:00+08:00">2019-10-14</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/istio/" itemprop="url" rel="index"><span itemprop="name">istio</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Pilot"><a href="#Pilot" class="headerlink" title="Pilot"></a>Pilot</h1><p><code>Pilot</code>是Istio的控制中枢，它负责<code>sidecar</code>的生命周期管理并负责向<code>Sidecar</code>下发控制数据。</p>
+<p>[TOC]</p>
+<p>下面将从以下几个方面来分析<code>Pilot</code>:</p>
+<ul>
+<li>整体架构</li>
+<li>启动过程</li>
+<li><code>Sidecar</code> 初始拉取过程 <strong>&amp;</strong> 信息下发过程</li>
+<li>拓展性</li>
+</ul>
+<h2 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h2><p><code>Pilot</code> 内部整体架构如下：</p>
+<ul>
+<li>实现 <strong>Grpc Server</strong> 对<code>Envoy</code>提供查询配置以及服务发现服务；</li>
+<li>支持配置控制器、服务控制器</li>
+<li>配置控制器支持聚合多种类型配置源，如 K8s、基于文件系统的内存配置源、Galley 以及其他的实现MCP协议的拓展配置中心服务；</li>
+<li>服务控制器同样支持多种类型服务注册中心，如 K8s、Consul以及可以拓展MCP协议实现的注册中心服务</li>
+<li>另外，通过<code>ControlZ</code>服务对外暴露 <code>Pilot</code> 内部配置&amp;运行时信息的查询和修改接口</li>
+</ul>
+<p><img src="media/15769230772008/15769864174743.jpg" alt=""></p>
+<h2 id="启动分析"><a href="#启动分析" class="headerlink" title="启动分析"></a>启动分析</h2><p>首先其入口地址为：<code>istio/pilot/cmd/pilot-discovery</code>。<br>启动前，<code>init</code>方法预先执行，其解析出启动参数如：<code>registries</code>(注册中心配置，若未配置，则默认注册中心为<code>k8s</code>)、<code>meshConfig</code>(mesh的配置文件地址)、<code>httpAddr</code>、<code>grpcAddr</code> 服务器启动http、Grpc端口等。<br><code>discoveryCmd.Run</code>方法为启动入口，首先通过<code>bootstrap.NewServer</code>创建<strong>Server</strong>，然后通过<code>Start</code>方法启动 <strong>Server</strong>。<br>首先，看<code>bootstrap.NewServer</code>方法：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">s := &amp;Server&#123;</span><br><span class="line">    <span class="comment">// 文件监听器组件，用于监听文件更新事件</span></span><br><span class="line">	fileWatcher: filewatcher.NewWatcher(),</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 创建k8s client</span></span><br><span class="line">s.initKubeClient(&amp;args)</span><br><span class="line"><span class="comment">// 初始化 mesh配置 根据配置地址从指定位置获取配置，并添加文件监听器监听更新</span></span><br><span class="line">s.initMesh(&amp;args)</span><br><span class="line"><span class="comment">//  初始化Mesh网络配置，根据配置地址从指定位置获取配置，并添加文件监听器监听更新</span></span><br><span class="line">s.initMeshNetworks(&amp;args)</span><br><span class="line"><span class="comment">// 初始化证书控制器</span></span><br><span class="line">s.initCertController(&amp;args)</span><br><span class="line"><span class="comment">// 初始化配置控制器</span></span><br><span class="line">s.initConfigController(&amp;args)</span><br><span class="line"><span class="comment">// 初始化服务控制器</span></span><br><span class="line">s.initServiceControllers(&amp;args)</span><br><span class="line"><span class="comment">// 初始化发现服务</span></span><br><span class="line">s.initDiscoveryService(&amp;args)</span><br><span class="line"><span class="comment">// 初始化监控服务</span></span><br><span class="line">s.initMonitor(&amp;args)</span><br><span class="line"><span class="comment">// 初始化集群注册器，监控远程集群并初始化多集群结构</span></span><br><span class="line">s.initClusterRegistries(&amp;args)</span><br></pre></td></tr></table></figure>
+<p>创建完<code>DiscoveryServer</code>后，通过调用<code>Start</code>方法启动各组件。<br>上面执行流程大致过程如下：首先创建与<code>k8s</code>的交互客户端，然后根据初始传入配置路径读取配置文件中<code>mesh</code>以及网络的配置，同时监听、维护配置文件更新；其后创建三个控制器：证书、配置、服务控制器分别管理 Secert、config、service信息；再创建发现服务：聚合上面所有控制器的能力对<strong>Sidecar</strong>提供服务。<br>下面将分别介绍初始化<code>mesh</code>配置以及网络配置过程，初始化证书、配置以及服务控制器，以及初始化发现服务。</p>
+<h3 id="初始化Mesh配置"><a href="#初始化Mesh配置" class="headerlink" title="初始化Mesh配置"></a>初始化<code>Mesh</code>配置</h3><p> <strong>initMesh</strong>方法，首先判断是否配置了<code>args.Mesh.ConfigFile</code>。若是，则从文件中读取配置信息，并添加文件监听器当有更新时回调更新方法（下发配置）；若无，则从<code>k8s</code>中获取mesh配置信息。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// args.Mesh.ConfigFile != ""</span></span><br><span class="line">meshConfig, err = cmd.ReadMeshConfig(args.Mesh.ConfigFile)</span><br><span class="line">s.addFileWatcher(args.Mesh.ConfigFile, <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">	meshConfig, err = cmd.ReadMeshConfig(args.Mesh.ConfigFile)</span><br><span class="line">	<span class="keyword">if</span> !reflect.DeepEqual(meshConfig, s.mesh) &#123;</span><br><span class="line">		s.mesh = meshConfig</span><br><span class="line">		<span class="keyword">if</span> s.EnvoyXdsServer != <span class="literal">nil</span> &#123;</span><br><span class="line">			s.EnvoyXdsServer.Env.Mesh = meshConfig</span><br><span class="line">			<span class="comment">//下发配置</span></span><br><span class="line">			s.EnvoyXdsServer.ConfigUpdate(&amp;model.PushRequest&#123;Full: <span class="literal">true</span>&#125;)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;)</span><br><span class="line"><span class="comment">// 从k8s中获取配置信息 namespace:istio-system, name:istio</span></span><br><span class="line">cfg, err := kube.CoreV1().ConfigMaps(namespace).Get(name, meta_v1.GetOptions&#123;&#125;)</span><br><span class="line">cfgYaml, exists := cfg.Data[ConfigMapKey]</span><br><span class="line">meshConfig, err := mesh.ApplyMeshConfigDefaults(cfgYaml)</span><br></pre></td></tr></table></figure>
+
+<h3 id="初始化配置控制器"><a href="#初始化配置控制器" class="headerlink" title="初始化配置控制器"></a>初始化配置控制器</h3><p><strong>Pilot</strong> 支持对接多配置中心，支持从多个配置中心获取配置值：</p>
+<ol>
+<li>若设置了配置源<code>mesh.ConfigSources</code>，则初始化<code>MCPConfigController</code>；</li>
+<li>若设置了配置文件目录<code>Config.FileDir</code>，则创建一个内存配置控制器。并定时（<code>100ms</code>）同步指定文件目录下的配置到内存配置控制器中；</li>
+<li>创建 <strong>k8s</strong> 配置控制器，每种Istio配置类型对应一种<code>CRD</code>资源，并创建每种资源的informer，构成配置更新机制。</li>
+</ol>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="built_in">len</span>(s.mesh.ConfigSources) &gt; <span class="number">0</span> &#123;</span><br><span class="line">  s.initMCPConfigController(args)</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> args.Config.Controller != <span class="literal">nil</span> &#123;</span><br><span class="line">  <span class="comment">// 正常流程不会走到此处</span></span><br><span class="line">	s.configController = args.Config.Controller</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> args.Config.FileDir != <span class="string">""</span> &#123;</span><br><span class="line">	store := memory.Make(schemas.Istio)</span><br><span class="line">	configController := memory.NewController(store)</span><br><span class="line">	err := s.makeFileMonitor(args.Config.FileDir, configController)</span><br><span class="line">	s.configController = configController</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	cfgController, err := s.makeKubeConfigController(args)</span><br><span class="line">	s.configController = cfgController</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>随后添加置后 <strong>Start</strong>方法，在所有组件初始化完成执行（Pilot中所有组件都是如此）。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">s.addStartFunc(<span class="function"><span class="keyword">func</span><span class="params">(stop &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">go</span> s.configController.Run(stop)</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>完成基本类型配置控制器创建后，会继续判断是否支持 <code>Ingress</code> 模式的配置；若是则对控制器进行包装：添加一种配置类型<code>Ingress</code>，并按类型进行映射：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">   configController, err := configaggregate.MakeCache([]model.ConfigStoreCache&#123;</span><br><span class="line">	s.configController,</span><br><span class="line">	ingress.NewController(s.kubeClient, s.mesh, args.Config.ControllerOptions),</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>最后，根据创建的配置控制器创建 <code>IstioConfigStore</code>。其作用就是配置访问层，提供具体配置查询接口，定义如下：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> IstioConfigStore <span class="keyword">interface</span> &#123;</span><br><span class="line">	ConfigStore</span><br><span class="line">	ServiceEntries() []Config</span><br><span class="line">	Gateways(workloadLabels labels.Collection) []Config</span><br><span class="line">	EnvoyFilter(workloadLabels labels.Collection) *Config</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为<strong>MCP</strong>协议 是<code>Istio</code>中最近比较火的概念，下文将详细讲解<code>initMCPConfigController</code>：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span> <span class="title">initMCPConfigController</span><span class="params">(args *PilotArgs)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">for</span> _, configSource := <span class="keyword">range</span> s.mesh.ConfigSources &#123;</span><br><span class="line">        <span class="keyword">if</span> strings.Contains(configSource.Address, fsScheme+<span class="string">"://"</span>) &#123;</span><br><span class="line">        <span class="comment">// ... 若是，则创建文件配置控制器，上文中有提起此种类型控制器</span></span><br><span class="line">            configStores = <span class="built_in">append</span>(configStores, configController)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 根据配置创建与MCP server的grpc链接</span></span><br><span class="line">        conn, err := grpc.DialContext(</span><br><span class="line">			ctx,<span class="comment">//... 配置</span></span><br><span class="line">			)</span><br><span class="line">			<span class="comment">// 创建MCP控制</span></span><br><span class="line">			s.mcpController(args, conn, reporter, &amp;clients, &amp;configStores)</span><br><span class="line">			|- <span class="comment">// 基于Grpc链接创建grpc资源客户端，其用于与MCP服务端建立Stream通道，</span></span><br><span class="line">			|- cl := mcpapi.NewResourceSourceClient(conn)</span><br><span class="line">			<span class="comment">// 创建MCP客户端</span></span><br><span class="line">			|- mcpClient := sink.NewClient(cl, sinkOptions)</span><br><span class="line"></span><br><span class="line">			<span class="comment">// ！！！这里很有意思即可以 MCP服务端同时当成 注册中心使用</span></span><br><span class="line">			<span class="keyword">if</span> resourceContains(configSource.SubscribedResources, meshconfig.Resource_SERVICE_REGISTRY) &#123;</span><br><span class="line">			    args.Service.Registries = []<span class="keyword">string</span>&#123;<span class="keyword">string</span>(serviceregistry.MCPRegistry)&#125;</span><br><span class="line">    			conn, err := grpc.DialContext(</span><br><span class="line">    				ctx,</span><br><span class="line">    				<span class="comment">//...配置)</span></span><br><span class="line">    			conns = <span class="built_in">append</span>(conns, conn)</span><br><span class="line">    			<span class="comment">// 合成服务注册中心</span></span><br><span class="line">    			s.sseMCPController(args, conn, reporter, &amp;clients, &amp;configStores)</span><br><span class="line">			&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 添加启动方法</span></span><br><span class="line">	s.addStartFunc(<span class="function"><span class="keyword">func</span><span class="params">(stop &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="keyword">for</span> i := <span class="keyword">range</span> clients &#123;</span><br><span class="line">			client := clients[i]</span><br><span class="line">			<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">				client.Run(ctx)</span><br><span class="line">			&#125;()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//将多个配置服务源进行聚合</span></span><br><span class="line">	aggregateMcpController, err := configaggregate.MakeCache(configStores)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>继续跟进<code>s.mcpController(args, conn, reporter, &amp;clients, &amp;configStores)</code>，逻辑：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span> <span class="title">mcpController</span><span class="params">(args *PilotArgs,</span></span></span><br><span class="line"><span class="function"><span class="params">	conn *grpc.ClientConn,</span></span></span><br><span class="line"><span class="function"><span class="params">	reporter monitoring.Reporter,</span></span></span><br><span class="line"><span class="function"><span class="params">	clients *[]*sink.Client,</span></span></span><br><span class="line"><span class="function"><span class="params">	configStores *[]model.ConfigStoreCache)</span></span> &#123;</span><br><span class="line">	<span class="comment">//  CoreDataModel 结构，用于配置临时存储并接收MCP Server下发的变更</span></span><br><span class="line">	mcpController := coredatamodel.NewController(s.mcpOptions)</span><br><span class="line">	sinkOptions := &amp;sink.Options&#123;</span><br><span class="line">		CollectionOptions: collections,</span><br><span class="line">		Updater:           mcpController,</span><br><span class="line">		ID:                clientNodeID,</span><br><span class="line">		Reporter:          reporter,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//创建资源客户端</span></span><br><span class="line">	cl := mcpapi.NewResourceSourceClient(conn)</span><br><span class="line">	<span class="comment">// 创建Sink客户端，针对MCP而设计的资源信息交互组件，后面我们将分章节讲解MCP整体交互实现。</span></span><br><span class="line">	mcpClient := sink.NewClient(cl, sinkOptions)</span><br><span class="line">	configz.Register(mcpClient)</span><br><span class="line">	*clients = <span class="built_in">append</span>(*clients, mcpClient)</span><br><span class="line">	*configStores = <span class="built_in">append</span>(*configStores, mcpController)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>总结创建 <strong>MCPConfigController</strong>的执行过程如下：</p>
+<ul>
+<li>对于每种配置源，根据<code>configSource.Address</code>以及配置创建与<strong>MCP</strong>服务端的grpc链接以及stream client；</li>
+<li>创建 <code>mcpController</code> 用于接收 <strong>MCP Server</strong> 的配置变更；</li>
+<li>创建 <code>Sink</code>组件，维护与 <strong>MCP Server</strong> 的交互；</li>
+<li>别外，如果若配置源同时也维护 <strong>服务资源</strong>（充当注册中心的角色），同时会创建 <code>SyntheticServiceEntryController</code>。</li>
+</ul>
+<h3 id="初始化服务控制器"><a href="#初始化服务控制器" class="headerlink" title="初始化服务控制器"></a>初始化服务控制器</h3><p>Pilot同时也支持对接多个注册中心，其同时可以从多个注册中心获取服务注册信息。目前Pilot支持三种类型的注册中心：k8s、consul和基于MCP协议实现的注册中心。<br>初始化时，创建指定类型<code>Registry</code>，然后加到<code>aggregate.Controller</code>中，其聚合不同注册中心的数据，对sidecar服务。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span> <span class="title">initServiceControllers</span><span class="params">(args *PilotArgs)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> _, r := <span class="keyword">range</span> args.Service.Registries &#123;</span><br><span class="line">        <span class="keyword">switch</span> serviceRegistry &#123;</span><br><span class="line">		<span class="keyword">case</span> serviceregistry.KubernetesRegistry:</span><br><span class="line">		  s.createK8sServiceControllers(serviceControllers, args)</span><br><span class="line">		<span class="keyword">case</span> serviceregistry.ConsulRegistry:</span><br><span class="line">			s.initConsulRegistry(serviceControllers, args)</span><br><span class="line">		<span class="keyword">case</span> serviceregistry.MCPRegistry:</span><br><span class="line">			<span class="keyword">if</span> s.mcpDiscovery != <span class="literal">nil</span> &#123;</span><br><span class="line">				serviceControllers.AddRegistry(</span><br><span class="line">					aggregate.Registry&#123;</span><br><span class="line">						Name:             serviceregistry.MCPRegistry,</span><br><span class="line">						<span class="comment">// mcpDiscovery为之前初始化配置服务时创建</span></span><br><span class="line">						ServiceDiscovery: s.mcpDiscovery,</span><br><span class="line">						Controller:       s.mcpDiscovery,</span><br><span class="line">					&#125;)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 将配置中心包装成注册中心，其会将配置数据转换成Sidecar需要的Sercice\Instance数据。</span></span><br><span class="line">    serviceEntryStore := external.NewServiceDiscovery(s.configController, s.istioConfigStore)</span><br><span class="line">    serviceEntryRegistry := aggregate.Registry&#123;</span><br><span class="line">		Name:             <span class="string">"ServiceEntries"</span>,</span><br><span class="line">		Controller:       serviceEntryStore,</span><br><span class="line">		ServiceDiscovery: serviceEntryStore,</span><br><span class="line">	&#125;</span><br><span class="line">	serviceControllers.AddRegistry(serviceEntryRegistry)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 添加开启方法</span></span><br><span class="line">s.addStartFunc(<span class="function"><span class="keyword">func</span><span class="params">(stop &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">go</span> s.ServiceController.Run(stop)</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>初始化服务发现控制器的过程主要如下：</p>
+<ul>
+<li>根据注册器配置列表创建相应类型服务发现管理器；</li>
+<li>将配置中心包装成发现服务；</li>
+<li>将生成的所有发现服务聚合成<code>aggregate.Controller</code></li>
+</ul>
+<p>再深入<code>Registry</code>服务逻辑，首先看其定义：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Registry <span class="keyword">struct</span> &#123;</span><br><span class="line">    <span class="comment">// 服务注册类型</span></span><br><span class="line">	Name serviceregistry.ServiceRegistry</span><br><span class="line">	<span class="comment">// 集群ID，当有多个同种类型注册中心时，用ClusterID来区分它们</span></span><br><span class="line">	ClusterID <span class="keyword">string</span></span><br><span class="line">   <span class="comment">// 控制器：提供接口让依赖方可以加入变更事件处理器</span></span><br><span class="line">	model.Controller</span><br><span class="line">	<span class="comment">// 定义获取资源的接口</span></span><br><span class="line">	model.ServiceDiscovery</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> Controller <span class="keyword">interface</span> &#123;</span><br><span class="line">	AppendServiceHandler(f <span class="function"><span class="keyword">func</span><span class="params">(*Service, Event)</span>) <span class="title">error</span></span></span><br><span class="line">	AppendInstanceHandler(f <span class="function"><span class="keyword">func</span><span class="params">(*ServiceInstance, Event)</span>) <span class="title">error</span></span></span><br><span class="line">	Run(stop &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> ServiceDiscovery <span class="keyword">interface</span> &#123;</span><br><span class="line">	Services() ([]*Service, error)</span><br><span class="line">	GetService(hostname host.Name) (*Service, error)</span><br><span class="line">	InstancesByPort(svc *Service, servicePort <span class="keyword">int</span>, labels labels.Collection) ([]*ServiceInstance, error)</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面将以<code>k8s</code>为具体发现服务来讲解其工作原理。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span> <span class="title">createK8sServiceControllers</span><span class="params">(serviceControllers *aggregate.Controller, args *PilotArgs)</span> <span class="params">(err error)</span></span> &#123;</span><br><span class="line">	clusterID := <span class="keyword">string</span>(serviceregistry.KubernetesRegistry)</span><br><span class="line">	args.Config.ControllerOptions.ClusterID = clusterID</span><br><span class="line">	<span class="comment">// 构建k8s服务发现控制器</span></span><br><span class="line">	kubectl := controller2.NewController(s.kubeClient, args.Config.ControllerOptions)</span><br><span class="line">	s.kubeRegistry = kubectl</span><br><span class="line">	serviceControllers.AddRegistry(</span><br><span class="line">		aggregate.Registry&#123;</span><br><span class="line">			Name:             serviceregistry.KubernetesRegistry,</span><br><span class="line">			ClusterID:        clusterID,</span><br><span class="line">			ServiceDiscovery: kubectl,</span><br><span class="line">			Controller:       kubectl,</span><br><span class="line">		&#125;)</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上文可以看出<code>controller2.NewController</code>是 <strong>k8sRegistry</strong> 的核心部分。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewController</span><span class="params">(client kubernetes.Interface, options Options)</span> *<span class="title">Controller</span></span> &#123;</span><br><span class="line">	<span class="comment">// Queue requires a time duration for a retry delay after a handler error</span></span><br><span class="line">	out := &amp;Controller&#123;</span><br><span class="line">		domainSuffix:               options.DomainSuffix,</span><br><span class="line">		client:                     client,</span><br><span class="line">		queue:                      kube.NewQueue(<span class="number">1</span> * time.Second),</span><br><span class="line">		ClusterID:                  options.ClusterID,</span><br><span class="line">		XDSUpdater:                 options.XDSUpdater,</span><br><span class="line">		servicesMap:                <span class="built_in">make</span>(<span class="keyword">map</span>[host.Name]*model.Service),</span><br><span class="line">		externalNameSvcInstanceMap: <span class="built_in">make</span>(<span class="keyword">map</span>[host.Name][]*model.ServiceInstance),</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 基于k8s的client创建Informer(与k8s apiserver的交互组件)</span></span><br><span class="line">	sharedInformers := informers.NewSharedInformerFactoryWithOptions(client, options.ResyncPeriod, informers.WithNamespace(options.WatchedNamespace))</span><br><span class="line">	<span class="comment">// 创建 Service、Endpoint、Node、Pod 的 Informer，并向每个informer中添加事件监听器，监听每种类型的变更事件。当有变更时会通知controller的queue，Queue中会定时`1s`捞事件执行回调，回调什么将从下文中介绍</span></span><br><span class="line">	svcInformer := sharedInformers.Core().V1().Services().Informer()</span><br><span class="line">	out.services = out.createCacheHandler(svcInformer, <span class="string">"Services"</span>)</span><br><span class="line"></span><br><span class="line">	epInformer := sharedInformers.Core().V1().Endpoints().Informer()</span><br><span class="line">	out.endpoints = out.createEDSCacheHandler(epInformer, <span class="string">"Endpoints"</span>)</span><br><span class="line"></span><br><span class="line">	nodeInformer := sharedInformers.Core().V1().Nodes().Informer()</span><br><span class="line">	out.nodes = out.createCacheHandler(nodeInformer, <span class="string">"Nodes"</span>)</span><br><span class="line"></span><br><span class="line">	podInformer := sharedInformers.Core().V1().Pods().Informer()</span><br><span class="line">	out.pods = newPodCache(out.createCacheHandler(podInformer, <span class="string">"Pod"</span>), out)</span><br><span class="line">	<span class="keyword">return</span> out</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>首先基于 <code>k8s</code> client创建 <code>Service</code>、<code>Endpoint</code>、<code>Node</code>、<code>Pod</code>（<code>k8s</code>中的服务角色） 的 Informer（k8s为了简化各组件之间交互而构建的工具，其即具有缓存的功能同时也有查询与实时变更通知的功能）。</li>
+<li>向每种 <code>Informer</code> 添加变更事件回调方法，回调方法会往<code>controller</code>的<code>queue</code>中Push变更task</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">handler := &amp;kube.ChainHandler&#123;Funcs: []kube.Handler&#123;c.notify&#125;&#125;</span><br><span class="line">informer.AddEventHandler(</span><br><span class="line">		cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">			AddFunc: <span class="function"><span class="keyword">func</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">    			<span class="comment">// ...</span></span><br><span class="line">    			c.queue.Push(kube.Task&#123;Handler: handler.Apply, Obj: obj, Event: model.EventAdd&#125;)</span><br><span class="line">			&#125;,</span><br><span class="line">			UpdateFunc: <span class="function"><span class="keyword">func</span><span class="params">(old, cur <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">    			<span class="comment">// ...</span></span><br><span class="line">			&#125;,</span><br><span class="line">			DeleteFunc: <span class="function"><span class="keyword">func</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">		      <span class="comment">// ...</span></span><br><span class="line">			&#125;,</span><br><span class="line">		&#125;)</span><br><span class="line">handler := &amp;kube.ChainHandler&#123;Funcs: []kube.Handler&#123;c.notify&#125;&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>queue</code>是一个防抖动的设计，其会缓存一秒的变更对象，然后集中执行<code>Handler</code>方法，而<code>Handler</code>则是一个调用链。其允许添加多个处理器</li>
+<li>再看对<code>Controller</code>接口的实现方法，其实就是往<code>queue</code>的调用链中添加处理方法：</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Controller)</span> <span class="title">AppendServiceHandler</span><span class="params">(f <span class="keyword">func</span>(*model.Service, model.Event)</span>) <span class="title">error</span></span> &#123;</span><br><span class="line">	c.services.handler.Append(<span class="function"><span class="keyword">func</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;, event model.Event)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		svc, ok := obj.(*v1.Service)</span><br><span class="line">		hostname := svc.Name + <span class="string">"."</span> + svc.Namespace</span><br><span class="line">		ports := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">uint32</span>&#123;&#125;</span><br><span class="line">		portsByNum := <span class="keyword">map</span>[<span class="keyword">uint32</span>]<span class="keyword">string</span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> _, port := <span class="keyword">range</span> svc.Spec.Ports &#123;</span><br><span class="line">			ports[port.Name] = <span class="keyword">uint32</span>(port.Port)</span><br><span class="line">			portsByNum[<span class="keyword">uint32</span>(port.Port)] = port.Name</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//将</span></span><br><span class="line">		svcConv := kube.ConvertService(*svc, c.domainSuffix, c.ClusterID)</span><br><span class="line">		instances := kube.ExternalNameServiceInstances(*svc, svcConv)</span><br><span class="line">		<span class="comment">// ...</span></span><br><span class="line">		<span class="comment">// EDS needs the port mapping.</span></span><br><span class="line">		c.XDSUpdater.SvcUpdate(c.ClusterID, hostname, ports, portsByNum)</span><br><span class="line">     <span class="comment">// 回调</span></span><br><span class="line">		f(svcConv, event)</span><br><span class="line"></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;)</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="初始化发现服务"><a href="#初始化发现服务" class="headerlink" title="初始化发现服务"></a>初始化发现服务</h3><p><code>EnvoyXdsServer</code> 的作用是聚合服务控制器、配置控制器、mesh配置、meshNetworks配置信息，为<code>Sidecar</code>提供服务。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span> <span class="title">initDiscoveryService</span><span class="params">(args *PilotArgs)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    environment := &amp;model.Environment&#123;</span><br><span class="line">		Mesh:             s.mesh,</span><br><span class="line">		MeshNetworks:     s.meshNetworks,</span><br><span class="line">		IstioConfigStore: s.istioConfigStore,</span><br><span class="line">		ServiceDiscovery: s.ServiceController,</span><br><span class="line">		PushContext:      model.NewPushContext(),</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 添加 `/v1/registration`路径处理函数，查询所有Service和Endpoint</span></span><br><span class="line">	discovery, err := envoy.NewDiscoveryService(</span><br><span class="line">		environment,</span><br><span class="line">		args.DiscoveryOptions,</span><br><span class="line">	)</span><br><span class="line">	s.mux = discovery.RestContainer.ServeMux</span><br><span class="line">	<span class="comment">// 1. 聚合配置中心、注册中心，并往其中添加各种类型的事件处理器</span></span><br><span class="line">	<span class="comment">// 2. 创建配置生成器</span></span><br><span class="line">	s.EnvoyXdsServer = envoyv2.NewDiscoveryServer(environment,</span><br><span class="line">		istio_networking.NewConfigGenerator(args.Plugins),</span><br><span class="line">		s.ServiceController, s.kubeRegistry, s.configController)</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">	<span class="keyword">if</span> s.kubeRegistry != <span class="literal">nil</span> &#123;</span><br><span class="line">		s.kubeRegistry.Env = environment</span><br><span class="line">		s.kubeRegistry.InitNetworkLookup(s.meshNetworks)</span><br><span class="line">		<span class="comment">// 设置k8s注册器的更新回调</span></span><br><span class="line">		s.kubeRegistry.XDSUpdater = s.EnvoyXdsServer</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> s.mcpOptions != <span class="literal">nil</span> &#123;</span><br><span class="line">	   <span class="comment">// 设置mcp配置更新回调</span></span><br><span class="line">		s.mcpOptions.XDSUpdater = s.EnvoyXdsServer</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> s.incrementalMcpOptions != <span class="literal">nil</span> &#123;</span><br><span class="line">		clusterID := args.Config.ControllerOptions.ClusterID</span><br><span class="line">		s.incrementalMcpOptions.XDSUpdater = s.EnvoyXdsServer</span><br><span class="line">		s.incrementalMcpOptions.ClusterID = clusterID</span><br><span class="line">		<span class="comment">// 设置服务发现配置更新回调</span></span><br><span class="line">		s.discoveryOptions.XDSUpdater = s.EnvoyXdsServer</span><br><span class="line">		s.discoveryOptions.Env = environment</span><br><span class="line">		s.discoveryOptions.ClusterID = clusterID</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	s.addStartFunc(<span class="function"><span class="keyword">func</span><span class="params">(stop &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		s.EnvoyXdsServer.Start(stop)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;)</span><br><span class="line">	<span class="comment">// 创建GrpServer，并将 EnvoyXdsServer 服务注册到GrpcServer中</span></span><br><span class="line">	s.initGrpcServer(args.KeepaliveOptions)</span><br><span class="line">	<span class="comment">// 创建安全端口服务</span></span><br><span class="line">	<span class="keyword">if</span> args.DiscoveryOptions.SecureGrpcAddr != <span class="string">""</span> &#123;</span><br><span class="line">    	s.initSecureGrpcServer(args.KeepaliveOptions)</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>其中，最重要的是创建<code>EnvoyXdsServer</code>，构建参数分别是 <code>Environment</code> 所有数据源、<code>ConfigGenerator</code>配置生成器（其作用是根据已有信息生成<code>Sidecar</code>需要的 <code>Cluster</code>、<code>Route</code>、<code>Listener</code>，并且会构建相应的filter链）。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">s.EnvoyXdsServer = envoyv2.NewDiscoveryServer(environment,</span><br><span class="line">		istio_networking.NewConfigGenerator(args.Plugins),</span><br><span class="line">		s.ServiceController, s.kubeRegistry, s.configController)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewDiscoveryServer</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">	env *model.Environment,</span></span></span><br><span class="line"><span class="function"><span class="params">	generator core.ConfigGenerator,</span></span></span><br><span class="line"><span class="function"><span class="params">	ctl model.Controller,</span></span></span><br><span class="line"><span class="function"><span class="params">	kubeController *controller.Controller,</span></span></span><br><span class="line"><span class="function"><span class="params">	configCache model.ConfigStoreCache)</span> *<span class="title">DiscoveryServer</span></span> &#123;</span><br><span class="line">	serviceHandler := <span class="function"><span class="keyword">func</span><span class="params">(svc *model.Service, _ model.Event)</span></span> &#123;</span><br><span class="line">		pushReq := &amp;model.PushRequest&#123;</span><br><span class="line">			Full:               <span class="literal">true</span>,</span><br><span class="line">			NamespacesUpdated:  <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">struct</span>&#123;&#125;&#123;svc.Attributes.Namespace: &#123;&#125;&#125;,</span><br><span class="line">			ConfigTypesUpdated: <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">struct</span>&#123;&#125;&#123;schemas.ServiceEntry.Type: &#123;&#125;&#125;,</span><br><span class="line">		&#125;</span><br><span class="line">		out.ConfigUpdate(pushReq)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 往注册中心添加Service变更处理器</span></span><br><span class="line">	ctl.AppendServiceHandler(serviceHandler)</span><br><span class="line">	instanceHandler := <span class="function"><span class="keyword">func</span><span class="params">(si *model.ServiceInstance, _ model.Event)</span></span> &#123;</span><br><span class="line">		out.ConfigUpdate(&amp;model.PushRequest&#123;</span><br><span class="line">			Full:              <span class="literal">true</span>,</span><br><span class="line">			NamespacesUpdated: <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">struct</span>&#123;&#125;&#123;si.Service.Attributes.Namespace: &#123;&#125;&#125;,</span><br><span class="line">			ConfigTypesUpdated: <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">struct</span>&#123;&#125;&#123;schemas.ServiceEntry.Type: &#123;&#125;&#125;,</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">	ctl.AppendInstanceHandler(instanceHandler)</span><br><span class="line">	configHandler := <span class="function"><span class="keyword">func</span><span class="params">(c model.Config, _ model.Event)</span></span> &#123;</span><br><span class="line">		pushReq := &amp;model.PushRequest&#123;</span><br><span class="line">			Full:               <span class="literal">true</span>,</span><br><span class="line">			ConfigTypesUpdated: <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">struct</span>&#123;&#125;&#123;c.Type: &#123;&#125;&#125;,</span><br><span class="line">		&#125;</span><br><span class="line">		out.ConfigUpdate(pushReq)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 往配置中心添加配置变更处理器</span></span><br><span class="line">	<span class="keyword">for</span> _, descriptor := <span class="keyword">range</span> schemas.Istio &#123;</span><br><span class="line">		configCache.RegisterEventHandler(descriptor.Type, configHandler)</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="初始化更新下发流程"><a href="#初始化更新下发流程" class="headerlink" title="初始化更新下发流程"></a>初始化更新下发流程</h4><p>创建完 <code>EnvoyXdsServer</code>后，执行其<code>Start</code>方法，开启<code>push</code>通道处理流程：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *DiscoveryServer)</span> <span class="title">Start</span><span class="params">(stopCh &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">   <span class="comment">// 接收 配置中心、注册中心的配置变更</span></span><br><span class="line">	<span class="keyword">go</span> s.handleUpdates(stopCh)</span><br><span class="line">	<span class="comment">// 周期性刷新Metrics信息</span></span><br><span class="line">	<span class="keyword">go</span> s.periodicRefreshMetrics(stopCh)</span><br><span class="line">	<span class="comment">// 往下发送变更</span></span><br><span class="line">	<span class="keyword">go</span> s.sendPushes(stopCh)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先，先来看处理变更流程：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *DiscoveryServer)</span> <span class="title">handleUpdates</span><span class="params">(stopCh &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">    <span class="comment">// pushChannel接收上层配置中心、注册中心的更新</span></span><br><span class="line">	debounce(s.pushChannel, stopCh, s.Push)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">debounce</span><span class="params">(ch <span class="keyword">chan</span> *model.PushRequest, stopCh &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, pushFn <span class="keyword">func</span>(req *model.PushRequest)</span>)</span> &#123;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">	<span class="keyword">var</span> req *model.PushRequest</span><br><span class="line">	free := <span class="literal">true</span></span><br><span class="line">	freeCh := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</span><br><span class="line">	push := <span class="function"><span class="keyword">func</span><span class="params">(req *model.PushRequest)</span></span> &#123;</span><br><span class="line">		pushFn(req)</span><br><span class="line">		freeCh &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	pushWorker := <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">	   <span class="comment">// 距离上一次开始防抖动时间开始</span></span><br><span class="line">		eventDelay := time.Since(startDebounce)</span><br><span class="line">		<span class="comment">// 距离上次配置更新间隔时间</span></span><br><span class="line">		quietTime := time.Since(lastConfigUpdateTime)</span><br><span class="line">      <span class="comment">// 大于 10s，100ms</span></span><br><span class="line">		<span class="keyword">if</span> eventDelay &gt;= DebounceMax || quietTime &gt;= DebounceAfter &#123;</span><br><span class="line">			<span class="keyword">if</span> req != <span class="literal">nil</span> &#123;</span><br><span class="line">			   <span class="comment">// ... 打印下发信息</span></span><br><span class="line">				free = <span class="literal">false</span></span><br><span class="line">				<span class="keyword">go</span> push(req)</span><br><span class="line">				req = <span class="literal">nil</span></span><br><span class="line">				debouncedEvents = <span class="number">0</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			timeChan = time.After(DebounceAfter - quietTime)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-freeCh:</span><br><span class="line">			free = <span class="literal">true</span></span><br><span class="line">			pushWorker()</span><br><span class="line">		<span class="keyword">case</span> r := &lt;-ch:</span><br><span class="line">			<span class="comment">// ... 对于EDS而言，如果未配置防抖动，且不是全局更新，则立即下发     </span></span><br><span class="line">			lastConfigUpdateTime = time.Now()</span><br><span class="line">			<span class="comment">// 第一次更新事件</span></span><br><span class="line">			<span class="keyword">if</span> debouncedEvents == <span class="number">0</span> &#123;</span><br><span class="line">				timeChan = time.After(DebounceAfter)</span><br><span class="line">				startDebounce = lastConfigUpdateTime</span><br><span class="line">			&#125;</span><br><span class="line">			debouncedEvents++</span><br><span class="line">            <span class="comment">// 合并变更</span></span><br><span class="line">			req = req.Merge(r)</span><br><span class="line">		<span class="keyword">case</span> &lt;-timeChan:</span><br><span class="line">		   <span class="comment">// 时间窗口到来时，下发更新</span></span><br><span class="line">			<span class="keyword">if</span> free &#123;</span><br><span class="line">				pushWorker()</span><br><span class="line">			&#125;</span><br><span class="line">		<span class="keyword">case</span> &lt;-stopCh:</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>处理变更处理流程是一个<strong>防抖动</strong>的设计，处理流程大致如下：</p>
+<ol>
+<li>当 <code>配置中心</code> 或者 <code>注册中心</code> 有变更时 会发送到 <strong>pushChannel</strong>；</li>
+<li>每个抖动窗口（默认 100ms，<strong>DebounceAfter</strong>）第一次接收更新，设置到期 <code>timer</code>，后续不断接收更新，并合并更新；</li>
+<li>当抖动窗口期到期时则调用<code>pushWorker</code>下发更新；</li>
+<li>另外通过 变量<code>free</code>和<code>freeCh</code>来防止上一次没下发完后一次就开始了。</li>
+</ol>
+<p>合并请求主要内容如下（<code>push_context.go/L201</code>）：</p>
+<ul>
+<li>如果任意一个更新是全局 <strong>Push</strong>，则合并更新即为全局 <strong>Push</strong>；</li>
+<li>如果不是全局 <strong>Push</strong>，则合并 <strong>EdsUpdates</strong>信息，标识哪些 <strong>Service</strong> 需要更新；</li>
+<li>合并需要更新的目标命名空间；</li>
+<li>合并需要更新的配置类型。</li>
+</ul>
+<p><code>pushWorker</code>最后调用的是 <code>EnvoyXdsServer</code>的<code>Push</code>方法：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *DiscoveryServer)</span> <span class="title">Push</span><span class="params">(req *model.PushRequest)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> !req.Full &#123;</span><br><span class="line">	   <span class="comment">// 部分下发，只下发EDS</span></span><br><span class="line">		req.Push = s.globalPushContext()</span><br><span class="line">		<span class="keyword">go</span> s.AdsPushAll(versionInfo(), req)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	oldPushContext := s.globalPushContext()</span><br><span class="line">	<span class="keyword">if</span> oldPushContext != <span class="literal">nil</span> &#123;</span><br><span class="line">		oldPushContext.OnConfigChange()</span><br><span class="line">	&#125;</span><br><span class="line">	t0 := time.Now()</span><br><span class="line">	<span class="comment">// 创建新的PushContext，并基于已有PushContext和请求以及环境初始化新的PushContext</span></span><br><span class="line">	push := model.NewPushContext()</span><br><span class="line">	push.InitContext(s.Env, oldPushContext, req)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 根据最新的push信息，更新本地缓存</span></span><br><span class="line">	<span class="keyword">if</span> err := s.updateServiceShards(push); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	s.updateMutex.Lock()</span><br><span class="line">	s.Env.PushContext = push</span><br><span class="line">	s.updateMutex.Unlock()</span><br><span class="line">  <span class="comment">// 生成版本号</span></span><br><span class="line">	versionLocal := time.Now().Format(time.RFC3339) + <span class="string">"/"</span> + strconv.FormatUint(versionNum.Load(), <span class="number">10</span>)</span><br><span class="line">	versionNum.Inc()</span><br><span class="line">	initContextTime := time.Since(t0)</span><br><span class="line">	versionMutex.Lock()</span><br><span class="line">	version = versionLocal</span><br><span class="line">	versionMutex.Unlock()</span><br><span class="line">	req.Push = push</span><br><span class="line">	<span class="keyword">go</span> s.AdsPushAll(versionLocal, req)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>总结其执行流程如下：</p>
+<ol>
+<li>若部分更新即只有EDS更新，则异步调用<code>AdsPushAll</code>下发；</li>
+<li>若全局更新，首先创建出初始化新的Push上下文 <code>PushContext</code>（包含全局信息）；</li>
+<li>根据最新的Push上下文更新本地的<code>IstioEndpoint</code>缓存；</li>
+<li>生成新的版本号；</li>
+<li>最后异步执行 <code>AdsPushAl</code> 下发。</li>
+</ol>
+<p>继续跟进<code>AdsPushAll</code>方法中：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *DiscoveryServer)</span> <span class="title">AdsPushAll</span><span class="params">(version <span class="keyword">string</span>, req *model.PushRequest)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> !req.Full &#123;</span><br><span class="line">	   <span class="comment">// 增量eds更新下发，更新本地缓存。</span></span><br><span class="line">		s.edsIncremental(version, req.Push, req)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	cMap := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">string</span>]*EdsCluster, <span class="built_in">len</span>(edsClusters))</span><br><span class="line">	<span class="keyword">for</span> k, v := <span class="keyword">range</span> edsClusters &#123;</span><br><span class="line">		cMap[k] = v</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> clusterName, edsCluster := <span class="keyword">range</span> cMap &#123;</span><br><span class="line">	   <span class="comment">// 更新本地缓存</span></span><br><span class="line">		s.updateCluster(req.Push, clusterName, edsCluster)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 下发将所有与DiscoveryServer建立的链接XdsConnection和下发请求组队，放入 pushQueue。s.pushQueue.Enqueue(p, req)</span></span><br><span class="line">	s.startPush(req)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>AdsPushAll</code>首先会根据下发请求更新本地缓存，然后再执行 <code>startPush</code> 进行下发。<code>startPush</code>将所有与DiscoveryServer建立的链接XdsConnection和下发请求组队，放入 pushQueue</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *DiscoveryServer)</span> <span class="title">startPush</span><span class="params">(req *model.PushRequest)</span></span> &#123;</span><br><span class="line">    pending := []*XdsConnection&#123;&#125;</span><br><span class="line">	<span class="keyword">for</span> _, v := <span class="keyword">range</span> adsClients &#123;</span><br><span class="line">		pending = <span class="built_in">append</span>(pending, v)</span><br><span class="line">	&#125;</span><br><span class="line">	req.Start = time.Now()</span><br><span class="line">	<span class="keyword">for</span> _, p := <span class="keyword">range</span> pending &#123;</span><br><span class="line">		s.pushQueue.Enqueue(p, req)</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p><code>discovery.go/doSendPushes</code>方法会阻塞等待pushQueue的内容：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">doSendPushes</span><span class="params">(stopCh &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, semaphore <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, queue *PushQueue)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-stopCh:</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">		     <span class="comment">// 控制下发的并发度</span></span><br><span class="line">			semaphore &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">             <span class="comment">// 阻塞等待下发			</span></span><br><span class="line">			client, info := queue.Dequeue()</span><br><span class="line">			doneFunc := <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">				queue.MarkDone(client)</span><br><span class="line">				&lt;-semaphore</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">			   <span class="comment">// ...</span></span><br><span class="line">				<span class="keyword">select</span> &#123;</span><br><span class="line">				<span class="comment">// 向每个链接的下发通道中发送事件</span></span><br><span class="line">				<span class="keyword">case</span> client.pushChannel &lt;- &amp;XdsEvent&#123;</span><br><span class="line">					push:               info.Push,</span><br><span class="line">					edsUpdatedServices: edsUpdates,</span><br><span class="line">					done:               doneFunc,</span><br><span class="line">					start:              info.Start,</span><br><span class="line">					namespacesUpdated:  info.NamespacesUpdated,</span><br><span class="line">					configTypesUpdated: info.ConfigTypesUpdated,</span><br><span class="line">					noncePrefix:        info.Push.Version,</span><br><span class="line">				&#125;:</span><br><span class="line">					<span class="keyword">return</span></span><br><span class="line">				<span class="keyword">case</span> &lt;-client.stream.Context().Done(): <span class="comment">// 连接断开					doneFunc()</span></span><br><span class="line">				&#125;</span><br><span class="line">			&#125;()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="初始化集群注册器"><a href="#初始化集群注册器" class="headerlink" title="初始化集群注册器"></a>初始化集群注册器</h3><p><code>Pilot</code> 支持创建多集群注册中心，通过配置<code>istio/multiCluster=true</code> <strong>Secrets</strong> 类型，可以<code>Pilot</code>对接多<code>k8s</code>集群。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">StartSecretController</span><span class="params">(k8s kubernetes.Interface,</span></span></span><br><span class="line"><span class="function"><span class="params">    // ...</span></span></span><br><span class="line"><span class="function"><span class="params">	namespace <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	stopCh := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">	clusterStore := newClustersStore()</span><br><span class="line">	controller := NewController(k8s, namespace, clusterStore, addCallback, removeCallback)</span><br><span class="line">	<span class="keyword">go</span> controller.Run(stopCh)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewController</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">	kubeclientset kubernetes.Interface,</span></span></span><br><span class="line"><span class="function"><span class="params">	namespace <span class="keyword">string</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">	cs *ClusterStore,</span></span></span><br><span class="line"><span class="function"><span class="params">	addCallback addSecretCallback,</span></span></span><br><span class="line"><span class="function"><span class="params">	removeCallback removeSecretCallback)</span> *<span class="title">Controller</span></span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建Secret的Informer，监听 带`istio/multiCluster=true`d的Secret资源</span></span><br><span class="line">	secretsInformer := cache.NewSharedIndexInformer(</span><br><span class="line">		&amp;cache.ListWatch&#123;</span><br><span class="line">			ListFunc: <span class="function"><span class="keyword">func</span><span class="params">(opts meta_v1.ListOptions)</span> <span class="params">(runtime.Object, error)</span></span> &#123;</span><br><span class="line">				opts.LabelSelector = MultiClusterSecretLabel + <span class="string">"=true"</span></span><br><span class="line">				<span class="keyword">return</span> kubeclientset.CoreV1().Secrets(namespace).List(opts)</span><br><span class="line">			&#125;,</span><br><span class="line">			WatchFunc: <span class="function"><span class="keyword">func</span><span class="params">(opts meta_v1.ListOptions)</span> <span class="params">(watch.Interface, error)</span></span> &#123;</span><br><span class="line">				opts.LabelSelector = MultiClusterSecretLabel + <span class="string">"=true"</span></span><br><span class="line">				<span class="keyword">return</span> kubeclientset.CoreV1().Secrets(namespace).Watch(opts)</span><br><span class="line">			&#125;,</span><br><span class="line">		&#125;,</span><br><span class="line">		&amp;corev1.Secret&#123;&#125;, <span class="number">0</span>, cache.Indexers&#123;&#125;,</span><br><span class="line">	)</span><br><span class="line"></span><br><span class="line">	controller := &amp;Controller&#123;</span><br><span class="line">		<span class="comment">//...</span></span><br><span class="line">		queue:          queue,</span><br><span class="line">		addCallback:    addCallback,</span><br><span class="line">		removeCallback: removeCallback,</span><br><span class="line">	&#125;</span><br><span class="line">	secretsInformer.AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">		AddFunc: <span class="function"><span class="keyword">func</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">			key, err := cache.MetaNamespaceKeyFunc(obj)</span><br><span class="line">			queue.Add(key)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// ...</span></span><br><span class="line">	&#125;)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> controller</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Controller)</span> <span class="title">Run</span><span class="params">(stopCh &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	<span class="keyword">go</span> c.informer.Run(stopCh)</span><br><span class="line">	wait.Until(c.runWorker, <span class="number">5</span>*time.Second, stopCh)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 创建集群</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Controller)</span> <span class="title">addMemberCluster</span><span class="params">(secretName <span class="keyword">string</span>, s *corev1.Secret)</span></span> &#123;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>创建跨集群注册服务流程如下：</p>
+<ol>
+<li>向当前对接k8s集群添加 带有<code>istio/multiCluster=true</code>的<strong>Secret</strong>资源；</li>
+<li><strong>Pilot</strong> 获取此配置后，解析配置，并根据配置创建对应<code>k8s</code>集群的<code>client</code>，并基于此创建相应的注册器。</li>
+</ol>
+<p>初始化完所有组件后，调用<code>Server.Start</code>方法执行之前注入的<code>StartFunc</code>。<br>到此，<strong>Pilot</strong> 的初始化过程就结束了。</p>
+<h3 id="初始化-ControlZ"><a href="#初始化-ControlZ" class="headerlink" title="初始化 ControlZ"></a>初始化 <code>ControlZ</code></h3><p><code>Pilot</code> 里挺有意思的一个设计。作用是开启一个端口向外暴露运维查询界面：<a href="https://istio.io/docs/ops/diagnostic-tools/controlz/" target="_blank" rel="noopener">官方介绍</a>。<br>目前支持：</p>
+<ul>
+<li><strong>ScopeTopic：</strong> 查询和修改日志级别</li>
+<li><strong>MemTopic：</strong> 查询内存统计、强制GC</li>
+<li><strong>ProcTopic：</strong>查询进程执行情况：进程ID、协程数、hostName等</li>
+<li><strong>ArgsTopic：</strong>启动参数</li>
+<li><strong>MetricsTopic：</strong> metric信息</li>
+<li>…</li>
+</ul>
+<p>同时该机制支持组件拓展，比如配置服务可以通过该机制对外暴露接口查询信息。目前，<code>McpController</code>以及<code>sseMcpController</code>（组合服务MCP控制器）也是通过它来暴露查询信息接口的：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *configzTopic)</span> <span class="title">Activate</span><span class="params">(context fw.TopicContext)</span></span> &#123;</span><br><span class="line">	l := template.Must(context.Layout().Clone())</span><br><span class="line">	c.tmpl = template.Must(l.Parse(<span class="keyword">string</span>(assets.MustAsset(<span class="string">"templates/config.html"</span>))))</span><br><span class="line">	_ = context.HTMLRouter().StrictSlash(<span class="literal">true</span>).NewRoute().Path(<span class="string">"/"</span>).HandlerFunc(<span class="function"><span class="keyword">func</span><span class="params">(w http.ResponseWriter, req *http.Request)</span></span> &#123;</span><br><span class="line">		d := c.collectData()</span><br><span class="line">		fw.RenderHTML(w, c.tmpl, d)</span><br><span class="line">	&#125;)</span><br><span class="line">	_ = context.JSONRouter().StrictSlash(<span class="literal">true</span>).NewRoute().Methods(<span class="string">"GET"</span>).Path(<span class="string">"/"</span>).HandlerFunc(<span class="function"><span class="keyword">func</span><span class="params">(w http.ResponseWriter, req *http.Request)</span></span> &#123;</span><br><span class="line">		d := c.collectData()</span><br><span class="line">		fw.RenderJSON(w, http.StatusOK, d)</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *configzTopic)</span> <span class="title">collectData</span><span class="params">()</span> *<span class="title">data</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;data&#123;</span><br><span class="line">		ID:             c.topic.ID(),</span><br><span class="line">		Metadata:       c.topic.Metadata(), <span class="comment">// mcp元数据</span></span><br><span class="line">		Collections:    c.topic.Collections(), <span class="comment">// mcp请求的资源集合包含版本信息</span></span><br><span class="line">		LatestRequests: c.topic.SnapshotRequestInfo(), <span class="comment">// 最近一组已知请求结果的快照信息</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>CtrolZ</code>提供 接口<code>ctrlz.RegisterTopic(CreateTopic(topic)</code>来拓展信息暴露</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>总结启动过程大致如下：<br><img src="media/15762032316330/15766110366375.jpg" alt=""></p>
+<ol>
+<li>根据参数创建 <code>k8s</code> Client；</li>
+<li>从配置地址中获取 <strong>mesh</strong> 配置，并监听文件变更；</li>
+<li>从配置地址获取 <strong>mesh</strong> 网络配置，并监听变更；</li>
+<li>初始化配置控制器，支持文件配置、k8s配置、MCP协议配置服务；</li>
+<li>初始化注册服务控制器，支持k8s、consul、实现MCP协议的拓展注册中心并且将配置控制器也包装成注册中心；</li>
+<li>初始化发现服务，聚合之前初始化的控制器对外提供服务，包括http查询服务以及对<code>sidecar</code>服务的grpc服务；</li>
+<li>初始化集群注册服务，使得pilot可以对接多k8s集群；</li>
+<li></li>
+<li>初始化所有组件后，调用初始化过程中添加的<code>StartFunc</code>开启所有组件的执行流程。</li>
+</ol>
+<h2 id="信息拉取与下发"><a href="#信息拉取与下发" class="headerlink" title="信息拉取与下发"></a>信息拉取与下发</h2><p>上一节介绍过，<code>DiscoveryServer.StreamAggregatedResources</code>用来接收客户端请求。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *DiscoveryServer)</span> <span class="title">StreamAggregatedResources</span><span class="params">(stream ads.AggregatedDiscoveryService_StreamAggregatedResourcesServer)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="comment">// 从grpc stream上下文中获取 连接信</span></span><br><span class="line">    peerInfo, ok := peer.FromContext(stream.Context())</span><br><span class="line">    <span class="comment">//  初始化Push上下文，若是第一次，则会根据之前构建的Enviroment属性里面的 注册服务和配置服务 的内容初始化下全局的缓存信息</span></span><br><span class="line">    err := s.globalPushContext().InitContext(s.Env, <span class="literal">nil</span>, <span class="literal">nil</span>)</span><br><span class="line">    <span class="comment">// 将每个sidecar对应stream、节点地址包装成XdsConnection，其会在下发时被使用</span></span><br><span class="line">    con := newXdsConnection(peerAddr, stream)</span><br><span class="line">    <span class="comment">// 开启 异步接收代理（sidecar、gateray）通过Stream发送过来的信息</span></span><br><span class="line">    <span class="keyword">go</span> receiveThread(con, reqChannel, &amp;receiveError)</span><br><span class="line">    <span class="comment">// 处理流程的核心部分：</span></span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="comment">// 对于来自于 Sidecar的请求</span></span><br><span class="line">		<span class="keyword">case</span> discReq, ok := &lt;-reqChannel:</span><br><span class="line">		   <span class="comment">// 如果是第一次，代理会带上其自身节点信息 Node属性</span></span><br><span class="line">		  <span class="comment">// 使用解析出来的信息填充 XdsConnection</span></span><br><span class="line">			<span class="keyword">if</span> discReq.Node != <span class="literal">nil</span> &amp;&amp; discReq.Node.Id != <span class="string">""</span> &#123;</span><br><span class="line">				err = s.initConnectionNode(discReq.Node, con)</span><br><span class="line">				<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">					<span class="keyword">return</span> err</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">switch</span> discReq.TypeUrl &#123;</span><br><span class="line">    			<span class="keyword">case</span> ClusterType:</span><br><span class="line">    				con.CDSWatch = <span class="literal">true</span></span><br><span class="line">    				<span class="comment">// 首先，跟据节点信息 构建envoy.Cluster信息</span></span><br><span class="line">    				<span class="comment">// 跟据Cluster构建DiscoveryResponse通过Stream返回代理</span></span><br><span class="line">    				s.pushCds(con, s.globalPushContext(), versionInfo())</span><br><span class="line">    			<span class="keyword">case</span> ListenerType:</span><br><span class="line">        			con.LDSWatch = <span class="literal">true</span></span><br><span class="line">        			<span class="comment">// 构建Listener信息</span></span><br><span class="line">        			<span class="comment">// 构建DiscoveryResponse通过Stream返回代理</span></span><br><span class="line">        			err := s.pushLds(con, s.globalPushContext(), versionInfo())</span><br><span class="line">        		<span class="keyword">case</span> RouteType:</span><br><span class="line">        		  <span class="comment">//...</span></span><br><span class="line">        		  err := s.pushRoute(con, s.globalPushContext(), versionInfo())</span><br><span class="line">        		<span class="keyword">case</span> EndpointType:</span><br><span class="line">        		  clusters := discReq.GetResourceNames()</span><br><span class="line">        		  <span class="keyword">for</span> _, cn := <span class="keyword">range</span> con.Clusters &#123;</span><br><span class="line">        		      s.removeEdsCon(cn, con.ConID)</span><br><span class="line">        		  &#125;</span><br><span class="line">        		  <span class="keyword">for</span> _, cn := <span class="keyword">range</span> clusters &#123;</span><br><span class="line">        		      s.getOrAddEdsCluster(cn, con.ConID, con)</span><br><span class="line">        		  &#125;</span><br><span class="line">        		  err := s.pushEds(s.globalPushContext(), con, versionInfo(), <span class="literal">nil</span>)</span><br><span class="line">        	&#125;</span><br><span class="line">        	<span class="keyword">if</span> !con.added &#123;</span><br><span class="line">				con.added = <span class="literal">true</span></span><br><span class="line">				s.addCon(con.ConID, con)</span><br><span class="line">				<span class="keyword">defer</span> s.removeCon(con.ConID, con)</span><br><span class="line">			&#125;</span><br><span class="line">        <span class="keyword">case</span> pushEv := &lt;-con.pushChannel:</span><br><span class="line">            <span class="comment">// 接收更新下发</span></span><br><span class="line">            err := s.pushConnection(con, pushEv)</span><br><span class="line">            pushEv.done()</span><br></pre></td></tr></table></figure>
+<p>总结其实现流程如下：</p>
+<ol>
+<li>首先 <code>StreamAggregatedResources</code> 是代理（Envoy， 可以是Sidecar角色也可以是Gateway角色）的入口，接收代理的Grpc Stream；</li>
+<li>如果全局PushContext未初始化好，则进行一次初始化；</li>
+<li>根据Stream信息构建 <code>XdsConnection</code></li>
+<li>构建一个协程用于接收代理的请求，当请求到达时，丢进reqChannel中；</li>
+<li>构建一个循环，同时接收代理的请求和要下发给代理的XdsEvent；</li>
+<li><strong>对于请求：</strong><ul>
+<li>当是首次接收代理的请求时，代理请求中会携带<code>Node</code>信息，Pilot会解析此信息并根据<code>Controller</code>查询相关信息来填充 <code>XdsConnection</code> 信息(代理的类型（sidecar\gateway）、ip地址、版本号、节点标签、关联的<code>ServiceInstance</code>)；</li>
+<li>其后根据请求的<code>TypeUrl</code>判断请求类型进行相应处理；</li>
+<li>对于每种类型请求<ul>
+<li>会将对应的<code>XdsConnection.XXXWatch</code>置为True，表示代理对这种类型数据敏感，当有这种类型数据变更时，下发给它；</li>
+<li>同时需要注意的是，下发的时候会带上版本号（<code>VersionInfo</code>）；</li>
+<li>根据 <code>XdsConnection</code> 信息构建相应类型数据；（<code>pushXds</code>）</li>
+<li>根据数据构建 <code>DiscoveryResponse</code>进行下发。</li>
+</ul>
+</li>
+<li>最后会将<code>XdsConnection</code> 添加到<code>DiscoveryServer</code>中。</li>
+</ul>
+</li>
+<li><strong>数据下发</strong>（之前提到：当信息变更时会捞出<code>DiscoveryServer</code>中保存的所有<code>XdsConnection</code>，然后往其<code>pushChannel</code>中发送<code>XdsEvent</code>）<ul>
+<li>数据下发接口最终会调用<code>pushConnection</code>方法，其处理流程大致如下：<ul>
+<li>如果只是Eds信息更新，则只下发<code>pushEds</code>；</li>
+<li>如不是，则会依次下发 <code>CDS</code>、<code>EDS</code>、<code>LDS</code>、<code>Route</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="拓展性"><a href="#拓展性" class="headerlink" title="拓展性"></a>拓展性</h2><p>提到<code>Pilot</code>的拓展性，首先想到其支持对接实现<code>MCP</code>协议的配置中心和注册中心。下一章将首先介绍<code>MCP</code>协议，然后再结合<code>Galley</code>实例来讲解<code>MCP</code>的工作原理。<a href="https://github.com/istio/api/tree/master/mcp?spm=a2c4e.10696291.0.0.3b0419a4nAPVr2" target="_blank" rel="noopener">官方文档</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/istio/" rel="tag"># istio</a>
+          
+            <a href="/tags/servicemesh/" rel="tag"># servicemesh</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/10/12/istio/1.istio-%E7%AE%80%E4%BB%8B/" rel="next" title="Istio 简介">
+                <i class="fa fa-chevron-left"></i> Istio 简介
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/10/15/istio/3.istio-mcp&galley/" rel="prev" title="Istio MCP&Galley">
+                Istio MCP&Galley <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Pilot"><span class="nav-number">1.</span> <span class="nav-text">Pilot</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#整体架构"><span class="nav-number">1.1.</span> <span class="nav-text">整体架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动分析"><span class="nav-number">1.2.</span> <span class="nav-text">启动分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化Mesh配置"><span class="nav-number">1.2.1.</span> <span class="nav-text">初始化Mesh配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化配置控制器"><span class="nav-number">1.2.2.</span> <span class="nav-text">初始化配置控制器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化服务控制器"><span class="nav-number">1.2.3.</span> <span class="nav-text">初始化服务控制器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化发现服务"><span class="nav-number">1.2.4.</span> <span class="nav-text">初始化发现服务</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#初始化更新下发流程"><span class="nav-number">1.2.4.1.</span> <span class="nav-text">初始化更新下发流程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化集群注册器"><span class="nav-number">1.2.5.</span> <span class="nav-text">初始化集群注册器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化-ControlZ"><span class="nav-number">1.2.6.</span> <span class="nav-text">初始化 ControlZ</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">1.2.7.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#信息拉取与下发"><span class="nav-number">1.3.</span> <span class="nav-text">信息拉取与下发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#拓展性"><span class="nav-number">1.4.</span> <span class="nav-text">拓展性</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

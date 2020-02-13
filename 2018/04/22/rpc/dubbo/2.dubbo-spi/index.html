@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="rpc,dubbo," />
+
+
+<meta name="description" content="SPI拓展机制（IOC、AOP、自适应拓展）Dubbo 官方文档 拓展点加载 介绍了Dubbo的SPI拓展机制，总结起来如下：   是JDK SPI的加强版： 只有使用的时候才会实例化拓展点，而摒弃JDK SPI一次性实例化所有拓展点 增加了对IOC、AOP的支持   拓展的方法：在扩展类的 jar 包内，放置扩展点配置文件 META-INF&#x2F;dubbo&#x2F;接口全限定名，内容为：配置名&#x3D;扩展实现类全">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Dubbo SPI拓展机制">
+<meta property="og:url" content="https://dorgenjones.github.io/2018/04/22/rpc/dubbo/2.dubbo-spi/index.html">
+<meta property="og:site_name" content="Zamperini">
+<meta property="og:description" content="SPI拓展机制（IOC、AOP、自适应拓展）Dubbo 官方文档 拓展点加载 介绍了Dubbo的SPI拓展机制，总结起来如下：   是JDK SPI的加强版： 只有使用的时候才会实例化拓展点，而摒弃JDK SPI一次性实例化所有拓展点 增加了对IOC、AOP的支持   拓展的方法：在扩展类的 jar 包内，放置扩展点配置文件 META-INF&#x2F;dubbo&#x2F;接口全限定名，内容为：配置名&#x3D;扩展实现类全">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-04-21T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-02-13T11:06:46.053Z">
+<meta property="article:author" content="Zamperini">
+<meta property="article:tag" content="rpc">
+<meta property="article:tag" content="dubbo">
+<meta name="twitter:card" content="summary">
+
+
+
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/2018/04/22/rpc/dubbo/2.dubbo-spi/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>Dubbo SPI拓展机制 | Zamperini</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zamperini</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2018/04/22/rpc/dubbo/2.dubbo-spi/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Dubbo SPI拓展机制</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-22T00:00:00+08:00">2018-04-22</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/dubbo/" itemprop="url" rel="index"><span itemprop="name">dubbo</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="SPI拓展机制（IOC、AOP、自适应拓展）"><a href="#SPI拓展机制（IOC、AOP、自适应拓展）" class="headerlink" title="SPI拓展机制（IOC、AOP、自适应拓展）"></a>SPI拓展机制（IOC、AOP、自适应拓展）</h1><p>Dubbo 官方文档 <a href="http://dubbo.io/books/dubbo-dev-book/SPI.html" target="_blank" rel="noopener">拓展点加载</a> 介绍了Dubbo的<strong>SPI拓展机制</strong>，总结起来如下：</p>
+<blockquote>
+<ol>
+<li>是<code>JDK SPI</code>的加强版：<ul>
+<li>只有使用的时候才会实例化拓展点，而摒弃<code>JDK SPI</code>一次性实例化所有拓展点</li>
+<li>增加了对IOC、AOP的支持</li>
+</ul>
+</li>
+<li>拓展的方法：在扩展类的 jar 包内，放置扩展点配置文件 <code>META-INF/dubbo/接口全限定名</code>，内容为：配置名=扩展实现类全限定名，多个实现类用换行符分隔。即可被Dubbo自动加载。</li>
+<li>扩展点的特性：<ul>
+<li>扩展点自动装配(<strong>IOC</strong>)：加载扩展点时，扩展点实现类的成员如果为其它扩展点类型，在会自动注入依赖的扩展点；</li>
+<li>扩展点自动包装：<strong>AOP</strong>的一种实现方式，为拓展点自动添加一层包装，将某些可拓展的共有逻辑放在包装类(Wrapper)中。调用时，会先调用包装类的逻辑再调用拓展点的内容；</li>
+<li>扩展点<strong>自适应</strong>：在拓展点方法执行的时候，根据调用的参数(<strong>URL</strong>)决定调用的是哪个拓展点实现，而不会在初始化时就直接指定是哪个拓展点；</li>
+<li>扩展点自动激活：对于集合类拓展点，可以同时加载多个实现。自动激活可以简化配置，且可以编排它们的顺序。</li>
+</ul>
+</li>
+</ol>
+</blockquote>
+<p><code>ExtensionLoader</code>是实现其SPI拓展机制的关键类，Dubbo会为每种类型拓展点都创建有一个<code>ExtensionLoader</code>实例:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">ExtensionLoader&lt;T&gt; <span class="title">getExtensionLoader</span><span class="params">(Class&lt;T&gt; type)</span> </span>&#123;</span><br><span class="line">   <span class="comment">//首先从缓存里获取</span></span><br><span class="line">   ExtensionLoader&lt;T&gt; loader = (ExtensionLoader&lt;T&gt;) EXTENSION_LOADERS.get(type);</span><br><span class="line">   <span class="keyword">if</span> (loader == <span class="keyword">null</span>) &#123;</span><br><span class="line">       EXTENSION_LOADERS.putIfAbsent(type, <span class="keyword">new</span> ExtensionLoader&lt;T&gt;(type));</span><br><span class="line">       loader = (ExtensionLoader&lt;T&gt;) EXTENSION_LOADERS.get(type);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> loader;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//私有构造函数</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="title">ExtensionLoader</span><span class="params">(Class&lt;?&gt; type)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">this</span>.type = type;</span><br><span class="line">   objectFactory = (type == ExtensionFactory.class ? null : ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其最主要的属性如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//所处理的拓展点类型（接口类型）</span></span><br><span class="line">Class&lt;?&gt; type;</span><br><span class="line"><span class="comment">//拓展点工厂，用于在拓展点注入属性时获取属性的实例（从SPI中获取或者从Spring的上下文中获取）</span></span><br><span class="line">ExtensionFactory objectFactory;</span><br><span class="line"><span class="comment">//拓展点类和名称的映射</span></span><br><span class="line">ConcurrentMap&lt;Class&lt;?&gt;, String&gt; cachedNames = <span class="keyword">new</span> ConcurrentHashMap&lt;Class&lt;?&gt;, String&gt;();</span><br><span class="line"><span class="comment">// 名称和类的映射，类可能有多个名称</span></span><br><span class="line">Holder&lt;Map&lt;String, Class&lt;?&gt;&gt;&gt; cachedClasses = <span class="keyword">new</span> Holder&lt;Map&lt;String, Class&lt;?&gt;&gt;&gt;();</span><br><span class="line"><span class="comment">// 名称与激活拓展点注解的映射。</span></span><br><span class="line">Map&lt;String, Activate&gt; cachedActivates = <span class="keyword">new</span> ConcurrentHashMap&lt;String, Activate&gt;();</span><br><span class="line"><span class="comment">//名称与拓展点实例的映射，一般一个拓展点只会有一个实例</span></span><br><span class="line">ConcurrentMap&lt;String, Holder&lt;Object&gt;&gt; cachedInstances = <span class="keyword">new</span></span><br><span class="line">ConcurrentHashMap&lt;String, Holder&lt;Object&gt;&gt;();</span><br><span class="line"><span class="comment">// 自适应拓展点实例</span></span><br><span class="line">Holder&lt;Object&gt; cachedAdaptiveInstance = <span class="keyword">new</span> Holder&lt;Object&gt;();</span><br><span class="line"><span class="comment">//自实例拓展点类型</span></span><br><span class="line">Class&lt;?&gt; cachedAdaptiveClass = <span class="keyword">null</span>;</span><br><span class="line">String cachedDefaultName;</span><br><span class="line"><span class="comment">//包装类集合 AOP</span></span><br><span class="line">Set&lt;Class&lt;?&gt;&gt; cachedWrapperClasses;</span><br></pre></td></tr></table></figure>
+
+<p>对外暴露的最主要的方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//获取自适应拓展</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">getAdaptiveExtension</span><span class="params">()</span></span>;</span><br><span class="line"><span class="comment">//根据name获取特定的拓展实例</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">getExtension</span><span class="params">(String name)</span></span>;</span><br><span class="line"><span class="comment">// 根据条件获取当前扩展可自动激活的实现</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> List&lt;T&gt; <span class="title">getActivateExtension</span><span class="params">(URL url, String[] values, String group)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>Dubbo初始化时，获取拓展点时一般是调用<code>getActivateExtension</code>获取自适应拓展点，然后在运行时调用方法时，根据实时的参数<code>URL</code>确定拓展点实例的name，调用<code>getExtension(name)</code>获取实例。下面我们依次看这三个实现方法：</p>
+<h3 id="getAdaptiveExtension"><a href="#getAdaptiveExtension" class="headerlink" title="getAdaptiveExtension"></a>getAdaptiveExtension</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">getAdaptiveExtension</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   Object instance = cachedAdaptiveInstance.get();</span><br><span class="line">   <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">       <span class="keyword">if</span> (createAdaptiveInstanceError == <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">synchronized</span> (cachedAdaptiveInstance) &#123;</span><br><span class="line">               instance = cachedAdaptiveInstance.get();</span><br><span class="line">               <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">                   <span class="keyword">try</span> &#123;</span><br><span class="line">                       <span class="comment">//没有时，创建</span></span><br><span class="line">                       instance = createAdaptiveExtension();</span><br><span class="line">                       cachedAdaptiveInstance.set(instance);</span><br><span class="line">                   &#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">                       ...</span><br><span class="line">                   &#125;</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">           ...</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> (T) instance;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> T <span class="title">createAdaptiveExtension</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">//先实例化自适应对象实例，后注入属性</span></span><br><span class="line">       <span class="keyword">return</span> injectExtension((T) getAdaptiveExtensionClass().newInstance());</span><br><span class="line">   &#125;...</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">private</span> Class&lt;?&gt; getAdaptiveExtensionClass() &#123;</span><br><span class="line">   <span class="comment">//加载所有type类型类</span></span><br><span class="line">   getExtensionClasses();</span><br><span class="line">   <span class="comment">//若有自适应类信息，则直接返回</span></span><br><span class="line">   <span class="keyword">if</span> (cachedAdaptiveClass != <span class="keyword">null</span>) &#123;</span><br><span class="line">       <span class="keyword">return</span> cachedAdaptiveClass;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">//没有时，自动生成自适应类(xxx$Adaptive)</span></span><br><span class="line">   <span class="keyword">return</span> cachedAdaptiveClass = createAdaptiveExtensionClass();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上文分析中有三个比较关键的方法<code>getExtensionClasses</code>、<code>createAdaptiveExtensionClass</code>、<code>injectExtension</code>。下面，我们重点来分析它们：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//最终会调用loadExtensionClasses来加载所有type类型的Class</span></span><br><span class="line">getExtensionClass(String name)</span><br><span class="line">    - getExtensionClasses().get(name)</span><br><span class="line">        - loadExtensionClasses()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">loadFile</span><span class="params">(Map&lt;String, Class&lt;?&gt;&gt; extensionClasses, String dir)</span> </span>&#123;</span><br><span class="line">  String fileName = dir + type.getName();</span><br><span class="line">  Enumeration&lt;java.net.URL&gt; urls;</span><br><span class="line">  ClassLoader classLoader = findClassLoader();</span><br><span class="line">  <span class="keyword">if</span> (classLoader != <span class="keyword">null</span>) &#123;</span><br><span class="line">      urls = classLoader.getResources(fileName);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      urls = ClassLoader.getSystemResources(fileName);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (urls == <span class="keyword">null</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">while</span> (urls.hasMoreElements()) &#123;</span><br><span class="line">      java.net.URL url = urls.nextElement();</span><br><span class="line">      BufferedReader reader = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> InputStreamReader(url.openStream(), <span class="string">"utf-8"</span>));</span><br><span class="line">      String line = <span class="keyword">null</span>;</span><br><span class="line">      <span class="keyword">while</span> ((line = reader.readLine()) != <span class="keyword">null</span>) &#123;</span><br><span class="line">          <span class="keyword">final</span> <span class="keyword">int</span> ci = line.indexOf(<span class="string">'#'</span>);</span><br><span class="line">          <span class="keyword">if</span> (ci &gt;= <span class="number">0</span>) line = line.substring(<span class="number">0</span>, ci);</span><br><span class="line">          line = line.trim();</span><br><span class="line">          <span class="keyword">if</span> (line.length() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">              String name = <span class="keyword">null</span>;</span><br><span class="line">              <span class="keyword">int</span> i = line.indexOf(<span class="string">'='</span>);</span><br><span class="line">              <span class="keyword">if</span> (i &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                  name = line.substring(<span class="number">0</span>, i).trim();</span><br><span class="line">                  line = line.substring(i + <span class="number">1</span>).trim();</span><br><span class="line">              &#125;</span><br><span class="line">              <span class="keyword">if</span> (line.length() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                  <span class="comment">//加载类</span></span><br><span class="line">                  Class&lt;?&gt; clazz = Class.forName(line, <span class="keyword">true</span>, classLoader);</span><br><span class="line">                  <span class="comment">//如果是自适应类，则设置</span></span><br><span class="line">                  <span class="keyword">if</span> (clazz.isAnnotationPresent(Adaptive<span class="class">.<span class="keyword">class</span>)) </span>&#123;</span><br><span class="line">                      <span class="keyword">if</span> (cachedAdaptiveClass == <span class="keyword">null</span>) &#123;</span><br><span class="line">                          cachedAdaptiveClass = clazz;</span><br><span class="line">                      &#125;...</span><br><span class="line">                  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                      <span class="keyword">try</span> &#123;</span><br><span class="line">                          <span class="comment">//如果有以type为入参的构造函数，则说明类是包装类，加入包装类缓存中</span></span><br><span class="line">                          clazz.getConstructor(type);</span><br><span class="line">                          Set&lt;Class&lt;?&gt;&gt; wrappers = cachedWrapperClasses;</span><br><span class="line">                          <span class="keyword">if</span> (wrappers == <span class="keyword">null</span>) &#123;</span><br><span class="line">                              cachedWrapperClasses = <span class="keyword">new</span> ConcurrentHashSet&lt;Class&lt;?&gt;&gt;();</span><br><span class="line">                              wrappers = cachedWrapperClasses;</span><br><span class="line">                          &#125;</span><br><span class="line">                          wrappers.add(clazz);</span><br><span class="line">                      &#125; <span class="keyword">catch</span> (NoSuchMethodException e) &#123;</span><br><span class="line">                          <span class="comment">//不是包装类时</span></span><br><span class="line">                          clazz.getConstructor();</span><br><span class="line">                          <span class="keyword">if</span> (name == <span class="keyword">null</span> || name.length() == <span class="number">0</span>) &#123;</span><br><span class="line">                              name = findAnnotationName(clazz);</span><br><span class="line">                              <span class="keyword">if</span> (name == <span class="keyword">null</span> || name.length() == <span class="number">0</span>) &#123;</span><br><span class="line">                                  <span class="keyword">if</span> (clazz.getSimpleName().length() &gt; type.getSimpleName().length()</span><br><span class="line">                                          &amp;&amp; clazz.getSimpleName().endsWith(type.getSimpleName())) &#123;</span><br><span class="line">                                      name = clazz.getSimpleName().substring(<span class="number">0</span>, clazz.getSimpleName().length() - type.getSimpleName().length()).toLowerCase();</span><br><span class="line">                                  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                                      <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"No such extension name for the class "</span> + clazz.getName() + <span class="string">" in the config "</span> + url);</span><br><span class="line">                                  &#125;</span><br><span class="line">                              &#125;</span><br><span class="line">                          &#125;</span><br><span class="line">                          String[] names = NAME_SEPARATOR.split(name);</span><br><span class="line">                          <span class="keyword">if</span> (names != <span class="keyword">null</span> &amp;&amp; names.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                              <span class="comment">//如果带有自动激活注解，则说明是自动激活类，缓存到...</span></span><br><span class="line">                              Activate activate = clazz.getAnnotation(Activate<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">                              <span class="keyword">if</span> (activate != <span class="keyword">null</span>) &#123;</span><br><span class="line">                                  cachedActivates.put(names[<span class="number">0</span>], activate);</span><br><span class="line">                              &#125;</span><br><span class="line">                              <span class="keyword">for</span> (String n : names) &#123;</span><br><span class="line">                                  <span class="keyword">if</span> (!cachedNames.containsKey(clazz)) &#123;</span><br><span class="line">                                      cachedNames.put(clazz, n);</span><br><span class="line">                                  &#125;</span><br><span class="line">                                  Class&lt;?&gt; c = extensionClasses.get(n);</span><br><span class="line">                                  <span class="keyword">if</span> (c == <span class="keyword">null</span>) &#123;</span><br><span class="line">                                      extensionClasses.put(n, clazz);</span><br><span class="line">                                  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (c != clazz) &#123;</span><br><span class="line">                                                 ...</span><br><span class="line">                                  &#125;</span><br><span class="line">                              &#125;</span><br><span class="line">                          &#125;</span><br><span class="line">                      &#125;</span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;...</span><br><span class="line">          &#125;</span><br><span class="line">      &#125; <span class="comment">// end of while read lines</span></span><br><span class="line">  &#125; <span class="comment">// end of while urls</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当没有自适应类时，需要自动拼装自适应类，并编译。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> Class&lt;?&gt; createAdaptiveExtensionClass() &#123;</span><br><span class="line">   <span class="comment">//生成自适应类代码</span></span><br><span class="line">   <span class="comment">//自适应方法的内容，会根据type方法上@Adaptive的属性生成</span></span><br><span class="line">   String code = createAdaptiveExtensionClassCode();</span><br><span class="line">   ClassLoader classLoader = findClassLoader();</span><br><span class="line">   com.alibaba.dubbo.common.compiler.Compiler compiler = ExtensionLoader.getExtensionLoader(com.alibaba.dubbo.common.compiler.Compiler<span class="class">.<span class="keyword">class</span>).<span class="title">getAdaptiveExtension</span>()</span>;</span><br><span class="line">   <span class="comment">//编译</span></span><br><span class="line">   <span class="keyword">return</span> compiler.compile(code, classLoader);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>创建类后，需要注入属性，<code>injectExtension</code>方法负责其工作：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> T <span class="title">injectExtension</span><span class="params">(T instance)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">if</span> (objectFactory != <span class="keyword">null</span>) &#123;</span><br><span class="line">      <span class="keyword">for</span> (Method method : instance.getClass().getMethods()) &#123;</span><br><span class="line">          <span class="keyword">if</span> (method.getName().startsWith(<span class="string">"set"</span>)</span><br><span class="line">                  &amp;&amp; method.getParameterTypes().length == <span class="number">1</span></span><br><span class="line">                  &amp;&amp; Modifier.isPublic(method.getModifiers())) &#123;</span><br><span class="line">              Class&lt;?&gt; pt = method.getParameterTypes()[<span class="number">0</span>];</span><br><span class="line">              <span class="keyword">try</span> &#123;</span><br><span class="line">                  String property = method.getName().length() &gt; <span class="number">3</span> ? method.getName().substring(<span class="number">3</span>, <span class="number">4</span>).toLowerCase() + method.getName().substring(<span class="number">4</span>) : <span class="string">""</span>;</span><br><span class="line">                  <span class="comment">// 获取自适应的属性</span></span><br><span class="line">                  Object object = objectFactory.getExtension(pt, property);</span><br><span class="line">                 <span class="comment">// 注入属性</span></span><br><span class="line">                  <span class="keyword">if</span> (object != <span class="keyword">null</span>) &#123;</span><br><span class="line">                      method.invoke(instance, object);</span><br><span class="line">                  &#125;</span><br><span class="line">              &#125; ...</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> instance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="getExtension"><a href="#getExtension" class="headerlink" title="getExtension"></a>getExtension</h3><p>在<code>getAdapativeExtension</code>执行中，已经加载了所有的<code>type</code>拓展类，初始化了<code>type</code>对应的<code>ExtensionLoader</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> T <span class="title">createExtension</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">   <span class="comment">//loadFile中加载的所有拓展类</span></span><br><span class="line">   Class&lt;?&gt; clazz = getExtensionClasses().get(name);</span><br><span class="line">   <span class="keyword">if</span> (clazz == <span class="keyword">null</span>) &#123;</span><br><span class="line">       <span class="keyword">throw</span> findException(name);</span><br><span class="line">   &#125;</span><br><span class="line">   T instance = (T) EXTENSION_INSTANCES.get(clazz);</span><br><span class="line">   <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">      <span class="comment">//创建对象</span></span><br><span class="line">       EXTENSION_INSTANCES.putIfAbsent(clazz, (T) clazz.newInstance());</span><br><span class="line">       instance = (T) EXTENSION_INSTANCES.get(clazz);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">//注入属性</span></span><br><span class="line">   injectExtension(instance);</span><br><span class="line">   <span class="comment">//如果有包装类，进行包装</span></span><br><span class="line">   Set&lt;Class&lt;?&gt;&gt; wrapperClasses = cachedWrapperClasses;</span><br><span class="line">   <span class="keyword">if</span> (wrapperClasses != <span class="keyword">null</span> &amp;&amp; !wrapperClasses.isEmpty()) &#123;</span><br><span class="line">       <span class="keyword">for</span> (Class&lt;?&gt; wrapperClass : wrapperClasses) &#123;</span><br><span class="line">           instance = injectExtension((T) wrapperClass.getConstructor(type).newInstance(instance));</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> instance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="getActivateExtension"><a href="#getActivateExtension" class="headerlink" title="getActivateExtension"></a>getActivateExtension</h3><p>根据条件获取当前扩展可自动激活的实现。比如<code>Filter</code>、<code>InvokerListener</code>、<code>ExporterListener</code>。<br><code>getActivateExtension</code>有多个重载函数，最主要的实现在下面这个函数中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> List&lt;T&gt; <span class="title">getActivateExtension</span><span class="params">(URL url, String[] values, String group)</span> </span>&#123;</span><br><span class="line">   List&lt;T&gt; exts = <span class="keyword">new</span> ArrayList&lt;T&gt;();</span><br><span class="line">   List&lt;String&gt; names = values == <span class="keyword">null</span> ? <span class="keyword">new</span> ArrayList&lt;String&gt;(<span class="number">0</span>) : Arrays.asList(values);</span><br><span class="line">   <span class="keyword">if</span> (!names.contains(Constants.REMOVE_VALUE_PREFIX + Constants.DEFAULT_KEY)) &#123;</span><br><span class="line">       getExtensionClasses();</span><br><span class="line">       <span class="keyword">for</span> (Map.Entry&lt;String, Activate&gt; entry : cachedActivates.entrySet()) &#123;</span><br><span class="line">           String name = entry.getKey();</span><br><span class="line">           Activate activate = entry.getValue();</span><br><span class="line">           <span class="keyword">if</span> (isMatchGroup(group, activate.group())) &#123;</span><br><span class="line">               T ext = getExtension(name);</span><br><span class="line">               <span class="keyword">if</span> (!names.contains(name)</span><br><span class="line">                       &amp;&amp; !names.contains(Constants.REMOVE_VALUE_PREFIX + name)</span><br><span class="line">                       &amp;&amp; isActive(activate, url)) &#123;</span><br><span class="line">                   exts.add(ext);</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       Collections.sort(exts, ActivateComparator.COMPARATOR);</span><br><span class="line">   &#125;</span><br><span class="line">   List&lt;T&gt; usrs = <span class="keyword">new</span> ArrayList&lt;T&gt;();</span><br><span class="line">   <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; names.size(); i++) &#123;</span><br><span class="line">       String name = names.get(i);</span><br><span class="line">       <span class="keyword">if</span> (!name.startsWith(Constants.REMOVE_VALUE_PREFIX)</span><br><span class="line">               &amp;&amp; !names.contains(Constants.REMOVE_VALUE_PREFIX + name)) &#123;</span><br><span class="line">           <span class="keyword">if</span> (Constants.DEFAULT_KEY.equals(name)) &#123;</span><br><span class="line">               <span class="keyword">if</span> (!usrs.isEmpty()) &#123;</span><br><span class="line">                   exts.addAll(<span class="number">0</span>, usrs);</span><br><span class="line">                   usrs.clear();</span><br><span class="line">               &#125;</span><br><span class="line">           &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               T ext = getExtension(name);</span><br><span class="line">               usrs.add(ext);</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">if</span> (!usrs.isEmpty()) &#123;</span><br><span class="line">       exts.addAll(usrs);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> exts;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>讲完它的原理，来看几个源码中的例子更好的理解下：</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/rpc/" rel="tag"># rpc</a>
+          
+            <a href="/tags/dubbo/" rel="tag"># dubbo</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/21/rpc/dubbo/1.dubbo%E7%AE%80%E4%BB%8B/" rel="next" title="Dubbo">
+                <i class="fa fa-chevron-left"></i> Dubbo
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/23/rpc/dubbo/3.dubbo-%E6%9C%8D%E5%8A%A1%E5%8F%91%E5%B8%83/" rel="prev" title="Dubbo 服务暴露">
+                Dubbo 服务暴露 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SPI拓展机制（IOC、AOP、自适应拓展）"><span class="nav-number">1.</span> <span class="nav-text">SPI拓展机制（IOC、AOP、自适应拓展）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#getAdaptiveExtension"><span class="nav-number">1.0.1.</span> <span class="nav-text">getAdaptiveExtension</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#getExtension"><span class="nav-number">1.0.2.</span> <span class="nav-text">getExtension</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#getActivateExtension"><span class="nav-number">1.0.3.</span> <span class="nav-text">getActivateExtension</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="rpc,nio,netty," />
+
+
+<meta name="description" content="初始化对于Client的初始化过程，本章主要会介绍怎样初始化ChannelPipeline以及与Server建立连接。Server初始化过程比Client端复杂一些，它分为两部分，分为Acceptor的处理链初始化过程和Reactor链的初始化过程。绑定端口提供服务的过程。 Client首先来看Client的初始化代码： 12345678910111213141516171819202122232">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Netty 初始化">
+<meta property="og:url" content="https://dorgenjones.github.io/2018/04/07/rpc/netty/2.netty%E5%88%9D%E5%A7%8B%E5%8C%96/index.html">
+<meta property="og:site_name" content="Zamperini">
+<meta property="og:description" content="初始化对于Client的初始化过程，本章主要会介绍怎样初始化ChannelPipeline以及与Server建立连接。Server初始化过程比Client端复杂一些，它分为两部分，分为Acceptor的处理链初始化过程和Reactor链的初始化过程。绑定端口提供服务的过程。 Client首先来看Client的初始化代码： 12345678910111213141516171819202122232">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://dorgenjones.github.io/2018/04/07/rpc/netty/2.netty%E5%88%9D%E5%A7%8B%E5%8C%96/media/15282071664552/15282181022734.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2018/04/07/rpc/netty/2.netty%E5%88%9D%E5%A7%8B%E5%8C%96/media/15282071664552/15282656793219.jpg">
+<meta property="article:published_time" content="2018-04-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-02-13T11:06:49.646Z">
+<meta property="article:author" content="Zamperini">
+<meta property="article:tag" content="rpc">
+<meta property="article:tag" content="nio">
+<meta property="article:tag" content="netty">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://dorgenjones.github.io/2018/04/07/rpc/netty/2.netty%E5%88%9D%E5%A7%8B%E5%8C%96/media/15282071664552/15282181022734.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/2018/04/07/rpc/netty/2.netty初始化/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>Netty 初始化 | Zamperini</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zamperini</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2018/04/07/rpc/netty/2.netty%E5%88%9D%E5%A7%8B%E5%8C%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Netty 初始化</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-07T00:00:00+08:00">2018-04-07</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/netty/" itemprop="url" rel="index"><span itemprop="name">netty</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h1><p>对于<code>Client</code>的初始化过程，本章主要会介绍怎样初始化<code>ChannelPipeline</code>以及与<code>Server</code>建立连接。<br><code>Server</code>初始化过程比<code>Client</code>端复杂一些，它分为两部分，分为<code>Acceptor</code>的处理链初始化过程和<code>Reactor</code>链的初始化过程。绑定端口提供服务的过程。</p>
+<h2 id="Client"><a href="#Client" class="headerlink" title="Client"></a>Client</h2><p>首先来看<code>Client</code>的初始化代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 配置事件组，即线程组，会在构造函数中创建线程，默认情况下他会创建 CPU数*2个 线程</span></span><br><span class="line">EventLoopGroup group = <span class="keyword">new</span> NioEventLoopGroup();</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  <span class="comment">// Client端启动辅助类</span></span><br><span class="line">  Bootstrap b = <span class="keyword">new</span> Bootstrap();</span><br><span class="line">  <span class="comment">// 设置Client端线程池，一般一个线程负责至少一个Channel</span></span><br><span class="line">  b.group(group)</span><br><span class="line">   <span class="comment">// 设置 Client 的 SocketChannel，也可以选择 像 EpollSocketChannel这种！</span></span><br><span class="line">   .channel(NioSocketChannel<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class">          //添加配置项</span></span><br><span class="line"><span class="class">   .<span class="title">option</span>(<span class="title">ChannelOption</span>.<span class="title">TCP_NODELAY</span>, <span class="title">true</span>)</span></span><br><span class="line"><span class="class">          // 设置 <span class="title">ChannelHandler</span>，这里的 <span class="title">ChannelInitializer</span>不是最终最终编制在 <span class="title">Pipeline</span>上的<span class="title">ChannelHandler</span>，而只是起一个初始化作用的<span class="title">Handler</span>，后文中会细说</span></span><br><span class="line"><span class="class">   .<span class="title">handler</span>(<span class="title">new</span> <span class="title">ChannelInitializer</span>&lt;<span class="title">SocketChannel</span>&gt;() </span>&#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initChannel</span><span class="params">(SocketChannel ch)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">           ChannelPipeline p = ch.pipeline();</span><br><span class="line">           <span class="comment">//在其中添加业务定制的Handler</span></span><br><span class="line">           p.addLast(<span class="keyword">new</span> EchoClientHandler());</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 发起连接</span></span><br><span class="line">  ChannelFuture f = b.connect(HOST, PORT).sync();</span><br><span class="line">  <span class="comment">// 阻塞等待，一直等到链接关闭</span></span><br><span class="line">  <span class="comment">// Wait until the connection is closed.</span></span><br><span class="line">  f.channel().closeFuture().sync();</span><br><span class="line">&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">  group.shutdownGracefully();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>Bootstrap</strong>类是<code>Client</code>端的启动辅助类。<br>整个过程中，分为两大步，第一步进行参数设置，设置<strong>Bootstrap</strong>的参数，第二步则是发起连接。<br>在<strong>Bootstrap</strong>参数设置里，可以看到业务方配置了<code>group</code>（客户端事件线程池<code>EventLoopGroup</code>，后面单领出来讲解）、<code>Channel</code>的类型（比如对于<code>NIO</code>和<code>Epoll</code>Channel）和 <code>ChannelHandler</code>（这里的<strong>ChannelInitializer</strong> 是给业务放提供的入口，让业务将自定义的<code>ChannelHandler</code>编制进<code>Pipeline</code>）。</p>
+<p><strong>发起连接：</strong> 利用设置的参数进行初始化处理链，注册事件、开启事件线程、发起连接的过程：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Bootstrap.connect</span><br><span class="line">--&gt; Bootstrap.doResolveAndConnect</span><br><span class="line"><span class="function"><span class="keyword">private</span> ChannelFuture <span class="title">doResolveAndConnect</span><span class="params">(<span class="keyword">final</span> SocketAddress remoteAddress, <span class="keyword">final</span> SocketAddress localAddress)</span> </span>&#123;</span><br><span class="line">   <span class="comment">// 初始化Channel，并将Channel注册到事件线程中</span></span><br><span class="line">   <span class="keyword">final</span> ChannelFuture regFuture = initAndRegister();</span><br><span class="line">   <span class="keyword">final</span> Channel channel = regFuture.channel();</span><br><span class="line">   <span class="comment">// 解析地址 并创建连接</span></span><br><span class="line">   <span class="keyword">return</span> doResolveAndConnect0(channel, remoteAddress, localAddress, channel.newPromise());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>执行<code>InitAndRegister</code>方法主要是初始化<code>Channel</code>并与某个<code>EventLoop</code>绑定。执行<code>doResolveAndConnect0</code>方法用于解析地址并创建连接。下面就来分别详细解析这两个方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> ChannelFuture <span class="title">initAndRegister</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   Channel channel = <span class="keyword">null</span>;</span><br><span class="line">   channel =</span><br><span class="line">   <span class="comment">// 根据之前设置的Channel类型实例化一个Channel然后根绝配置的option设置参数</span></span><br><span class="line">   channelFactory.newChannel();</span><br><span class="line">   <span class="comment">//参数设置，options</span></span><br><span class="line">   init(channel);</span><br><span class="line">   <span class="comment">// 将channel和一个EventLoop绑定</span></span><br><span class="line">   ChannelFuture regFuture = config().group().register(channel);</span><br><span class="line">   <span class="keyword">return</span> regFuture;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>register</code>方法最终会调用<code>MultithreadEventLoopGroup.register</code>方法，而其只是按轮询的方式选择一个<code>SingleThreadEventLoop</code>执行<code>register</code>方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> ChannelFuture MultithreadEventExecutorGroup.register(Channel channel) &#123;</span><br><span class="line">   <span class="keyword">return</span> next().register(channel);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> ChannelFuture <span class="title">register</span><span class="params">(Channel channel)</span> </span>&#123;</span><br><span class="line">   <span class="comment">//将Channel包装进ChannelPromise中，其主作用主要起一个回调的作用，比如当完成连接后会触发相应的监听器</span></span><br><span class="line">   <span class="keyword">return</span> register(<span class="keyword">new</span> DefaultChannelPromise(channel, <span class="keyword">this</span>));</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> ChannelFuture SingleThreadEventLoop.register(<span class="keyword">final</span> ChannelPromise promise) &#123;</span><br><span class="line">   ObjectUtil.checkNotNull(promise, <span class="string">"promise"</span>);</span><br><span class="line">promise.channel().unsafe().register(<span class="keyword">this</span>, promise);</span><br><span class="line">   <span class="keyword">return</span> promise;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到<code>register</code>方法最终会调用<code>Channel</code>里的<code>Unsafe</code>（<strong>Unsafe</strong>是操作底层）的<code>register</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">register</span><span class="params">(EventLoop eventLoop, <span class="keyword">final</span> ChannelPromise promise)</span> </span>&#123;</span><br><span class="line">  AbstractChannel.<span class="keyword">this</span>.eventLoop = eventLoop;</span><br><span class="line">  <span class="keyword">if</span> (eventLoop.inEventLoop()) &#123;</span><br><span class="line">      register0(promise);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      eventLoop.execute(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">          <span class="meta">@Override</span></span><br><span class="line">          <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">              register0(promise);</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里首先给<code>Channel</code>赋一个<code>EventLoop</code>，因为是启动线程不是该<code>EventLoop</code>，所以将<code>register</code>操作丢给该<code>EventLoop</code>执行。<br>在<code>SingleThreadEventLoop.execute</code>方法里：<br>可以看到当前线程没启动的时候会开启该线程，并将任务丢进<code>EventLoop</code>的任务队列中，<code>EventLoop</code>线程执行时从任务队列中获取任务执行。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">(Runnable task)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">boolean</span> inEventLoop = inEventLoop();</span><br><span class="line">   <span class="keyword">if</span> (inEventLoop) &#123;</span><br><span class="line">       addTask(task);</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       <span class="comment">// 开启线程</span></span><br><span class="line">       startThread();</span><br><span class="line">       <span class="comment">// 将注册任务加到任务队列中</span></span><br><span class="line">       addTask(task);</span><br><span class="line">       <span class="keyword">if</span> (isShutdown() &amp;&amp; removeTask(task)) &#123;</span><br><span class="line">           reject();</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">if</span> (!addTaskWakesUp &amp;&amp; wakesUpForTask(task)) &#123;</span><br><span class="line">       wakeup(inEventLoop);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>执行<code>regsiter0</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">register0</span><span class="params">(ChannelPromise promise)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">boolean</span> firstRegistration = neverRegistered;</span><br><span class="line">  doRegister();</span><br><span class="line">  neverRegistered = <span class="keyword">false</span>;</span><br><span class="line">  registered = <span class="keyword">true</span>;</span><br><span class="line">  safeSetSuccess(promise);</span><br><span class="line">  <span class="comment">// 触发 pipleline的编制，将业务自定义的handler加入到pipeline中</span></span><br><span class="line">  pipeline.fireChannelRegistered();</span><br><span class="line">  <span class="comment">// 当channel重新注册的时候，已经连接</span></span><br><span class="line">  <span class="keyword">if</span> (isActive()) &#123;</span><br><span class="line">      <span class="keyword">if</span> (firstRegistration) &#123;</span><br><span class="line">          <span class="comment">//触发 激活channel Active事件</span></span><br><span class="line">          pipeline.fireChannelActive();</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (config().isAutoRead()) &#123;</span><br><span class="line">          <span class="comment">//</span></span><br><span class="line">          beginRead();</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doRegister</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">   <span class="comment">// 真正的注册，将channel注册到 EventLoop中的Selector上</span></span><br><span class="line">   selectionKey = javaChannel().register(eventLoop().unwrappedSelector(), <span class="number">0</span>, <span class="keyword">this</span>);</span><br><span class="line">   <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>完成初始化处理链后，<strong>EchoClient</strong>的处理链如下：<br><img src="media/15282071664552/15282181022734.jpg" alt=""></p>
+<p>完成注册后，则开始创建连接（<code>Bootstrap.doConnect</code>），</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> Bootstrap.doConnect(</span><br><span class="line">       <span class="keyword">final</span> SocketAddress remoteAddress, <span class="keyword">final</span> SocketAddress localAddress, <span class="keyword">final</span> ChannelPromise connectPromise) &#123;</span><br><span class="line">   <span class="comment">// 在register之后才会执行，排在register0任务之后</span></span><br><span class="line">   <span class="keyword">final</span> Channel channel = connectPromise.channel();</span><br><span class="line">   channel.eventLoop().execute(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">           <span class="keyword">if</span> (localAddress == <span class="keyword">null</span>) &#123;</span><br><span class="line">               channel.connect(remoteAddress, connectPromise);</span><br><span class="line">           &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               channel.connect(remoteAddress, localAddress, connectPromise);</span><br><span class="line">           &#125;</span><br><span class="line">           connectPromise.addListener(ChannelFutureListener.CLOSE_ON_FAILURE);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到最终是会执行<code>Channel.connect</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> ChannelFuture <span class="title">connect</span><span class="params">(SocketAddress remoteAddress, ChannelPromise promise)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">return</span> pipeline.connect(remoteAddress, promise);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> ChannelFuture DefaultChannelPipeline.connect(SocketAddress remoteAddress, ChannelPromise promise) &#123;</span><br><span class="line">   <span class="keyword">return</span> tail.connect(remoteAddress, promise);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Channel.connect</code>方法则开始执行处理链，可以看到其从<code>TailContext</code>往前执行，执行<code>ChannelOutboundHandler.connect</code>方法，最终会执行<code>HeadContext.connect</code>方法。而其调用<code>Unsafe.connect</code>方法进行连接。最终调用原生<code>SocketChannel.connect</code>方法进行连接，连接成功后设置<code>Promise</code>状态通知监听者并执行<code>pipeline.fireChannelActive</code>。</p>
+<p><code>Pipeline.fireChannelActive</code>是由<code>HeadContext</code>往前传递的，其会触发<code>EchoClientHandler</code>的<code>channelActive</code>方法，然后再会触发<code>readIfAutoRead</code>方法，将<code>NioSocketChannel</code>中的<code>selectionKey</code>设置为<code>SelectionKey.OP_READ</code>(<strong>对于ServerSocketChannel则设置为OP_ACCEPT</strong>)，以监听网络读事件。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">HeadContext-&gt;EchoClientHandler: channelActive</span><br><span class="line">EchoClientHandler-&gt;EchoClientHandler:writeAndFlush(发送第一个消息)</span><br><span class="line">HeadContext-&gt;HeadContext:readIfAutoRead(设置读事件)</span><br></pre></td></tr></table></figure>
+<p>到此<code>Client</code>初始化的过程就讲完了，下面我们将来讲解服务端内容。</p>
+<h2 id="Server"><a href="#Server" class="headerlink" title="Server"></a>Server</h2><p>还是以<code>Echo</code>为例来讲解此过程：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// acceptor事件组</span></span><br><span class="line">EventLoopGroup bossGroup = <span class="keyword">new</span> NioEventLoopGroup(<span class="number">1</span>);</span><br><span class="line"><span class="comment">//reactor事件组</span></span><br><span class="line">EventLoopGroup workerGroup = <span class="keyword">new</span> NioEventLoopGroup();</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  ServerBootstrap b = <span class="keyword">new</span> ServerBootstrap();</span><br><span class="line">  b.group(bossGroup, workerGroup)</span><br><span class="line">    <span class="comment">//设置 ServerSocketChannel</span></span><br><span class="line">   .channel(NioServerSocketChannel<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class">   .<span class="title">option</span>(<span class="title">ChannelOption</span>.<span class="title">SO_BACKLOG</span>, 100)</span></span><br><span class="line"><span class="class">    // 在 <span class="title">Acceptor</span> 的处理链上添加 <span class="title">Handler</span></span></span><br><span class="line"><span class="class">   .<span class="title">handler</span>(<span class="title">new</span> <span class="title">LoggingHandler</span>(<span class="title">LogLevel</span>.<span class="title">INFO</span>))</span></span><br><span class="line"><span class="class">   // 设置 <span class="title">reactor</span>的处理链</span></span><br><span class="line"><span class="class">   .<span class="title">childHandler</span>(<span class="title">new</span> <span class="title">ChannelInitializer</span>&lt;<span class="title">SocketChannel</span>&gt;() </span>&#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initChannel</span><span class="params">(SocketChannel ch)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">           ChannelPipeline p = ch.pipeline();</span><br><span class="line">           p.addLast(<span class="keyword">new</span> EchoServerHandler());</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;);</span><br><span class="line">  <span class="comment">// 绑定接口提供服务</span></span><br><span class="line">  ChannelFuture f = b.bind(PORT).sync();</span><br><span class="line">  f.channel().closeFuture().sync();</span><br><span class="line">&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">  bossGroup.shutdownGracefully();</span><br><span class="line">  workerGroup.shutdownGracefully();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>ServerBootstrap</strong> 是<code>Server</code>端的辅助启动类。用户使用的时候会配置 <code>Acceptor</code>和<code>Reactor</code>的事件线程组（<code>boosGroup</code>的线程个数和监听端口数相等）。设置<code>ServerSocketChannel</code>类型，设置参数<code>Channel</code>的参数<code>option</code>，然后在<code>Acceptor</code>的处理链上中添加<code>Handler</code>。最后<code>childHandler</code>配置<code>Reactor</code>处理链，再其上添加业务方定制的<code>Handler</code>。</p>
+<p><code>bind</code>方法最终执行的是<code>doBind</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> ChannelFuture <span class="title">doBind</span><span class="params">(<span class="keyword">final</span> SocketAddress localAddress)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//</span></span><br><span class="line">   <span class="keyword">final</span> ChannelFuture regFuture = initAndRegister();</span><br><span class="line">   <span class="keyword">final</span> Channel channel = regFuture.channel();</span><br><span class="line">   ChannelPromise promise = channel.newPromise();</span><br><span class="line">   <span class="comment">//绑定端口，开启服务</span></span><br><span class="line">   doBind0(regFuture, channel, localAddress, promise);</span><br><span class="line">   <span class="keyword">return</span> promise;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">final</span> ChannelFuture <span class="title">initAndRegister</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Channel channel = channelFactory.newChannel();</span><br><span class="line">   <span class="comment">//调用 ServerBootStrap.init</span></span><br><span class="line">   init(channel);</span><br><span class="line">   <span class="comment">// 将SeverBootStrap注册到线程池上，然后监听 OP_ACCEPT事件</span></span><br><span class="line">   ChannelFuture regFuture = config().group().register(channel);</span><br><span class="line">   <span class="keyword">return</span> regFuture;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在讲<code>Client</code>的初始化过程中，解释了<code>initAndRegister</code>的作用，实例化<code>SocektChannel</code>，并将其与一个<code>EventLoop</code>进行绑定，并将其注册到<code>EventLoop</code>的<code>Selector</code>上。这里，对于<code>ServerSocketChannel</code>会有所不同：<code>init</code>方法会调用<code>ServerBootStrap</code>的<code>init</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">init</span><span class="params">(Channel channel)</span> </span>&#123;</span><br><span class="line">   <span class="comment">// ServerSocketChannel的pipeline</span></span><br><span class="line">   ChannelPipeline p = channel.pipeline();</span><br><span class="line">   <span class="comment">//...</span></span><br><span class="line">   <span class="keyword">final</span> EventLoopGroup currentChildGroup = childGroup;</span><br><span class="line">   <span class="keyword">final</span> ChannelHandler currentChildHandler = childHandler;</span><br><span class="line">   p.addLast(<span class="keyword">new</span> ChannelInitializer&lt;Channel&gt;() &#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initChannel</span><span class="params">(<span class="keyword">final</span> Channel ch)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">           <span class="keyword">final</span> ChannelPipeline pipeline = ch.pipeline();</span><br><span class="line">           <span class="comment">// 将业务配置的channel加到 pipeline中</span></span><br><span class="line">           ChannelHandler handler = config.handler();</span><br><span class="line">           <span class="keyword">if</span> (handler != <span class="keyword">null</span>) &#123;</span><br><span class="line">               pipeline.addLast(handler);</span><br><span class="line">           &#125;</span><br><span class="line">           ch.eventLoop().execute(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">               <span class="meta">@Override</span></span><br><span class="line">               <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                   <span class="comment">// ServerBootstrapAcceptor 在acceptor与reactor之间衔接</span></span><br><span class="line">                   pipeline.addLast(<span class="keyword">new</span> ServerBootstrapAcceptor(</span><br><span class="line">                           ch, currentChildGroup, currentChildHandler, currentChildOptions, currentChildAttrs));</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其主要是在 <code>ServerSocketChannel</code> 的处理链上加上添加 <code>ChannelHandler</code>，包括业务方配置的 <code>LoggingHandler</code> 和 <strong>ServerBootstrapAcceptor</strong>（<strong>Acceptor</strong>，负责接收请求，然后把请求丢给<code>Reactor</code>线程）。</p>
+<p>初始化完成后，boss线程的处理链：<br><img src="media/15282071664552/15282656793219.jpg" alt=""></p>
+<p>服务端到此就完成了初始化过程。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/rpc/" rel="tag"># rpc</a>
+          
+            <a href="/tags/nio/" rel="tag"># nio</a>
+          
+            <a href="/tags/netty/" rel="tag"># netty</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/06/rpc/netty/1.netty%E7%AE%80%E4%BB%8B/" rel="next" title="Netty 简介">
+                <i class="fa fa-chevron-left"></i> Netty 简介
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/08/rpc/netty/3.netty-nioeventloop/" rel="prev" title="Netty NioEventLoop">
+                Netty NioEventLoop <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#初始化"><span class="nav-number">1.</span> <span class="nav-text">初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Client"><span class="nav-number">1.1.</span> <span class="nav-text">Client</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Server"><span class="nav-number">1.2.</span> <span class="nav-text">Server</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

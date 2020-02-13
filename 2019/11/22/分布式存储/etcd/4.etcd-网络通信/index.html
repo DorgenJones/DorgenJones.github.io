@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="etcd," />
+
+
+<meta name="description" content="2. 网络通信在上一节，我们介绍了etcd集群的启动过程。在其中也简单介绍了会初始化与其他成员节点通信的连接，以及启动为其他成员节点提供服务的GRPC服务和Http服务以及启动服务客户端的服务。本章我们将详细介绍通信相关的实现。 2.1 成员节点间通信（peer）前一章节介绍了peer服务端启动过程。下面，我们来讲解下调用端是如何初始化以及如何调用的。与成员节点间通信传输的初始化之前介绍过，是调用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ETCD网络通信">
+<meta property="og:url" content="https://dorgenjones.github.io/2019/11/22/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/4.etcd-%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/index.html">
+<meta property="og:site_name" content="Zamperini">
+<meta property="og:description" content="2. 网络通信在上一节，我们介绍了etcd集群的启动过程。在其中也简单介绍了会初始化与其他成员节点通信的连接，以及启动为其他成员节点提供服务的GRPC服务和Http服务以及启动服务客户端的服务。本章我们将详细介绍通信相关的实现。 2.1 成员节点间通信（peer）前一章节介绍了peer服务端启动过程。下面，我们来讲解下调用端是如何初始化以及如何调用的。与成员节点间通信传输的初始化之前介绍过，是调用">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-11-21T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-02-13T11:11:06.317Z">
+<meta property="article:author" content="Zamperini">
+<meta property="article:tag" content="etcd">
+<meta name="twitter:card" content="summary">
+
+
+
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/2019/11/22/分布式存储/etcd/4.etcd-网络通信/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>ETCD网络通信 | Zamperini</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zamperini</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2019/11/22/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/4.etcd-%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ETCD网络通信</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-22T00:00:00+08:00">2019-11-22</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/etcd/" itemprop="url" rel="index"><span itemprop="name">etcd</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="2-网络通信"><a href="#2-网络通信" class="headerlink" title="2. 网络通信"></a>2. 网络通信</h1><p>在上一节，我们介绍了<code>etcd</code>集群的启动过程。在其中也简单介绍了会初始化与其他成员节点通信的连接，以及启动为其他成员节点提供服务的<code>GRPC</code>服务和<code>Http</code>服务以及启动服务客户端的服务。本章我们将详细介绍通信相关的实现。</p>
+<h2 id="2-1-成员节点间通信（peer）"><a href="#2-1-成员节点间通信（peer）" class="headerlink" title="2.1 成员节点间通信（peer）"></a>2.1 成员节点间通信（peer）</h2><p>前一章节介绍了peer服务端启动过程。下面，我们来讲解下调用端是如何初始化以及如何调用的。<br>与成员节点间通信传输的初始化之前介绍过，是调用<code>Transport.AddPeer</code>方法。<br>前面我们介绍了<code>Transport</code>的作用：向成员节点发送raft消息，并从成员节点获取raft消息。下面将详细描述其作用。<br>首先来看其初始化和启动过程：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">tr := &amp;rafthttp.Transport&#123;</span><br><span class="line">	DialTimeout: cfg.peerDialTimeout(),</span><br><span class="line">	ID:          id,</span><br><span class="line">	URLs:        cfg.PeerURLs,</span><br><span class="line">	ClusterID:   cl.ID(),</span><br><span class="line">	Raft:        srv, <span class="comment">// EtcdServer</span></span><br><span class="line">	Snapshotter: ss,</span><br><span class="line">	ServerStats: sstats,</span><br><span class="line">	LeaderStats: lstats,</span><br><span class="line">	ErrorC:      srv.errorc,</span><br><span class="line">&#125;</span><br><span class="line">tr.Start()</span><br><span class="line">|- t.streamRt = newStreamRoundTripper(t.TLSInfo, t.DialTimeout) <span class="comment">// 其作用前面介绍过：可以执行事务性HTTP请求，给定请求获取结果</span></span><br><span class="line">|- t.pipelineRt = NewRoundTripper(t.TLSInfo, t.DialTimeout) <span class="comment">//</span></span><br><span class="line">|- t.remotes = <span class="built_in">make</span>(<span class="keyword">map</span>[types.ID]*remote) <span class="comment">// 初始化复制节点映射</span></span><br><span class="line">|- t.peers = <span class="built_in">make</span>(<span class="keyword">map</span>[types.ID]Peer) <span class="comment">// 初始化成员节点映射</span></span><br><span class="line">|- t.pipelineProber = probing.NewProber(t.pipelineRt) <span class="comment">// Prober的作用是探测，探测链路监控状态</span></span><br><span class="line">|- t.streamProber = probing.NewProber(t.streamRt)</span><br></pre></td></tr></table></figure>
+<p>接下来，继续了解<code>AddPeer</code>实现：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Transport/AddPeer</span><br><span class="line">|- startPeer</span><br><span class="line">    |- picker := newURLPicker(urls) <span class="comment">// 其用于选取通信通道（负载均衡作用）</span></span><br><span class="line">    |- pipeline := &amp;pipeline&#123;...&#125; <span class="comment">// 创建pipeline，多通道发送消息。</span></span><br><span class="line">    |- pipeline.start() <span class="comment">// 开启多个异步任务，监听 msgC通道，进行数据发送</span></span><br><span class="line">    |- p := &amp;peer&#123;...&#125; <span class="comment">// 创建peer结构体，初始化其属性，如recev、propc通道、消息发送器 msgAppV2Writer、writer（StreamWriter）</span></span><br><span class="line">    |- <span class="keyword">go</span> <span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> mm := &lt;-p.recvc:  <span class="comment">//监听 recev通道发来的消息，并将其丢给 EtcdServer.`Process`方法处理</span></span><br><span class="line">				<span class="keyword">if</span> err := r.Process(ctx, mm)</span><br><span class="line">			&#125;</span><br><span class="line">    |- <span class="keyword">go</span> <span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> mm := &lt;-p.propc: <span class="comment">// 监听 propc 通道发来的消息，将其丢给...</span></span><br><span class="line">				<span class="keyword">if</span> err := r.Process(ctx, mm);</span><br><span class="line">		  &#125;</span><br><span class="line">    |-  初始化 <span class="string">`p.msgAppV2Reader`</span>、<span class="string">`p.msgAppReader`</span> 用于读取消息</span><br><span class="line">    |- p.msgAppV2Reader.start() <span class="comment">// 开启监听消息读取</span></span><br><span class="line">    |- p.msgAppReader.start()    </span><br><span class="line">|- addPeerToProber(t.Logger, t.pipelineProber, id.String(), us, RoundTripperNameSnapshot, rttSec) <span class="comment">// 将该节点添加到探测器中，进行定期探测状态</span></span><br><span class="line">|-	addPeerToProber(t.Logger, t.streamProber, id.String(), us, RoundTripperNameRaftMessage, rttSec)</span><br></pre></td></tr></table></figure>
+<p>从上面的流程可以看出 <code>peer</code>使用stream模式通信方式。读写分别用不同的协程去监听处理。其中<code>streamWriter</code>负责消息发送，<code>streamReader</code>负责消息接收。见下面详情：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">w := &amp;streamWriter&#123;</span><br><span class="line">	peerID:  id,</span><br><span class="line">	status: status,</span><br><span class="line">	fs:     fs,</span><br><span class="line">	r:      r,</span><br><span class="line">	msgc:   <span class="built_in">make</span>(<span class="keyword">chan</span> raftpb.Message, streamBufSize),</span><br><span class="line">	connc:  <span class="built_in">make</span>(<span class="keyword">chan</span> *outgoingConn),</span><br><span class="line">	stopc:  <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;),</span><br><span class="line">	done:   <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;),</span><br><span class="line">&#125;</span><br><span class="line">w.run:</span><br><span class="line">|- <span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> &lt;-heartbeatc:</span><br><span class="line">	<span class="comment">//发送心跳消息</span></span><br><span class="line">	<span class="keyword">case</span> m := &lt;-msgc:</span><br><span class="line">	<span class="comment">// 接收到需要发送的消息，进行编码并使用conn进行发送</span></span><br><span class="line">    <span class="keyword">case</span> conn := &lt;-cw.connc:</span><br><span class="line">    <span class="comment">// 监听附加上来的连接通道，进行初始化 编码器、Flusher等</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>streamWriter</code>里比较关键的一点是，这里的<code>conn</code>从哪来？往<code>cw.connc</code>传递<code>conn</code>的只有<code>peer.attachOutgoingConn</code>方法。<br>而在上面初始化并启动<code>peer</code>的时候是没有发现调用这个方法的 ？？？哪是哪里进行执行的呢？通过 追踪<code>peer.attachOutgoingConn</code>的调用方，最终发现，其在<code>rafthhtp/http.go/ServeHTTP() L483</code>处调用。而这个方法会在客户端建立连接<strong>进行http服务调用</strong>的时候执行。所以，在这里调用 <code>peer.attachOutgoingConn</code> 的作用是复用<code>连接</code>。当我们分析完读处理过程后，再来整体看 <code>etcd</code>节点是怎么建立通信链路的。</p>
+<p><code>StreamReader</code>的处理比<code>StreamWriter</code>的处理要简单一些。初始化完其属性后，调用<code>start</code>方法启动监听读请求过程。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">StreamReader/start</span><br><span class="line">|- run</span><br><span class="line">    |- rc, err := cr.dial(t) <span class="comment">// 进行拨号，建立起与peer之间的连接</span></span><br><span class="line">    |- err = cr.decodeLoop(rc, t) <span class="comment">// 获取返回结果，进行解码</span></span><br><span class="line">        |- <span class="keyword">for</span>&#123; m, err := dec.decode() <span class="comment">//循环解码</span></span><br><span class="line">        |- 如果 m 是<span class="string">`MsgProp`</span>类型，则将消息传递到 propc通道，否则到 recv通道</span><br></pre></td></tr></table></figure>
+<p>这样每个peer之间的链路就建立了。回过头来，可以看出每对<code>peer</code>之间至少会有两条<code>connection</code>。且他们之间交互交错使用。</p>
+<p>单<code>peer</code>往对方发送的消息，是通过 <strong>对方跟自己建立的连接</strong> 来发送的。</p>
+<p>最后，我们通过单次请求响应过程，来介绍节点间的通信过程。</p>
+<p>当要想集群其他成员节点发送消息时，最终会调用<code>peer.send</code>方法：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">peer.send</span><br><span class="line">|- writec, name := p.pick(m) <span class="comment">// 首先peer会根据m的类型来选择一个发送通道</span></span><br><span class="line">    |- isMsgSnap(m) <span class="keyword">return</span> p.pipeline.msgc, pipelineMsg <span class="comment">// 如果是快照消息，则通过pipeline.msgc来发送消息</span></span><br><span class="line">    |- isMsgApp(m) <span class="keyword">return</span> p.msgAppV2Writer.writec(),streamAppV2 <span class="comment">// 如果是MsgApp消息</span></span><br><span class="line">    |- 如果 p.writer.writec() 可用，<span class="keyword">return</span> p.writer.writec()</span><br><span class="line">    |- 备用 p.pipeline.msgc, pipelineMsg</span><br><span class="line">|- writec &lt;- m: <span class="comment">// 即发送数据到 写通道中，`StreamWriter` 中会监听此通道。</span></span><br><span class="line"></span><br><span class="line">StreamWriter.run</span><br><span class="line">|- <span class="keyword">select</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> m := &lt;-msgc:</span><br><span class="line">     |- enc.encode(&amp;m)</span><br><span class="line">        |- binary.Write(enc.w, binary.BigEndian, <span class="keyword">uint64</span>(m.Size())) <span class="comment">// 对于 messageEncoder，首先发送字节长度</span></span><br><span class="line">        |- enc.w.Write(pbutil.MustMarshal(m)) <span class="comment">//再发送字节内容</span></span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>目标节点的 <strong>StreamReader</strong>（<code>p.msgAppReader</code>）接收到消息后，通过解析后传递到 <code>EtcdServer</code>(Process)，即完成单次通信；对于请求的响应，则通过对方的<code>peer</code>来发送给本节点，本节点的<code>StreamReader</code>来接受响应消息。</p>
+<h2 id="2-2-客户端通信"><a href="#2-2-客户端通信" class="headerlink" title="2.2 客户端通信"></a>2.2 客户端通信</h2><p>对于客户端通信，因为是<code>GRPC</code>或者<code>HTTP</code>简单的请求响应方式，因此这里就不再介绍了。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/etcd/" rel="tag"># etcd</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/11/21/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/3.etcd-%E5%AD%98%E5%82%A8/" rel="next" title="ETCD数据存储">
+                <i class="fa fa-chevron-left"></i> ETCD数据存储
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/11/23/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/5.etcd-%E4%BA%8B%E5%8A%A1%E8%AF%B7%E6%B1%82/" rel="prev" title="ETCD事务请求">
+                ETCD事务请求 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#2-网络通信"><span class="nav-number">1.</span> <span class="nav-text">2. 网络通信</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-成员节点间通信（peer）"><span class="nav-number">1.1.</span> <span class="nav-text">2.1 成员节点间通信（peer）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-客户端通信"><span class="nav-number">1.2.</span> <span class="nav-text">2.2 客户端通信</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

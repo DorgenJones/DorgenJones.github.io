@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="k8s," />
+
+
+<meta name="description" content="4.kube-schedulerscheduler是k8s集群中负责调度的组件。它监听apiserver，查询未绑定Node资源的Pod，并跟据调度策略为其选择一个最合适的节点。下面本节将从两个方面来介绍scheduler的实现：  初始化过程 单次调度过程  4.1 初始化过程scheduler的初始化过程与其他组件非常类似。创建初始化配置，并将启动参数应用到该配置上，再基于此参数来运行sche">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kube-scheduler">
+<meta property="og:url" content="https://dorgenjones.github.io/2020/02/07/k8s/6.k8s-scheduler/index.html">
+<meta property="og:site_name" content="Zamperini">
+<meta property="og:description" content="4.kube-schedulerscheduler是k8s集群中负责调度的组件。它监听apiserver，查询未绑定Node资源的Pod，并跟据调度策略为其选择一个最合适的节点。下面本节将从两个方面来介绍scheduler的实现：  初始化过程 单次调度过程  4.1 初始化过程scheduler的初始化过程与其他组件非常类似。创建初始化配置，并将启动参数应用到该配置上，再基于此参数来运行sche">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://dorgenjones.github.io/2020/02/07/k8s/6.k8s-scheduler/media/15656126194942/15813607449175.jpg">
+<meta property="article:published_time" content="2020-02-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-02-13T11:10:28.238Z">
+<meta property="article:author" content="Zamperini">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://dorgenjones.github.io/2020/02/07/k8s/6.k8s-scheduler/media/15656126194942/15813607449175.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/2020/02/07/k8s/6.k8s-scheduler/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>kube-scheduler | Zamperini</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zamperini</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2020/02/07/k8s/6.k8s-scheduler/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">kube-scheduler</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-07T00:00:00+08:00">2020-02-07</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="4-kube-scheduler"><a href="#4-kube-scheduler" class="headerlink" title="4.kube-scheduler"></a>4.kube-scheduler</h1><p><code>scheduler</code>是<code>k8s</code>集群中负责调度的组件。它监听<code>apiserver</code>，查询未绑定<code>Node</code>资源的<code>Pod</code>，并跟据调度策略为其选择一个最合适的节点。<br>下面本节将从两个方面来介绍<code>scheduler</code>的实现：</p>
+<ol>
+<li>初始化过程</li>
+<li>单次调度过程</li>
+</ol>
+<h2 id="4-1-初始化过程"><a href="#4-1-初始化过程" class="headerlink" title="4.1 初始化过程"></a>4.1 初始化过程</h2><p><code>scheduler</code>的初始化过程与其他组件非常类似。创建初始化配置，并将启动参数应用到该配置上，再基于此参数来运行<code>scheudler</code>，同样也会进行初始化参数的验证。</p>
+<p>在运行前，<code>scheduler</code>会执行一些<code>init</code>方法注册调度策略（<code>predicates</code>过滤策略、<code>priority</code>优先级策略）<code>register_predicates | register_priority</code>、策略提供器配置（默认提供器和集群自动扩容提供器）<code>defaults</code>。位置位于<code>algorithprovider/defaults</code>。<br>注册时，注册的是<strong>策略构建工厂</strong>，并将其保存在全局变量中<code>scheduler/algorithm_factory.go/</code>。</p>
+<p>注册的过滤算法有如下几种：</p>
+<blockquote>
+<p><strong>PodFitsPorts：</strong>被<code>PodFitsHostPorts</code>取代<br><strong>PodFitsHostPorts：</strong>检查是否有<code>Host Ports</code> 冲突；<br><strong>PodFitsResources：</strong>检查资源可用性（<code>CPU</code>、<code>内存</code>等是否充足），其也是默认的过滤策略；<br><strong>HostName：</strong> 检查 <code>pod.Spec.NodeName</code> 是否与候选节点一致；<br><strong>MatchNodeSelector：</strong>检查候选节点的 <code>pod.Spec.NodeSelector</code> 是否匹配；<br><strong>NoVolumeZoneConflict：</strong>检查 <code>volume zone</code> 是否冲突；<br><strong>MaxEBSVolumeCount：</strong>（<code>废弃</code>）检查 <code>AWS EBS Volume</code> 数量是否过多（<code>默认不超过 39</code>）<br><strong>MaxGCEPDVolumeCount：</strong>（<code>废弃</code>）检查 <code>GCE PD Volume</code> 数量是否过多（默认不超过 <code>16</code>）<br><strong>MaxAzureDiskVolumeCount：</strong>（<code>废弃</code>）检查 <code>Azure Disk Volume</code> 数量是否过多（默认不超过 <code>16</code>）<br><strong>MatchInterPodAffinity：</strong>检查是否匹配 <code>Pod Affinity</code>(<code>亲和度</code>)要求<br><strong>NoDiskConflict：</strong>检查是否存在 <code>Volume 冲突</code>；<br><strong>GeneralPredicates：</strong>由多个<code>过滤策略</code>聚合，所有<code>k8s</code>组件都强制执行，包括<code>PodFitsResources</code>、<code>PodFitsHost</code>，<code>PodFitsHostPorts</code> 和 <code>PodSelectorMatches</code>；<br><strong>PodToleratesNodeTaints：</strong>检查 <code>Pod</code> 是否容忍<code>Node</code>误点 <code>Node Taints</code>；<br><strong>CheckNodeMemoryPressure：</strong>检查 <code>Pod</code> 是否可以调度到 <code>MemoryPressure</code> 的节点上。<br><strong>CheckNodeUnschedulable：</strong> 检查 <code>Pod</code> 是否可以调度到 带有<code>Unschedulable</code> 的节点上；<br><strong>CheckVolumeBinding：</strong> 检查是否能满足<code>Pod</code>的<code>PVC</code>上下界需求。</p>
+</blockquote>
+<p>注册的优先级排序算法有以下几种：</p>
+<blockquote>
+<p><strong>SelectorSpreadPriority：</strong>优先减少同一<code>Service</code>下的<code>Pod</code>在同一<code>Node</code>节点上的可能；<br><strong>MostRequestedPriority：</strong>尽量调度到已经使用过的 <code>Node</code> 上，介绍节点使用；<br><strong>RequestedToCapacityRatioPriority：</strong>跟据<code>Node</code>上的资源分配情况计算其分数；<br><strong>ServiceSpreadingPriority：</strong>尽量将同一个 <code>service</code> 的 <code>Pod</code> 分布到不同节点上，被 <code>SelectorSpreadPriority</code> 替代<br><strong>InterPodAffinityPriority：</strong>优先将 <code>Pod</code> 调度到相同的拓扑域上（如同一个节点、地域等）；<br><strong>LeastRequestedPriority：</strong>优先调度到请求资源少的节点上；<br><strong>BalancedResourceAllocation：</strong>优先平衡各节点的资源使用；<br><strong>NodePreferAvoidPodsPriority：</strong>跟据节点<code>scheduler.alpha.kubernetes.io/preferAvoidPods</code>注解来计算<code>Node</code>权重, 权重为 10000，避免其他优先级策略的影响；<br><strong>NodeAffinityPriority：</strong>优先调度到匹配 <code>NodeAffinity</code> 的节点上；<br><strong>TaintTolerationPriority：</strong>优先调度到匹配 <code>TaintToleration</code> 的节点上；<br><strong>ImageLocalityPriority：</strong>尽量将使用大镜像的容器调度到已经下拉了该镜像的节点上。</p>
+</blockquote>
+<p>注册的算法提供器，包含<code>DefaultProvider</code>和<code>ClusterAutoscalerProvider</code>，默认算法提供器为<code>DefaultProvider</code>：</p>
+<ul>
+<li><strong>DefaultProvider</strong> 包含默认的过滤和优先级策略：<ul>
+<li><code>MaxGCEPDVolumeCount,MaxCSIVolumeCountPred,NoDiskConflict,CheckVolumeBinding,CheckNodeUnschedulable,NoVolumeZoneConflict,MaxEBSVolumeCount,MaxAzureDiskVolumeCount,MatchInterPodAffinity,GeneralPredicates,PodToleratesNodeTaints</code></li>
+<li><code>SelectorSpreadPriority,InterPodAffinityPriority,LeastRequestedPriority,BalancedResourceAllocation,NodePreferAvoidPodsPriority,NodeAffinityPriority,TaintTolerationPriority,ImageLocalityPriority</code></li>
+</ul>
+</li>
+<li><strong>ClusterAutoscalerProvider</strong> 包含默认过滤和优先级策略：<ul>
+<li><code>MaxGCEPDVolumeCount,MaxCSIVolumeCountPred,NoDiskConflict,CheckVolumeBinding,CheckNodeUnschedulable,NoVolumeZoneConflict,MaxEBSVolumeCount,MaxAzureDiskVolumeCount,MatchInterPodAffinity,GeneralPredicates,PodToleratesNodeTaints</code></li>
+<li><code>SelectorSpreadPriority,InterPodAffinityPriority,MostRequestedPriority,BalancedResourceAllocation,NodePreferAvoidPodsPriority,NodeAffinityPriority,TaintTolerationPriority,ImageLocalityPriority</code></li>
+</ul>
+</li>
+</ul>
+<p>初始化过程主要在创建<code>Scheduler</code>中，<code>scheduler/scheduler.go/New</code>，笔者第一遍阅读代码的时候发现一个很令人费解的事：<code>Scheduler</code>中存在另外一套插件式策略框架，该框架与之前的注册机制功能作用雷同。后来，从注释中得到了蛛丝马迹，<code>Scheduler</code>正在从第一种方式向第二种方式过度，下面我们将在<code>scheduler</code>的创建过程中介绍这种新的策略框架，插件式策略框架更佳抽象可拓展。</p>
+<ol>
+<li>首先创建了<code>framework.Registry</code>，其保存了所有可用的插件，以及相应插件的构建函数<code>framework/plugins/default_registry.go/NewDefaultRegistry</code>；</li>
+<li>同时构建了<code>DefaultConfigProducerRegistry</code>，其保存了生成插件需要的配置生产者</li>
+<li>根据参数生成不同的<code>Scheduler</code>。<ul>
+<li>若配置了<code>provider</code>参数，则跟据策略提供者来创建；</li>
+<li>若用户自定义了<code>Policy</code>，则通过策略配置来创建调度器，该模式下支持用户通过<code>Extender</code>来拓展实现第三方调度器；</li>
+</ul>
+</li>
+<li>下面将介绍通过<strong>策略提供者</strong>的方式创建<code>Scheduler</code>的过程</li>
+<li>跟据<code>ProviderName</code>从之前注册的策略提供者列表中捞出该种类型的策略提供者配置（配置了开启哪些策略），调用<code>Configurator.CreateFromKeys</code>来<strong>进行最核心的初始化流程</strong>；<ol>
+<li>构建<code>过滤策略</code>的配置，其包含两部分内容：一部分通过第一种<code>注册构建工厂</code>（这里称之为<code>fitPredicates</code>）的方式，另一种是通过插件式策略框架的方式<code>framework plugins</code><ul>
+<li>这两种方式对应的策略集存在交集。对于某种策略来说，若注册了插件配置构造器，则用插件的方式；</li>
+<li>对于<strong>插件过滤策略</strong>，其会根据<code>predicates.Ordering()</code>顺序进行排序；</li>
+</ul>
+</li>
+<li>构建<code>优先级策略</code>的配置，其构建方式与上面构建<code>过滤策略</code>的配置的方式一致；</li>
+<li>利用上面的得到的配置参数，构建插件框架<code>framework</code>（<code>framework/v1alpha1/framework.go</code>）<ul>
+<li>筛选出所有需要的插件；</li>
+<li>根据前面构建的<code>framework.Registry</code>和<code>framework</code>来构建插件实体并进行保存</li>
+<li>将创建的这些插件策略器按类型赋值给<code>framework</code>的属性，如<code>filterPlugins</code>（对应过滤策略），<code>scorePlugins</code>（对应权重策略）。<ol start="4">
+<li>创建一个队列<code>SchedulingQueue</code>，用来接收需要调度的<code>Pod</code>，其是一种优先队列<code>PriorityQueue</code>（后文将单独详细剖析其实现）。</li>
+</ol>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+<li>创建完<code>Scheduler</code>后，调用<code>AddAllEventHandlers</code>方法，该方法的作用是监听资源的变更，并回调<code>Scheduler</code>的方法，如监听<code>pod</code>资源变更回调<code>Scheduler.addPodToSchedulingQueue</code>方法；</li>
+<li>开启健康检查服务；</li>
+<li>若配置了选主，则进行选主；</li>
+<li>开启<code>Scheduler</code>的后台运行任务，当有需要调度的<code>Pod</code>到来时，并最终调用<code>scheduleOne</code>。</li>
+</ol>
+<h2 id="4-2-单次调度过程"><a href="#4-2-单次调度过程" class="headerlink" title="4.2 单次调度过程"></a>4.2 单次调度过程</h2><p>当<code>ReplicaSetController</code>创建<code>Pod</code>之后，<code>Scheduler</code>则会接收到<code>Pod</code>的更新消息，会调用<code>addPodToSchedulingQueue</code>方法，而方法则直接将<code>Pod</code>放入<code>SchedulingQueue</code>中。<br><code>Scheduler.scheduleOne</code>是调度的核心，其阻塞监听<code>SchedulingQueue</code>队列并进行调度，下面将详细介绍该调度过程：</p>
+<ol>
+<li>阻塞调用<code>Scheduler.NextPod</code>方法，该方法实际是阻塞等待<code>SchedulingQueue</code>；</li>
+<li><code>Scheduler</code>接收到新建的<code>Pod</code>后执行<code>Schedule</code>执行调度；<ol>
+<li>首先进行一些基础校验：检测<code>Pod</code>设置<code>PVC</code>配置是否存在；</li>
+<li>为本此调度执行一次<code>Node</code>节点缓存的快照；</li>
+<li>执行<code>PreFilter</code>逻辑，若返回任何除成功以外的状态则终止流程（目前无实现）；</li>
+<li>执行<code>findNodesThatFit</code>逻辑，执行过滤策略，筛选出可备用<code>Node</code>节点列表；<ol>
+<li>首先计算参与调度的<code>Node</code>节点数量（<code>Scheduler</code>为了提交调度的性能，当节点数量众多时，则每次调度的时候不会选取所有Node节点）<ol>
+<li>若节点数小于<code>100</code>，或者配置的<code>percentageOfNodesToScore</code>大于<code>100</code>时，所有节点参与调度；</li>
+<li>否则只选出<code>percentageOfNodesToScore</code>个<code>Node</code>节点参数调度；当然若按百分比选出的节点数小于<code>100</code>时，返回<code>100</code></li>
+</ol>
+</li>
+<li>以<code>16</code>并发执行<code>podFitsOnNode</code>方法筛选可用的<code>Node</code>节点候选列表<ol>
+<li><code>podFitsOnNode</code>方法执行比较复杂，其涉及到抢占式调度的计算；</li>
+<li>首先通过<code>addNominatedPods</code>方法查看当前<code>Node</code>节点上是否有比当前<code>Pod</code>权重大的<code>nominatedPod</code>（通过<code>通过调度要运行在该节点上但未真正运行在该节点上</code>）</li>
+<li>运行通过老的筛选策略<code>fitPredicates</code>查看是否可以调度到该节点上；</li>
+<li>再运行<code>插件过滤策略</code>检测是否可以在<code>Node</code>上执行；</li>
+<li>当任何一个运行结果显示不合适时则立即返回；</li>
+<li>若匹配成功且<code>Node</code>节点上无<code>nominatedPod</code>，则返回该节点，表示可以调度到该节点；</li>
+<li>若匹配成功但<code>Node</code>上有<code>nominatedPod</code>时，则再次运行依次过滤匹配过程（<strong><code>twice</code></strong>），运行两次的原因是，（<code>源码注释中写的很绕</code>）：<ul>
+<li>当没有<code>nominatedPod</code>时，运行第二遍很可能通不过（<code>pod affnitity</code>策略），而``；</li>
+<li>当将<code>nominatedPod</code>视为运行状态时，<code>anti-affinity</code>策略很可能失败；而将<code>nominatedPod</code>视为非运行状态时，则<code>pod affinity</code>可能无法通过，因此不能假设<code>nominatedPod</code>是什么状态，所以运行第二次是有必要的<ol start="3">
+<li>当系统配置了第三方调度服务时，则会通过<code>Extender</code>（目前有<code>HttpExtender</code>）将上一步运行的结果带去请求第三方服务进行进一步的匹配；</li>
+</ol>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>当调度结果只有一个时，则直接返回结果；</li>
+<li>执行<code>prioritizeNodes</code><ol>
+<li>当没有配置<code>权重策略</code>时， 返回输入的节点；</li>
+<li>16并发计算每种<code>prioritizers</code>策略对每个节点的权重；<ol>
+<li><code>Map</code>操作：计算每个节点的结果集；</li>
+<li><code>Reduce</code>（如果有的话）：聚合每个节点的结果集，并计算每个结果的最终结果（<code>归一化</code>）</li>
+</ol>
+</li>
+<li>调用调度框架计算每种权重插件的分数：<code>RunScorePlugins</code><ol>
+<li><strong>16并发</strong>运行权重插件，计算每种插件针对每个节点的分数；</li>
+<li><strong>16并发</strong>为每个节点的分数乘以每个插件的权重</li>
+</ol>
+</li>
+<li>汇总上面两个计算结果，总结成每个<code>Node</code>的分值 <strong>result</strong>；</li>
+<li>最后一步，请求<code>Extender</code>计算每个节点的分值并整合到<code>result</code>上。</li>
+</ol>
+</li>
+<li>根据结果，选中分值最大的<code>Node</code>，当有多个分值一样大的节点时随机选择一个</li>
+</ol>
+</li>
+<li>在绑定<code>Node</code>之前，先绑定<code>vloume</code>资源；</li>
+<li>设置<code>Pod</code>节点的<code>SuggestedHost</code>，从<code>SchedulingQueue</code>中删除作为<code>notimatedPod</code>的本<code>pod</code>，将该<code>pod</code>添加到<code>node</code>信息里，将该<code>node</code>移到最前（<code>LRU</code>）；</li>
+<li>与<code>apiserver</code>进行绑定，将<code>pod</code>绑定到<code>node</code>上。</li>
+</ol>
+<p>简单总结其流程如下：<br> <img src="media/15656126194942/15813607449175.jpg" alt=""></p>
+<h2 id="PriorityQueue"><a href="#PriorityQueue" class="headerlink" title="PriorityQueue"></a>PriorityQueue</h2><p><code>Scheduler</code>中<code>PriorityQueue</code>有着特别的设计，其实现<code>SchedulingQueue</code>接口（存储<code>Pod</code>并等待被调度）。<br>本小节将从初始化和单次添加pod两个方面来介绍它：</p>
+<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><p>首先，先来了解其数据结构：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> PriorityQueue <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// 根据试图被重调度的pod节点信息</span></span><br><span class="line">	podBackoff *PodBackoffMap</span><br><span class="line">   <span class="comment">// 大根堆，按pod的权重来pod数据，可以优先弹出权重最大的pod</span></span><br><span class="line">	activeQ *heap.Heap</span><br><span class="line">	<span class="comment">// 按`backoff`过期时间排序的大根堆，弹出时先访问该堆再访问`activeQ`堆</span></span><br><span class="line">	podBackoffQ *heap.Heap</span><br><span class="line">	<span class="comment">// 保存暂且不可调度的pod列表</span></span><br><span class="line">	unschedulableQ *UnschedulablePodsMap</span><br><span class="line">	<span class="comment">// 保存要被委派给`Node`的pod列表信息</span></span><br><span class="line">	nominatedPods *nominatedPodMap</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>创建完这个<code>PriorityQueue</code>后开启后台任务<code>run</code>：</p>
+<ul>
+<li><strong>flushBackoffQCompleted：</strong> 从<code>podBackoffQ</code>中捞出超过<code>backoff</code>时间的<code>pod</code>重新放入<code>activeQ</code>中进行调度（每秒运行一次）；</li>
+<li><strong>flushUnschedulableQLeftover：</strong>将呆在<code>unschedulableQ</code>中时间超过<code>durationStayUnschedulableQ</code>（60s）时间的<code>pod</code>移到<code>activeQ</code>或者<code>podBackoffQ</code>中（每30秒运行一次）<h3 id="单次入队-amp-弹出"><a href="#单次入队-amp-弹出" class="headerlink" title="单次入队&amp;弹出"></a>单次入队&amp;弹出</h3><code>PriorityQueue.Add</code>方法用于入队：</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *PriorityQueue)</span> <span class="title">Add</span><span class="params">(pod *v1.Pod)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	p.lock.Lock()</span><br><span class="line">	<span class="keyword">defer</span> p.lock.Unlock()</span><br><span class="line">	pInfo := p.newPodInfo(pod)</span><br><span class="line">	<span class="keyword">if</span> err := p.activeQ.Add(pInfo); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> p.unschedulableQ.get(pod) != <span class="literal">nil</span> &#123;</span><br><span class="line">		p.unschedulableQ.<span class="built_in">delete</span>(pod)</span><br><span class="line">	&#125;</span><br><span class="line">	p.podBackoffQ.Delete(pInfo)</span><br><span class="line">	p.nominatedPods.add(pod, <span class="string">""</span>)</span><br><span class="line">	<span class="comment">// 通知队列变更</span></span><br><span class="line">	p.cond.Broadcast()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>直接添加到<code>activeQ</code>队列中，并且从<code>unschedulableQ</code>和<code>podbackoff!</code>中删除。</p>
+<p>弹出方法<code>Pop</code>：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *PriorityQueue)</span> <span class="title">Pop</span><span class="params">()</span> <span class="params">(*framework.PodInfo, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> p.activeQ.Len() == <span class="number">0</span> &#123;</span><br><span class="line">	   <span class="comment">//阻塞等待条件</span></span><br><span class="line">		p.cond.Wait()</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 从大根堆中弹出权重最大的`pod`返回</span></span><br><span class="line">	obj, err := p.activeQ.Pop()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	pInfo := obj.(*framework.PodInfo)</span><br><span class="line">	pInfo.Attempts++</span><br><span class="line">	p.schedulingCycle++</span><br><span class="line">	<span class="keyword">return</span> pInfo, err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/k8s/" rel="tag"># k8s</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/02/06/k8s/5.k8s-controllermanager/" rel="next" title="kube-controller-manager">
+                <i class="fa fa-chevron-left"></i> kube-controller-manager
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/02/07/k8s/7.k8s-kubetl/" rel="prev" title="Kubetl">
+                Kubetl <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#4-kube-scheduler"><span class="nav-number">1.</span> <span class="nav-text">4.kube-scheduler</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-初始化过程"><span class="nav-number">1.1.</span> <span class="nav-text">4.1 初始化过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-单次调度过程"><span class="nav-number">1.2.</span> <span class="nav-text">4.2 单次调度过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PriorityQueue"><span class="nav-number">1.3.</span> <span class="nav-text">PriorityQueue</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化"><span class="nav-number">1.3.1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#单次入队-amp-弹出"><span class="nav-number">1.3.2.</span> <span class="nav-text">单次入队&amp;弹出</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

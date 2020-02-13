@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="k8s," />
+
+
+<meta name="description" content="1. kube-apiserver（@v1.17.2）[TOC] ApiServer是K8S服务调度的核心，其同时负责与外界的交互、集群内其他组件的交互，也是K8S中唯一与持久化存储Etcd交互的组件。 下面将从以下几点来解析 ApiSever：  启动过程 Scheme构建过程   路由构建过程 认证、授权、准入构建过程   请求过程 读写请求过程 watch机制   其他组件与其交互过程 in">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s-apiserver">
+<meta property="og:url" content="https://dorgenjones.github.io/2020/02/04/k8s/3.k8s-apiserver/index.html">
+<meta property="og:site_name" content="Zamperini">
+<meta property="og:description" content="1. kube-apiserver（@v1.17.2）[TOC] ApiServer是K8S服务调度的核心，其同时负责与外界的交互、集群内其他组件的交互，也是K8S中唯一与持久化存储Etcd交互的组件。 下面将从以下几点来解析 ApiSever：  启动过程 Scheme构建过程   路由构建过程 认证、授权、准入构建过程   请求过程 读写请求过程 watch机制   其他组件与其交互过程 in">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://dorgenjones.github.io/2020/02/04/k8s/3.k8s-apiserver/media/15645672183579/15810695608846.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2020/02/04/k8s/3.k8s-apiserver/media/15645672183579/15810696269545.jpg">
+<meta property="article:published_time" content="2020-02-03T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-02-13T11:02:32.588Z">
+<meta property="article:author" content="Zamperini">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://dorgenjones.github.io/2020/02/04/k8s/3.k8s-apiserver/media/15645672183579/15810695608846.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/2020/02/04/k8s/3.k8s-apiserver/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>k8s-apiserver | Zamperini</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zamperini</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2020/02/04/k8s/3.k8s-apiserver/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">k8s-apiserver</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-04T00:00:00+08:00">2020-02-04</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="1-kube-apiserver（-v1-17-2）"><a href="#1-kube-apiserver（-v1-17-2）" class="headerlink" title="1. kube-apiserver（@v1.17.2）"></a>1. kube-apiserver（<code>@v1.17.2</code>）</h1><p>[TOC]</p>
+<p><code>ApiServer</code>是<code>K8S</code>服务调度的核心，其同时负责与外界的交互、集群内其他组件的交互，也是<code>K8S</code>中唯一与持久化存储<code>Etcd</code>交互的组件。</p>
+<p>下面将从以下几点来解析 <code>ApiSever</code>：</p>
+<ul>
+<li>启动过程<ul>
+<li><code>Scheme</code>构建过程  </li>
+<li>路由构建过程</li>
+<li>认证、授权、准入构建过程</li>
+</ul>
+</li>
+<li>请求过程<ul>
+<li>读写请求过程</li>
+<li>watch机制</li>
+</ul>
+</li>
+<li>其他组件与其交互过程<ul>
+<li>informerFactory机制</li>
+</ul>
+</li>
+</ul>
+<h2 id="1-启动过程"><a href="#1-启动过程" class="headerlink" title="1. 启动过程"></a>1. 启动过程</h2><h3 id="1-1-启动主流程"><a href="#1-1-启动主流程" class="headerlink" title="1.1 启动主流程"></a>1.1 启动主流程</h3><p><code>ApiServer</code>启动位置：<code>cmd/kube-apiserver/apiserver.go</code>，启动先需要先启动一个<code>Etcd</code>。调试启动参数如下：</p>
+<blockquote>
+<p>–secure-port=6445 –storage-backend=etcd3 –etcd-servers=<a href="http://127.0.0.1:2379" target="_blank" rel="noopener">http://127.0.0.1:2379</a> –enable-swagger-ui=true</p>
+</blockquote>
+<p>首先创建<code>ApiServerCommond</code>，然后执行命令：(整个<code>k8s</code>代码体系都引用<code>CLI</code>框架<code>Cobra</code>)<br>创建命令的过程：</p>
+<ol>
+<li>创建默认服务启动参数 <code>ServerRunOption</code>；</li>
+<li>通过<code>Cobra</code>获取程序启动参数并应用到<code>ServerRunOption</code>。</li>
+</ol>
+<p>执行的过程，如下：</p>
+<ol>
+<li>首先设置默认参数：<code>apiserver</code>的<code>AdvertiseAddress</code>（ip），<code>apiserver</code>的<code>SericeIp</code>、集群里所有<code>Service</code>Ip范围、授权配置、服务账户配置、etcd缓存配置、api开关配置；</li>
+<li>校验启动参数：如未配置<code>Etcd</code>服务节点信息，则返回异常，终止启动。</li>
+<li>基于<code>ServerRunOption</code>运行服务（核心流程）<ol>
+<li><strong>创建服务链：</strong>创建<code>APiServer</code>、<code>ApiExtensionServer</code>、<code>AggregatorServer</code>，建立非安全服务端口（默认<code>8080</code>）提供服务；</li>
+<li><strong>预运行：</strong>（安装健康检查探针、存活探针、就绪探针。装配 <code>OpenAPI</code>（<code>/openapi/v2</code>路径））；</li>
+<li><strong>运行：</strong>运行审计后台（<code>AuditBackend</code>），建立安全服务端口（默认<code>6445</code>）监听提供服务。</li>
+</ol>
+</li>
+</ol>
+<p>因此，启动过程最重要的内容在：<code>CreateServerChain</code>创建服务链中。<br>其过程如下：</p>
+<ol>
+<li><strong>创建节点拨号器组件</strong>（<code>NodeTunneler</code>），设置<code>SSH</code>等信息，对于不同的云服务提供商其区别即在于<code>AddSSHKeyToAllInstances</code>：<code>sshKey</code>分发函数，将<code>SSH</code>key分发到所有节点上；</li>
+<li><strong>创建<code>APIServer</code>配置</strong>（<code>CreateKubeAPIServerConfig</code>）:创建为运行APIServer所需要的资源。将<code>ServerRunOption</code>中配置转换成其所需要的资源。<ol>
+<li>构建<code>apiserver</code>配置<code>genericapiserver.Config(legacyscheme.Codecs)</code>，<ul>
+<li><code>legacyscheme.Codecs</code> 是<code>ApiServer</code>核心设计，其用于编解码<code>API</code>资源，后面讲重点讲解</li>
+<li>设置<code>BuildHandlerChainFunc</code>，其是<code>ApiServer</code>的拓展机制。每次请求到达后台处理逻辑之前，会先运行<code>处理链逻辑</code>，目前其默认实现<code>server.DefaultBuildHandlerChain</code>见 ^附件1 。其内部包含<code>认证</code>、<code>授权</code>、<code>审计</code>、<code>准入</code>等处理逻辑。</li>
+</ul>
+</li>
+<li>设置<code>MergedResourceConfig</code>，其用于表示配置哪些<code>groupVersion</code>被开启，哪个资源被启用和禁用；</li>
+<li>将服务启动<code>ServerRunOption</code>的部分参数应用到<code>genericapiserver.Config</code>中；</li>
+<li>根据<code>ServerRunOption</code>中的<code>InsecureServing</code>、<code>SecureServing</code>、<code>Authentication</code>、<code>Features</code>、<code>APIEnablement</code>应用到<code>genericapiserver.Config</code>中；</li>
+<li>创建<code>OpenAPI</code>配置；</li>
+<li>创建存储工厂<code>storageFactory</code>，并聚合<code>Etcd</code>的配置创建<code>genericapiserver.Config</code>需要的组件<code>RESTOptionsGetter</code>（其用于构建<code>RESTStorage</code>，用来访问存储层）<ul>
+<li><code>storageFactory</code>的创建过程存在很多细节：<ul>
+<li><code>StorageConfig</code>：存储配置</li>
+<li><code>Overrides</code>：覆盖设置，根据<code>EtcdServersOverrides</code>转换而得，其作用是对于某种特定资源转换到其他<code>etcd</code>服务上；</li>
+<li><code>ResourceEncodingConfig</code>：用来判断对于某种资源使用什么版本标识（存储的版本、内存中表示的版本）；</li>
+<li><code>DefaultSerializer</code>：序列化工具<code>legacyscheme.Codecs</code>；</li>
+<li><code>APIResoureceConfigSource</code>：存储哪些版本哪些资源可用或被禁用。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>创建<code>Clientset</code>（包含请求所有资源的<code>Client</code>），其用来请求自己来获取各种类型资源；</li>
+<li>创建<code>SharedInformerFactory</code>，其用来为所有已知api组版本的资源提供<code>Informer</code>（<code>k8s</code>体系中与<code>apiserver</code>交互的重要组件）；</li>
+<li>构建认证器<code>Authenticator</code><ul>
+<li>跟据<code>ServerRunOption</code>创建<code>authenticatorConfig</code></li>
+<li>创建<code>ServiceAccountTokenGetter</code>，用于获取<code>ServiceAccount</code>、<code>Secrets</code>，<code>Pod</code>；</li>
+<li>创建<code>BootstrapTokenAuthenticator</code>，；</li>
+<li>构建多个认证器，并包装成一个联合认证插件，目前<code>k8s</code>支持如下认证插件（<code>authenticator/config.New</code>）：<ul>
+<li>basic auth</li>
+<li><code>X509证书</code>；</li>
+<li><code>ServiceAccount</code></li>
+<li>静态 <code>Token</code> 文件</li>
+<li>引导 <code>Token</code></li>
+<li><code>OpenID</code></li>
+<li><code>WebHook</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>创建授权工具<code>Authorizer</code>，目前<code>k8s</code>支持6种授权模式：<ul>
+<li><code>ModeNode</code>：显示<code>kubelet</code>只能访问其自身所在的<code>Node</code></li>
+<li><code>ModeRBAC</code>：基于角色的访问控制</li>
+<li><code>ModeABAC</code>：基于属性（<code>Attribute</code>）的访问控制</li>
+<li><code>ModeWebhook</code>：通过webhook的访问控制</li>
+<li><code>ModeAlwaysDeny</code>：拒绝所有</li>
+<li><code>ModeAlwaysAllow</code>：允许所有</li>
+</ul>
+</li>
+<li>创建服务调节器<code>ServiceResolver</code> 给定命名空间、名称、端口返回<code>Service</code>的URL；</li>
+<li>创建审计策略检测器<code>AuditPolicyChecker</code>，审计后台<code>AuditBackend</code>；</li>
+<li>创建准入控制<code>AdmissionControl</code><ul>
+<li><code>k8s</code>目前支持<strong>13</strong>种准入插件：<code>NamespaceLifecycle,LimitRanger,ServiceAccount,TaintNodesByCondition,Priority,DefaultTolerationSeconds,DefaultStorageClass,StorageObjectInUseProtection,PersistentVolumeClaimResize,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,RuntimeClass,ResourceQuota</code>；</li>
+<li>插件初始化时会用<code>PluginInitializers</code>来对所有的插件进行填充，这也是<code>k8s</code>设计比较巧妙的点；<ul>
+<li>插件需要什么属性，实现相应接口即可。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>解析<code>ServiceIpRange</code>和<code>apiServerServiceIp</code>；</li>
+<li>创建<code>master.Config</code>，并进行赋值返回。</li>
+</ol>
+</li>
+<li>构建配置<code>APIExtensionsConfig</code>，为创建<code>ApiExtensionServer</code>做准备，<code>ApiExtensionServer</code>和<code>KubeAPIServer</code>的区别在于，<code>ApiExtensionServer</code>为<code>k8s</code>的拓展服务，其负责API：<code>CustomResourceDefinitions</code>（简称<code>CRD</code>）的管理；</li>
+<li>创建<code>apiExtensionsServer</code>，首先填充参数再创建：<ol>
+<li>创建<code>GenericAPIServer</code><ol>
+<li>创建<code>APIServerHandler</code>（<code>apiserver/pkg/server/handler.go</code>），其是众多<code>Hanlder</code>的包装器和分发器<ol>
+<li>其包含属性：<code>FullHandlerChain</code>(过滤链)、<code>GoRestfulContainer</code>、<code>NOGoRestfulMux</code>、<code>Director</code>；</li>
+<li>其处理请求的顺序：<code>FullHandlerChain -&gt; Director -&gt; {GoRestfulContainer,NonGoRestfulMux}</code></li>
+</ol>
+</li>
+<li>创建<code>GenericAPIServer</code>，填充参数</li>
+</ol>
+</li>
+<li>创建<code>ApiGroupInfo</code>，标识<code>API</code>组，包含组内元素的所有数据，其包含主要信息如下：<ul>
+<li><code>PrioritizedVersions</code>：标识该<code>API</code>组有哪些版本；</li>
+<li><code>VersionedResourcesStorageMap</code>：存储<code>API</code>组中每个版本的每种资源的存储API；</li>
+<li><code>Scheme</code>：包含该组内所有类型，并且可以做不同类型之间的相互转换，同时可以转换来自组外的对象；</li>
+<li><code>NegotiatedSerializer</code>：<code>API</code>组内数据编解码；</li>
+<li><code>ParameterCodec</code>：查询参数转换</li>
+</ul>
+</li>
+<li>填充<code>apiGroupInfo</code><ul>
+<li>填充<code>VersionedResourcesStorageMap</code></li>
+</ul>
+</li>
+<li>安装<code>APIGroupInfo</code><ul>
+<li>安装<code>APIResources</code><ul>
+<li>对于每个版本，首先创建<code>APIGroupVersion</code>（用于将存储对象暴露为<code>http.Handlers</code>的<code>helper</code>）(每个<code>APIGroupVersion</code>是一个<code>WebService</code>)</li>
+<li>调用<code>apiGroupVersion.InstallREST(s.Handler.GoRestfulContainer)</code>方法安装<code>Restful</code> API；</li>
+<li>创建<code>APIInstaller</code>执行<code>Install</code>方法进行安装<code>APIResource</code>；<ul>
+<li>对于<code>APIGroupVersion</code>中每种资源执行<code>registerResourceHandlers</code>方法进行 <strong>最核心的转换</strong>（<code>rest.Storage-&gt; http.Handler</code>），详细见<code>1.3</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>创建<code>KubeApiServer</code>，其创建过程与创建<code>apiextensionServer</code>类似<ol>
+<li>创建<code>GenericAPIServer</code>，但与上面不一样的地方是：其将<code>apiextensionServer</code>带入其中当<code>nofoundHandler</code>，当<code>kubeApiServer</code>不能处理请求时，会将请求转发到<code>apiextensionServer</code>；</li>
+<li>安装<code>api/</code>路径的核心资源（<code>LeagyAPI</code>）（<code>endpoint</code>、<code>node</code>、<code>pod</code>）。其内部安装逻辑与上面过程类似，则将不累述；</li>
+<li>安装<code>apis/</code>路径其他拓展资源；</li>
+</ol>
+</li>
+<li>创建<code>APIAggregator</code>，聚合服务，其是<code>apiserver</code>重要拓展机制，用户可以自定义API服务，然后以<code>APIService</code>形式告知<code>apiserver</code><ol>
+<li>同样先创建<code>GenericAPIServer</code>，传入<code>KubeApiServer</code>作为<code>nofoundHandler</code>；</li>
+<li>安装<code>apiregistration</code>API组；</li>
+<li>初始化<code>apiserviceRegistrationController</code>，其用于管理<code>APIService</code>。当有<code>APIService</code>更新时，其会将其转换成<code>proxyHandler</code>然后注册到<code>APIAggregator</code>的<code>NonGoRestfulMux</code>中，用于将请求转发到<code>APIService</code>中定义的自定义<strong>API服务</strong>；</li>
+</ol>
+</li>
+<li>构建<code>InsecureHandlerChain</code>，并监听<code>insecureServer</code>端口，接收请求</li>
+</ol>
+</li>
+</ol>
+<p>总结其运行图如下：<br><img src="./media/15645672183579/15810695608846.jpg" alt=""></p>
+<blockquote>
+<p>k8s现阶段，API一共分为13个Group：Core、apps、authentication、authorization、autoscaling、batch、certificates、componentconfig、extensions、imagepolicy、policy、rbac、storage。</p>
+</blockquote>
+<h3 id="1-2-Scheme"><a href="#1-2-Scheme" class="headerlink" title="1.2 Scheme"></a>1.2 Scheme</h3><p><code>Scheme</code>是<code>k8s</code>中最重要的组件。其存储API资源信息（类型信息、版本信息等），支持API资源的序列化、反序列化、版本转化。<br>首先，我们将来分析其结构：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Scheme <span class="keyword">struct</span> &#123;</span><br><span class="line">    <span class="comment">// GroupVersionKind到具体反射类型的映射</span></span><br><span class="line">	gvkToType <span class="keyword">map</span>[schema.GroupVersionKind]reflect.Type</span><br><span class="line">	<span class="comment">// 反射类型到GroupVersionKind列表的映射</span></span><br><span class="line">	typeToGVK <span class="keyword">map</span>[reflect.Type][]schema.GroupVersionKind</span><br><span class="line">	<span class="comment">// 不带版本的类型</span></span><br><span class="line">	unversionedTypes <span class="keyword">map</span>[reflect.Type]schema.GroupVersionKind</span><br><span class="line">  <span class="comment">// 可以在任意组合版本中创建的类型</span></span><br><span class="line">	unversionedKinds <span class="keyword">map</span>[<span class="keyword">string</span>]reflect.Type</span><br><span class="line">	<span class="comment">// 类型，属性标签转换函数</span></span><br><span class="line">	fieldLabelConversionFuncs <span class="keyword">map</span>[schema.GroupVersionKind]FieldLabelConversionFunc</span><br><span class="line">   <span class="comment">// 默认初始化函数</span></span><br><span class="line">	defaulterFuncs <span class="keyword">map</span>[reflect.Type]<span class="function"><span class="keyword">func</span><span class="params">(<span class="keyword">interface</span>&#123;&#125;)</span></span></span><br><span class="line">   <span class="comment">// 转换函数</span></span><br><span class="line">	converter *conversion.Converter</span><br><span class="line">   <span class="comment">// 版本优先级</span></span><br><span class="line">	versionPriority <span class="keyword">map</span>[<span class="keyword">string</span>][]<span class="keyword">string</span></span><br><span class="line">   <span class="comment">//记录类型注入时版本的顺序</span></span><br><span class="line">	observedVersions []schema.GroupVersion</span><br><span class="line">	schemeName <span class="keyword">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Scheme</code>内容的注册时机发生在创建<code>ApiServerCommand</code>的时候，其引入<code>k8s.io/kubernetes/pkg/master</code>包，而这个包中包含<code>import_known_versions.go</code>类，其引入众多<code>install</code>包：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="comment">// These imports are the API groups the API server will support.</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/admission/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/admissionregistration/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/apps/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/auditregistration/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/authentication/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/authorization/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/autoscaling/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/batch/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/certificates/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/coordination/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/core/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/discovery/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/events/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/extensions/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/flowcontrol/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/imagepolicy/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/networking/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/node/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/policy/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/rbac/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/scheduling/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/settings/install"</span></span><br><span class="line">	_ <span class="string">"k8s.io/kubernetes/pkg/apis/storage/install"</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>而，<code>Scheme</code>内容的注入则是在这些<code>install</code>中进行。下面以<code>k8s.io/kubernetes/pkg/apis/core/install</code>为例来介绍其注册过程：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</span><br><span class="line">	Install(legacyscheme.Scheme)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Install</span><span class="params">(scheme *runtime.Scheme)</span></span> &#123;</span><br><span class="line">	utilruntime.Must(core.AddToScheme(scheme))</span><br><span class="line">	utilruntime.Must(v1.AddToScheme(scheme))</span><br><span class="line">	utilruntime.Must(scheme.SetVersionPriority(v1.SchemeGroupVersion))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先，会将<code>core</code>包下的<code>API</code>资源注册到<code>Scheme</code>，再将<code>v1</code>包下的<code>API</code>资源注册到<code>Scheme</code>中，设置版本的优先级。<br><code>core</code>包下的注册内容如下：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addKnownTypes</span><span class="params">(scheme *runtime.Scheme)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">   <span class="comment">// 添加converter的忽略转换类型</span></span><br><span class="line">	<span class="keyword">if</span> err := scheme.AddIgnoredConversionType(&amp;metav1.TypeMeta&#123;&#125;, &amp;metav1.TypeMeta&#123;&#125;); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	scheme.AddKnownTypes(SchemeGroupVersion,</span><br><span class="line">		&amp;Pod&#123;&#125;,</span><br><span class="line">		&amp;PodList&#123;&#125;,</span><br><span class="line">		&amp;PodStatusResult&#123;&#125;,</span><br><span class="line">		&amp;PodTemplate&#123;&#125;,</span><br><span class="line">		&amp;PodTemplateList&#123;&#125;,</span><br><span class="line">		&amp;ReplicationControllerList&#123;&#125;,</span><br><span class="line">		&amp;ReplicationController&#123;&#125;,</span><br><span class="line">		&amp;ServiceList&#123;&#125;,</span><br><span class="line">		&amp;Service&#123;&#125;,</span><br><span class="line">		&amp;ServiceProxyOptions&#123;&#125;,</span><br><span class="line">		&amp;NodeList&#123;&#125;,</span><br><span class="line">		&amp;Node&#123;&#125;,</span><br><span class="line">		&amp;NodeProxyOptions&#123;&#125;,</span><br><span class="line">		&amp;Endpoints&#123;&#125;,</span><br><span class="line">		&amp;EndpointsList&#123;&#125;,</span><br><span class="line">		&amp;Binding&#123;&#125;,</span><br><span class="line">		&amp;Event&#123;&#125;,</span><br><span class="line">		&amp;EventList&#123;&#125;,</span><br><span class="line">		&amp;List&#123;&#125;</span><br><span class="line">      ...</span><br><span class="line">	)</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>将<code>core</code>包中关键<code>API</code>资源加入到<code>Scheme</code>中：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Scheme)</span> <span class="title">AddKnownTypes</span><span class="params">(gv schema.GroupVersion, types ...Object)</span></span> &#123;</span><br><span class="line">	s.addObservedVersion(gv)</span><br><span class="line">	<span class="keyword">for</span> _, obj := <span class="keyword">range</span> types &#123;</span><br><span class="line">    	t := reflect.TypeOf(obj)</span><br><span class="line">		t = t.Elem()</span><br><span class="line">		s.AddKnownTypeWithName(gv.WithKind(t.Name()), obj)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Scheme)</span> <span class="title">AddKnownTypeWithName</span><span class="params">(gvk schema.GroupVersionKind, obj Object)</span></span> &#123;</span><br><span class="line">	s.addObservedVersion(gvk.GroupVersion())</span><br><span class="line">	t := reflect.TypeOf(obj)</span><br><span class="line">	t = t.Elem()</span><br><span class="line">	<span class="comment">// 设置`GroupVersionKind`到类型反射的映射</span></span><br><span class="line">	s.gvkToType[gvk] = t</span><br><span class="line">	<span class="keyword">for</span> _, existingGvk := <span class="keyword">range</span> s.typeToGVK[t] &#123;</span><br><span class="line">		<span class="keyword">if</span> existingGvk == gvk &#123;</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 建立类型反射到`GroupVersionKind`列表的映射</span></span><br><span class="line">	s.typeToGVK[t] = <span class="built_in">append</span>(s.typeToGVK[t], gvk)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再看<code>v1.AddToScheme</code>，向<code>Scheme</code>中添加类型初始化函数<code>v1.addDefaultingFuncs</code>，向<code>Scheme</code>中添加转换函数<code>v1.addConversionFuncs</code></p>
+<h3 id="1-3-rest-Storage-gt-http-Handler"><a href="#1-3-rest-Storage-gt-http-Handler" class="headerlink" title="1.3 rest.Storage -&gt; http.Handler"></a>1.3 rest.Storage -&gt; http.Handler</h3><p><code>rest.Storage</code>到<code>http.Handler</code>的转换是<code>apiServer</code>中的重要部分。也是其抽象的精髓。位于<code>apiserver/pkg/endpoints/installer.go/registerResourceHandlers</code>。下面将详细阐述其实现过程：</p>
+<ol>
+<li>通过<code>Scheme</code>、<code>GroupVersion</code>、<code>Storage</code> 获取类型信息，<code>GroupVersionKind</code>；</li>
+<li>通过<code>Scheme</code>和<code>GroupVersionKind</code>创建类型实例；</li>
+<li>判断 <code>rest.Storage</code>实现了哪些接口：是否有创建接口（<code>isCreater</code>）、是否可列举（<code>isLister</code>）、是否可查询（<code>isGetter</code>）。判断的意义在于：确定该类型可以生成的<strong>Http行为</strong>；</li>
+<li>区分是否对命名空间敏感，形成不同的资源路径；其次，跟据前面的判断结果集生成可以生成httpHandler的<code>actions</code>。如 <code>LIST</code>、<code>POST</code>、<code>GET</code>、<code>WATCH</code>…；</li>
+<li>针对每种<code>action</code>，为其创建一个<code>route</code>（go-restful），同时为其构建一个处理函数<code>RouteFunction</code>；</li>
+<li>需要特别说明的一点是：对于修改操作，同时会将<code>Admit</code>传入<code>RouteFunction</code>中，为了在操作前进行准入的控制；</li>
+<li>最后，将每种<code>route</code>加入到<code>WebService</code>中。</li>
+</ol>
+<h2 id="单次请求过程"><a href="#单次请求过程" class="headerlink" title="单次请求过程"></a>单次请求过程</h2><p>下面本节将以创建一个<code>deployment</code>为例来讲解请求执行过程：<br>首先通过<code>kubectl</code>向<code>k8s-apiserver</code>发起创建<code>deployment</code>命令，<code>kubectl create -f nginx-deployment.yaml</code>。<br>其执行流程如下图：<br><img src="media/15645672183579/15810696269545.jpg" alt=""></p>
+<p>总结起来，其过程如下：</p>
+<ol>
+<li>首先经过过滤链进行处理，包括认证、准入等通用的功能链；</li>
+<li>开始依次经过aggregator、apiserver的<code>go-restful</code>的<code>Container</code>，查看是否匹配注册的规则；</li>
+<li>本次请求你<code>deploymenet</code>是<code>apps</code>API组中的资源，因此分发到对应的<code>apps/v1</code>WebService下<code>POST</code>route进行处理；</li>
+<li>route对应function是一个包装的handler<code>handlers.createHandlers</code>，其是整个请求核心逻辑模块，首先利用解码请求体（利用<code>Scheme</code>保障的<code>ParamterCocdec</code>），再通过准入控制插件（<strong>13种</strong>）的检测以及修改，调用<code>rest.Storage</code>进行操作etcd写入数据。</li>
+</ol>
+<h2 id="附件"><a href="#附件" class="headerlink" title="附件"></a>附件</h2><h3 id="1-处理链"><a href="#1-处理链" class="headerlink" title="1. 处理链"></a>1. 处理链</h3><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">handler := genericapifilters.WithAuthorization(apiHandler, c.Authorization.Authorizer, c.Serializer)</span><br><span class="line">handler = genericfilters.WithMaxInFlightLimit(handler, c.MaxRequestsInFlight, c.MaxMutatingRequestsInFlight, c.LongRunningFunc)</span><br><span class="line">handler = genericapifilters.WithImpersonation(handler, c.Authorization.Authorizer, c.Serializer)</span><br><span class="line">handler = genericapifilters.WithAudit(handler, c.AuditBackend, c.AuditPolicyChecker, c.LongRunningFunc)</span><br><span class="line">failedHandler := genericapifilters.Unauthorized(c.Serializer, c.Authentication.SupportsBasicAuth)</span><br><span class="line">failedHandler = genericapifilters.WithFailedAuthenticationAudit(failedHandler, c.AuditBackend, c.AuditPolicyChecker)</span><br><span class="line">handler = genericapifilters.WithAuthentication(handler, c.Authentication.Authenticator, failedHandler, c.Authentication.APIAudiences)</span><br><span class="line">handler = genericfilters.WithCORS(handler, c.CorsAllowedOriginList, <span class="literal">nil</span>, <span class="literal">nil</span>, <span class="literal">nil</span>, <span class="string">"true"</span>)</span><br><span class="line">handler = genericfilters.WithTimeoutForNonLongRunningRequests(handler, c.LongRunningFunc, c.RequestTimeout)</span><br><span class="line">handler = genericfilters.WithWaitGroup(handler, c.LongRunningFunc, c.HandlerChainWaitGroup)</span><br><span class="line">handler = genericapifilters.WithRequestInfo(handler, c.RequestInfoResolver)</span><br><span class="line">handler = genericfilters.WithPanicRecovery(handler)</span><br><span class="line"><span class="keyword">return</span> handler</span><br></pre></td></tr></table></figure>
+
+
+<p>拓展阅读：</p>
+<ul>
+<li><a href="https://mp.weixin.qq.com/s/K2LrmpYdmQRrb5NLT6A6eA" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/K2LrmpYdmQRrb5NLT6A6eA</a>    </li>
+<li><a href="https://feisky.gitbooks.io/kubernetes/components/apiserver.html" target="_blank" rel="noopener">https://feisky.gitbooks.io/kubernetes/components/apiserver.html</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/k8s/" rel="tag"># k8s</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/02/04/k8s/2.k8s%E6%9C%AC%E5%9C%B0%E8%B0%83%E8%AF%95/" rel="next" title="k8s本地调试">
+                <i class="fa fa-chevron-left"></i> k8s本地调试
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/02/05/k8s/4.k8s-informer/" rel="prev" title="通信组件 Informer">
+                通信组件 Informer <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-kube-apiserver（-v1-17-2）"><span class="nav-number">1.</span> <span class="nav-text">1. kube-apiserver（@v1.17.2）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-启动过程"><span class="nav-number">1.1.</span> <span class="nav-text">1. 启动过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-启动主流程"><span class="nav-number">1.1.1.</span> <span class="nav-text">1.1 启动主流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-Scheme"><span class="nav-number">1.1.2.</span> <span class="nav-text">1.2 Scheme</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-rest-Storage-gt-http-Handler"><span class="nav-number">1.1.3.</span> <span class="nav-text">1.3 rest.Storage -&gt; http.Handler</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#单次请求过程"><span class="nav-number">1.2.</span> <span class="nav-text">单次请求过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#附件"><span class="nav-number">1.3.</span> <span class="nav-text">附件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-处理链"><span class="nav-number">1.3.1.</span> <span class="nav-text">1. 处理链</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

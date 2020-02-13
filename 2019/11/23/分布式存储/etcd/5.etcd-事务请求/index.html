@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="etcd," />
+
+
+<meta name="description" content="4. 事务请求[TOC] 本节我们将讲述 etcd集群的事务请求处理过程。首先我们将以put操作为例来讲解一般性事务请求过程。其次，我们将介绍 etcd特有的线性一致性读请求过程。 put 请求通过 etcdctl put ty dj 命令，向本地监听2380端口的节点发送 写请求。该请求为GRPC请求，会中转到quotaKVServer进行处理。 Leader接收请求，并广播消息12345678">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ETCD事务请求">
+<meta property="og:url" content="https://dorgenjones.github.io/2019/11/23/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/5.etcd-%E4%BA%8B%E5%8A%A1%E8%AF%B7%E6%B1%82/index.html">
+<meta property="og:site_name" content="Zamperini">
+<meta property="og:description" content="4. 事务请求[TOC] 本节我们将讲述 etcd集群的事务请求处理过程。首先我们将以put操作为例来讲解一般性事务请求过程。其次，我们将介绍 etcd特有的线性一致性读请求过程。 put 请求通过 etcdctl put ty dj 命令，向本地监听2380端口的节点发送 写请求。该请求为GRPC请求，会中转到quotaKVServer进行处理。 Leader接收请求，并广播消息12345678">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-11-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-02-13T11:11:09.946Z">
+<meta property="article:author" content="Zamperini">
+<meta property="article:tag" content="etcd">
+<meta name="twitter:card" content="summary">
+
+
+
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/2019/11/23/分布式存储/etcd/5.etcd-事务请求/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>ETCD事务请求 | Zamperini</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zamperini</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2019/11/23/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/5.etcd-%E4%BA%8B%E5%8A%A1%E8%AF%B7%E6%B1%82/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ETCD事务请求</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-23T00:00:00+08:00">2019-11-23</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/etcd/" itemprop="url" rel="index"><span itemprop="name">etcd</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="4-事务请求"><a href="#4-事务请求" class="headerlink" title="4. 事务请求"></a>4. 事务请求</h1><p>[TOC]</p>
+<p>本节我们将讲述 <code>etcd</code>集群的事务请求处理过程。首先我们将以<code>put</code>操作为例来讲解一般性事务请求过程。其次，我们将介绍 <code>etcd</code>特有的线性一致性读请求过程。</p>
+<h2 id="put-请求"><a href="#put-请求" class="headerlink" title="put 请求"></a>put 请求</h2><p>通过 <code>etcdctl put ty dj</code> 命令，向本地监听<code>2380</code>端口的节点发送 写请求。<br>该请求为<code>GRPC</code>请求，会中转到<code>quotaKVServer</code>进行处理。</p>
+<h3 id="Leader接收请求，并广播消息"><a href="#Leader接收请求，并广播消息" class="headerlink" title="Leader接收请求，并广播消息"></a><code>Leader</code>接收请求，并广播消息</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">quotaKVServer.Put</span><br><span class="line">|- s.qa.check(ctx,r) <span class="comment">//检查是否满足quota,即是否有足够的内存，如果没有则忽略请求，并发报警</span></span><br><span class="line">|- EtcdServer.Put <span class="comment">// 调用EtcdServer进行写</span></span><br><span class="line">    |- s.raftRequest(ctx, pb.InternalRaftRequest&#123;Put: r&#125;) <span class="comment">// EtcdServer将请求进行包装成 `InternalRaftRequest`</span></span><br><span class="line">      并调用<span class="string">`raftRequest`</span>进行请求，并等待获取结果</span><br><span class="line">        |- s.processInternalRaftRequestOnce<span class="comment">// 最终会调用此方法  </span></span><br><span class="line">            |- <span class="keyword">if</span> ci &gt; ai+maxGapBetweenApplyAndCommitIndex <span class="comment">//首先检查apply索引和 commit索引是否相差太大，若太大则忽略请求（自我保护机制）</span></span><br><span class="line">            |- 生成请求头，并生成请求ID <span class="string">`s.reqIDGen.Next()`</span></span><br><span class="line">            |- r.Marshal() <span class="comment">// 对请求进行编码</span></span><br><span class="line">            |- ch := s.w.Register(id) <span class="comment">// 注册请求响应回调</span></span><br><span class="line">            |- err = s.r.Propose(cctx, data) <span class="comment">// 向 raftNode 发起提议，申请写入数据</span></span><br><span class="line">            |- <span class="keyword">select</span> &#123; <span class="comment">// 等待结果，或超时</span></span><br><span class="line">            	   <span class="keyword">case</span> x := &lt;-ch:</span><br><span class="line">            		  <span class="keyword">return</span> x.(*applyResult), <span class="literal">nil</span></span><br><span class="line">            		  <span class="keyword">case</span> timeout</span><br><span class="line">            	&#125;</span><br></pre></td></tr></table></figure>
+<p>接下来就进入了主要的处理流程：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">node.Propose</span><br><span class="line">|- n.stepWait(ctx, pb.Message&#123;Type: pb.MsgProp, Entries: []pb.Entry&#123;&#123;Data: data&#125;&#125;&#125;) <span class="comment">// 将请求包装成 `MsgProp`消息</span></span><br><span class="line">    |- n.stepWithWaitOption</span><br><span class="line">        |- pm := msgWithResult&#123;m: m&#125; <span class="comment">// 将消息再一次封装</span></span><br><span class="line">        |- 将消息传递给 通道<span class="string">`n.propc`</span></span><br></pre></td></tr></table></figure>
+<p>可以看出 将请求两层封装之后传递给通道<code>n.propc</code>。<br>在<code>node</code>的循环中，其会监听<code>proc</code>通道，当有消息到来时：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">node.start | <span class="number">360</span>+L</span><br><span class="line">|- m.From = r.id <span class="comment">// 将自己的id设置到消息的Form字段里</span></span><br><span class="line">|- err := r.Step(m) <span class="comment">// 再交给raft处理</span></span><br><span class="line">    |- r.step(r, m) <span class="comment">//此处就会根据节点的角色不同进行不同处理，若本节点是Follower则会转交给Leader节点进行处理，然后再进行如上的流程。这里假设本节点是主节点 即 stepLeader方法</span></span><br><span class="line">        |- r.appendEntry(m.Entries...) <span class="comment">// 将该记录追加到`raftLog`中</span></span><br><span class="line">            |- r.increaseUncommittedSize(es) <span class="comment">// 校验是否超过上界</span></span><br><span class="line">            |- r.raftLog.<span class="built_in">append</span>(es...) <span class="comment">// 追加到日志中记录下来（unstable中）</span></span><br><span class="line">            |- r.getProgress(r.id).maybeUpdate(li) <span class="comment">//更新本节点的复制进度</span></span><br><span class="line">            |- r.maybeCommit() <span class="comment">//对于单节点，尝试更新一次 raftLog中的 commit索引。//大多数节点都到达的索引</span></span><br><span class="line">        |- r.bcastAppend()  <span class="comment">// 广播消息</span></span><br><span class="line">            |- 对于每个其他成员节点，都执行 <span class="string">`r.sendAppend(id)`</span></span><br><span class="line">                |- pr := r.getProgress(to) <span class="comment">//获取节点的复制进程</span></span><br><span class="line">                |- term, errt := r.raftLog.term(pr.Next - <span class="number">1</span>) <span class="comment">// p.Next为该节点下次复制的索引号</span></span><br><span class="line">                |- ents, erre := r.raftLog.entries(pr.Next, r.maxMsgSize) <span class="comment">// 获取需要复制给对方节点的记录</span></span><br><span class="line">                |- 叫这些信息都封装成<span class="string">`MsgApp`</span>消息，进行发送</span><br><span class="line">                    |- r.send(m)</span><br><span class="line">                        |- r.msgs = <span class="built_in">append</span>(r.msgs, m) <span class="comment">// 将消息追加到了r.msgs中</span></span><br></pre></td></tr></table></figure>
+<p>当本节点将需要发送给每个成员节点的消息都放到<code>r.msgs</code>后，<code>node.run</code>会进入下一轮循环。此时：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">node.run</span><br><span class="line">|- rd = newReady(r, prevSoftSt, prevHardSt) <span class="comment">// 准备准备好发送的消息结构体 Ready</span></span><br><span class="line">    |- rd := Ready&#123;</span><br><span class="line">    		Entries:          r.raftLog.unstableEntries(),</span><br><span class="line">    		CommittedEntries: r.raftLog.nextEnts(),</span><br><span class="line">    		Messages:         r.msgs, <span class="comment">// 消息在此进行包装</span></span><br><span class="line">    	&#125;</span><br><span class="line">|- readyc = n.readyc    	</span><br><span class="line">|- <span class="keyword">select</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> readyc &lt;- rd: <span class="comment">// 此处即将消息传递到 n.readyc通道中</span></span><br><span class="line">     <span class="comment">//完成传递后，会进行一些状态的更新</span></span><br><span class="line">     <span class="keyword">if</span> index := rd.appliedCursor(); index != <span class="number">0</span> &#123;</span><br><span class="line">			applyingToI = index <span class="comment">// 提交消息的最大索引号</span></span><br><span class="line">		&#125;</span><br><span class="line">     advancec = n.advancec <span class="comment">// 赋值后，待本次消息发送完成后，进入下次循环。（等待 `raftNode`的通知）</span></span><br><span class="line">     <span class="keyword">case</span> &lt;-advancec:</span><br><span class="line">        <span class="comment">// 得到通知后，即知道之前的已提交的消息都已经发送出去了可以应用了</span></span><br><span class="line">			<span class="keyword">if</span> applyingToI != <span class="number">0</span> &#123;</span><br><span class="line">				r.raftLog.appliedTo(applyingToI)</span><br><span class="line">				applyingToI = <span class="number">0</span></span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>发送到<code>n.readyc</code>通道中的消息，会被<code>raftNode</code>捕获：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> rd := &lt;-r.Ready():</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">			<span class="keyword">if</span> islead &#123; <span class="comment">// 发送消息给相应节点</span></span><br><span class="line">		      r.transport.Send(r.processMessages(rd.Messages))</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// ...</span></span><br><span class="line">			r.Advance() <span class="comment">// 这里是通知 node.advancec 可以处理下一个循坏</span></span><br><span class="line">    <span class="comment">// ...   </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上是<code>Leader</code>角色接收到<code>Put</code>请求，然后自身进行处理，然后向 <code>Follower</code>发送<code>MsgApp</code>消息。</p>
+<h3 id="Follower接收到Leader的广播，进行处理回复"><a href="#Follower接收到Leader的广播，进行处理回复" class="headerlink" title="Follower接收到Leader的广播，进行处理回复"></a><code>Follower</code>接收到<code>Leader</code>的广播，进行处理回复</h3><p>当<code>Follower</code>收到消息后，会执行<code>EtcdServer.Process</code>方法：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">EtcdServer.Process</span><br><span class="line">|- node.Step</span><br><span class="line">    |- node.step</span><br><span class="line">        |- n.recvc &lt;- m <span class="comment">// 最终传递给node.recvc通道</span></span><br><span class="line">            |- raft.Step <span class="comment">// node监听node.recvc，接收到消息后调用 raft执行逻辑</span></span><br><span class="line">            |- stepFollower</span><br><span class="line">                |- r.handleAppendEntries(m) <span class="comment">//处理追加记录</span></span><br><span class="line">                    |- r.raftLog.maybeAppend(m.Index, m.LogTerm, m.Commit, m.Entries...) <span class="comment">// 尝试追加消息</span></span><br><span class="line">                        |- l.matchTerm(index, logTerm) <span class="comment">// 校验 term 和index信息是否跟本节点一致</span></span><br><span class="line">                        |- l.findConflict(ents) <span class="comment">//找出冲突的索引号</span></span><br><span class="line">                        |- l.<span class="built_in">append</span>(ents[ci-offset:]...) <span class="comment">// 追加记录到raftLog中(unstable中)</span></span><br><span class="line">                        |- l.commitTo(min(committed, lastnewi)) <span class="comment">// 更新 commitId</span></span><br><span class="line">                    |- r.send(pb.Message&#123;To: m.From, Type: pb.MsgAppResp, Index: mlastIndex&#125;) <span class="comment">// 向 Leader反馈 信息`MsgAppResp`和索引号</span></span><br><span class="line">                        |- r.msgs = <span class="built_in">append</span>(r.msgs, m) <span class="comment">// 将消息追加到了r.msgs中</span></span><br></pre></td></tr></table></figure>
+<p>发送的消息最终被 <code>raftNode</code>接收:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> rd := &lt;-r.Ready():</span><br><span class="line">        notifyc := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</span><br><span class="line">			ap := apply&#123;</span><br><span class="line">				entries:  rd.CommittedEntries, <span class="comment">// raft中已经提交的消息，</span></span><br><span class="line">				snapshot: rd.Snapshot,</span><br><span class="line">				notifyc:  notifyc,</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 将Committed数据应用到</span></span><br><span class="line">			updateCommittedIndex(&amp;ap, rh) <span class="comment">// 更新 EtcdServer的CommitId</span></span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">				<span class="keyword">case</span> r.applyc &lt;- ap: <span class="comment">// 将应用信息传递到 raftNode.applyc通道中，其被EtcdServer所监听。后续详解</span></span><br><span class="line">			&#125;</span><br><span class="line">			r.storage.Save(rd.HardState, rd.Entries) <span class="comment">// 实际调用WAL的Save方法，将记录写入到文件中 // ... wal</span></span><br><span class="line">			r.raftStorage.Append(rd.Entries) <span class="comment">// 将消息追加到 MemoryStorage中  </span></span><br><span class="line">		   <span class="keyword">if</span> !islead &#123;</span><br><span class="line">		      notifyc &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">		      r.transport.Send(msgs)</span><br><span class="line">		   &#125;</span><br><span class="line">			r.Advance() <span class="comment">// 这里是通知 node.advancec 可以处理下一个循坏</span></span><br><span class="line">    <span class="comment">// ...   </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再看<code>EtcdServer</code>接收到<code>apply</code>消息后的处理：<br>再来看 <code>EtcdServer</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">EtcdServer/<span class="number">1020</span>L+-</span><br><span class="line"><span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> ap := &lt;-s.r.apply():</span><br><span class="line">		f := <span class="function"><span class="keyword">func</span><span class="params">(context.Context)</span></span> &#123; s.applyAll(&amp;ep, &amp;ap) &#125;</span><br><span class="line">		sched.Schedule(f) <span class="comment">// 顺序调用`s.appAll`方法</span></span><br><span class="line">		s.applySnapshot(ep, apply)</span><br><span class="line">	   s.applyEntries(ep, apply) <span class="comment">//这里是应用服务最重要的地方</span></span><br><span class="line">	   |- 首先筛选出需要应用到此<span class="string">`EtcdServer`</span>的记录</span><br><span class="line">	   |- s.apply(ents, &amp;ep.confState)<span class="comment">//然后将这些记录应用到 `EtcdServer`中</span></span><br><span class="line">	       |- 对于正常的记录（<span class="string">`EntryNormal`</span>类型）</span><br><span class="line">	           |- <span class="keyword">case</span> raftpb.EntryNormal:</span><br><span class="line">            		s.applyEntryNormal(&amp;e)</span><br><span class="line">            		  |- s.consistIndex.setConsistentIndex(e.Index)<span class="comment">// 设置一致性索引号</span></span><br><span class="line">            		  |- 解码消息 Unmarshal</span><br><span class="line">            		  |- ar = s.applyV3.Apply(&amp;raftReq) <span class="comment">// 应用到应用数据存储中</span></span><br><span class="line">            		  |- s.w.Trigger(id, ar) <span class="comment">// 回调，通知该记录对应的请求</span></span><br><span class="line">           		    s.setAppliedIndex(e.Index)</span><br><span class="line">           			s.setTerm(e.Term)</span><br><span class="line"></span><br><span class="line">    |- &lt;-apply.notifyc <span class="comment">// 接到raftNode的通知已经完成发送等操作</span></span><br><span class="line">    |- s.triggerSnapshot(ep) <span class="comment">// 检查是否有 SnapshotCount操作，如果有则进行快照</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>总结起来，<code>Follower</code>节点接收到<code>Leader</code>节点的<code>MsgApp</code>应用到其节点中，然后向反馈<code>Leader</code> <code>MsgAppResp</code>消息，并带上自己的最大记录号。</p>
+<h3 id="Leader收到Follower的回复进行处理"><a href="#Leader收到Follower的回复进行处理" class="headerlink" title="Leader收到Follower的回复进行处理"></a><code>Leader</code>收到<code>Follower</code>的回复进行处理</h3><p><code>Leader</code>收到<code>MsgAppResp</code>消息后，经过层层传递到<code>stepLeader</code>方法中：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">|- pr := r.getProgress(m.From) <span class="comment">// 获取该节点的进度</span></span><br><span class="line">|- <span class="keyword">switch</span> m.Type &#123;</span><br><span class="line">	<span class="keyword">case</span> pb.MsgAppResp:</span><br><span class="line">	   pr.RecentActive = <span class="literal">true</span> <span class="comment">//设置该节点状态</span></span><br><span class="line">	   |- pr.maybeUpdate(m.Index) <span class="comment">//更新该节点在 主节点中的进度信息（已经复制到什么位置了）</span></span><br><span class="line">	   |- 根据该节点的状态进行相应操作</span><br><span class="line">	   |- <span class="keyword">if</span> r.maybeCommit() &#123; <span class="comment">// 判断是否可以提交</span></span><br><span class="line">			r.bcastAppend()  <span class="comment">// 若可以提交，则广播消息</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>我们先来看判断是否可以提交的逻辑：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">raft.maybeCommit</span><br><span class="line">mis := r.matchBuf[:<span class="built_in">len</span>(r.prs)]</span><br><span class="line">idx := <span class="number">0</span></span><br><span class="line"><span class="comment">// 首先将每个成员节点确认的同步消息索引号放入数组中</span></span><br><span class="line"><span class="keyword">for</span> _, p := <span class="keyword">range</span> r.prs &#123;</span><br><span class="line">	mis[idx] = p.Match</span><br><span class="line">	idx++</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 按索引号排序</span></span><br><span class="line">sort.Sort(mis)</span><br><span class="line"><span class="comment">// 获取 len(mis)-r.quorum()位的索引位置</span></span><br><span class="line">mci := mis[<span class="built_in">len</span>(mis)-r.quorum()]</span><br><span class="line"><span class="keyword">return</span> r.raftLog.maybeCommit(mci, r.Term) <span class="comment">//判断是否比raftLog中的CommitId大，若是则表示有数据可以提交</span></span><br><span class="line">    |- <span class="keyword">if</span> maxIndex &gt; l.committed &amp;&amp; l.zeroTermOnErrCompacted(l.term(maxIndex)) == term &#123;</span><br><span class="line">		l.commitTo(maxIndex) <span class="comment">// 更新commitId</span></span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p><code>r.bcastAppend()</code>的处理过程之前以及介绍过，其会构造一遍<code>Ready</code>数据结构，带上<code>CommitedEntries</code>提交的数据、其他节点未同步的<code>Entries</code>，传递给<code>raftNode</code>。<code>raftNode</code>接收到此消息后，会执行与上面分析的<code>Follower</code>的逻辑类似。</p>
+<h2 id="线性一致性读"><a href="#线性一致性读" class="headerlink" title="线性一致性读"></a>线性一致性读</h2><p>线性一致性读和一般的读不通的时候，会在进行真正的读请求之前，先与其他节点进行一个check，查看当前集群主是否发生了变化。通过<code>etcdctl get ty</code>命令，向监听本地<code>2380</code>端口的节点发送<code>GRPC</code>请求，会被中转到<code>quotaKVServer</code>上。<br><code>get</code>请求在<code>etcdctl</code>中会被转换成<code>Range</code>请求。<code>quotaKVServer</code>最终会调用<code>EtcdServer.Range</code>方法。</p>
+<h3 id="Leader节点收到请求后，广播心跳消息"><a href="#Leader节点收到请求后，广播心跳消息" class="headerlink" title="Leader节点收到请求后，广播心跳消息"></a><code>Leader</code>节点收到请求后，广播心跳消息</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">quotaKVServer</span><br><span class="line">|- kvServer.Range</span><br><span class="line">    |- EtcdServer.Range</span><br><span class="line">        |- <span class="keyword">if</span> !r.Serializable &#123; <span class="comment">//是否线性一致性</span></span><br><span class="line">    		err = s.linearizableReadNotify(ctx)</span><br><span class="line">    		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    			<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">    		&#125;</span><br><span class="line">    		resp, err = s.applyV3Base.Range(<span class="literal">nil</span>, r)</span><br><span class="line">    	&#125;</span><br></pre></td></tr></table></figure>
+<p>线性一致性读的主要逻辑体现在 <code>s.linearizableReadNotify</code>中。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">s.linearizableReadNotify  <span class="comment">// 线性读通知</span></span><br><span class="line">|- nc := s.readNotifier <span class="comment">// 用于通知读协程可以进行读操作</span></span><br><span class="line">|- <span class="keyword">select</span> &#123;</span><br><span class="line">	   <span class="keyword">case</span> s.readwaitc &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;: <span class="comment">//通知读等待通道</span></span><br><span class="line">	&#125;</span><br><span class="line">|- <span class="keyword">select</span> &#123;</span><br><span class="line">	   <span class="keyword">case</span> &lt;-nc.c: <span class="comment">// 等待读状态通知</span></span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p><code>EtcdServer</code>在启动的时候会启动<code>linearizableReadLoop</code>线性一致性读循环。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">linearizableReadLoop</span><br><span class="line">|- ctxToSend := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="number">8</span>)</span><br><span class="line">|- id1 := s.reqIDGen.Next()</span><br><span class="line">|- binary.BigEndian.PutUint64(ctxToSend, id1)</span><br><span class="line">|- <span class="keyword">for</span> ;; &#123;</span><br><span class="line">     <span class="keyword">select</span> &#123;</span><br><span class="line">    	<span class="keyword">case</span> &lt;-s.readwaitc: <span class="comment">// 当接收到线性一致性读请求后，循环就可以往下走</span></span><br><span class="line">    	&#125;</span><br><span class="line">    	nextnr := newNotifier() <span class="comment">// 创建新的读通知器，给下一个读请求使用</span></span><br><span class="line">    	nr := s.readNotifier</span><br><span class="line">		s.readNotifier = nextnr</span><br><span class="line">		err := s.r.ReadIndex(cctx, ctxToSend) <span class="comment">// 调用`node.ReadeIndex`发起读索引请求</span></span><br><span class="line">	   <span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> rs = &lt;-s.r.readStateC:</span><br><span class="line">			done = bytes.Equal(rs.RequestCtx, ctxToSend)</span><br><span class="line">		<span class="keyword">case</span> &lt;-leaderChangedNotifier:</span><br><span class="line">			nr.notify(ErrLeaderChanged)</span><br><span class="line">		<span class="keyword">case</span> &lt;-time.After(s.Cfg.ReqTimeout()):</span><br><span class="line">			nr.notify(ErrTimeout)</span><br><span class="line">			timeout = <span class="literal">true</span></span><br><span class="line">			slowReadIndex.Inc()</span><br><span class="line">		<span class="keyword">case</span> &lt;-s.stopping:</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">|- nr.notify(<span class="literal">nil</span>)</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">node.ReadIndex</span><br><span class="line">|- n.step(ctx, pb.Message&#123;Type: pb.MsgReadIndex, Entries: []pb.Entry&#123;&#123;Data: rctx&#125;&#125;&#125;) <span class="comment">//</span></span><br><span class="line">    |- raft.Step</span><br><span class="line">        |- raft.stepLeader</span><br><span class="line">            |- <span class="keyword">if</span> r.raftLog.zeroTermOnErrCompacted(r.raftLog.term(r.raftLog.committed)) != r.Term &#123; <span class="comment">// 当本任期没有提交任何消息时，拒绝读</span></span><br><span class="line">    				<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    			&#125;</span><br><span class="line">    			<span class="keyword">switch</span> r.readOnly.option &#123;</span><br><span class="line">    			<span class="keyword">case</span> <span class="string">`ReadOnlySafe`</span>:</span><br><span class="line">    				r.readOnly.addRequest(r.raftLog.committed, m) <span class="comment">// 将只读请求添加到`readyOnly`结构里。</span></span><br><span class="line">    				r.bcastHeartbeatWithCtx(m.Entries[<span class="number">0</span>].Data)<span class="comment">// 带上请求的ID，向所有成员节点发送心跳。</span></span><br><span class="line">    			<span class="keyword">case</span> <span class="string">`ReadOnlyLeaseBased`</span>:</span><br><span class="line">    				ri := r.raftLog.committed</span><br><span class="line">    				<span class="keyword">if</span> m.From == None || m.From == r.id &#123; <span class="comment">// from local member</span></span><br><span class="line">    					r.readStates = <span class="built_in">append</span>(r.readStates, ReadState&#123;Index: r.raftLog.committed, RequestCtx: m.Entries[<span class="number">0</span>].Data&#125;)</span><br><span class="line">    				&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    					r.send(pb.Message&#123;To: m.From, Type: pb.MsgReadIndexResp, Index: ri, Entries: m.Entries&#125;)</span><br><span class="line">    				&#125;</span><br><span class="line">    			&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Follower接收到Leader的心跳请求，并返回"><a href="#Follower接收到Leader的心跳请求，并返回" class="headerlink" title="Follower接收到Leader的心跳请求，并返回"></a><code>Follower</code>接收到<code>Leader</code>的心跳请求，并返回</h3><p><code>Follower</code>接收到<code>Leader</code>的心跳请求，最终会调用：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">r.raftLog.commitTo(m.Commit)</span><br><span class="line">r.send(pb.Message&#123;To: m.From, Type: pb.MsgHeartbeatResp, Context: m.Context&#125;) <span class="comment">// 发送心跳回复</span></span><br></pre></td></tr></table></figure>
+<h3 id="Leader接收Follower回复，通知客户端请求继续"><a href="#Leader接收Follower回复，通知客户端请求继续" class="headerlink" title="Leader接收Follower回复，通知客户端请求继续"></a><code>Leader</code>接收<code>Follower</code>回复，通知客户端请求继续</h3><p><code>Leader</code>节点接收到<code>Follower</code>的回复后，最终会调用如下逻辑：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">pr.RecentActive = <span class="literal">true</span></span><br><span class="line"><span class="keyword">if</span> pr.Match &lt; r.raftLog.lastIndex() &#123; <span class="comment">// 当Follower节点有数据没复制时，进行发送</span></span><br><span class="line">	r.sendAppend(m.From)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 操作readyOnly接收Ack，并返回有多少节点已经确认</span></span><br><span class="line">ackCount := r.readOnly.recvAck(m)</span><br><span class="line"><span class="keyword">if</span> ackCount &lt; r.quorum() &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 返回有哪些请求可以继续往下走</span></span><br><span class="line">rss := r.readOnly.advance(m)</span><br><span class="line"><span class="keyword">for</span> _, rs := <span class="keyword">range</span> rss &#123;</span><br><span class="line">	req := rs.req</span><br><span class="line">	<span class="keyword">if</span> req.From == None || req.From == r.id &#123;</span><br><span class="line">	   <span class="comment">// 将可以读的请求信息放到 r.readStates中，等后面提交到 ReadyC结构体，向上提交进行处理。</span></span><br><span class="line">		r.readStates = <span class="built_in">append</span>(r.readStates, ReadState&#123;Index: rs.index, RequestCtx: req.Entries[<span class="number">0</span>].Data&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ro *readOnly)</span> <span class="title">recvAck</span><span class="params">(m pb.Message)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">	rs, ok := ro.pendingReadIndex[<span class="keyword">string</span>(m.Context)]  <span class="comment">// m.Context 为请求ID</span></span><br><span class="line">	<span class="keyword">if</span> !ok &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">	&#125;</span><br><span class="line">	rs.acks[m.From] = <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">len</span>(rs.acks) + <span class="number">1</span> <span class="comment">// 返回已经有多少Follower进行了应答</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 返回容许读的请求ID列表</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ro *readOnly)</span> <span class="title">advance</span><span class="params">(m pb.Message)</span> []*<span class="title">readIndexStatus</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> (</span><br><span class="line">		i     <span class="keyword">int</span></span><br><span class="line">		found <span class="keyword">bool</span></span><br><span class="line">	)</span><br><span class="line">	ctx := <span class="keyword">string</span>(m.Context)</span><br><span class="line">	rss := []*readIndexStatus&#123;&#125;</span><br><span class="line">	<span class="keyword">for</span> _, okctx := <span class="keyword">range</span> ro.readIndexQueue &#123;</span><br><span class="line">		i++</span><br><span class="line">		rs, ok := ro.pendingReadIndex[okctx]</span><br><span class="line">		rss = <span class="built_in">append</span>(rss, rs)</span><br><span class="line">		<span class="comment">// 找到匹配的读，以及可以触发读的请求队列。</span></span><br><span class="line">		<span class="keyword">if</span> okctx == ctx &#123;</span><br><span class="line">			found = <span class="literal">true</span></span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> found &#123;</span><br><span class="line">		ro.readIndexQueue = ro.readIndexQueue[i:]<span class="comment">// 剔除之前的读请求</span></span><br><span class="line">		<span class="keyword">for</span> _, rs := <span class="keyword">range</span> rss &#123;</span><br><span class="line">			<span class="built_in">delete</span>(ro.pendingReadIndex, <span class="keyword">string</span>(rs.req.Entries[<span class="number">0</span>].Data))</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> rss</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>raftNode</code>结构体接收到<code>Ready</code>消息时，会检查是否有<code>ReadStates</code>，然后对其进行处理：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="built_in">len</span>(rd.ReadStates) != <span class="number">0</span> &#123;</span><br><span class="line">	<span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> r.readStateC &lt;- rd.ReadStates[<span class="built_in">len</span>(rd.ReadStates)<span class="number">-1</span>]:</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再回到<code>linearizableReadLoop</code>中：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> rs = &lt;-s.r.readStateC:</span><br><span class="line">	<span class="keyword">case</span> &lt;-leaderChangedNotifier:</span><br><span class="line">		nr.notify(ErrLeaderChanged)</span><br><span class="line">	<span class="keyword">case</span> &lt;-time.After(s.Cfg.ReqTimeout()):</span><br><span class="line">		nr.notify(ErrTimeout)</span><br><span class="line">	<span class="keyword">case</span> &lt;-s.stopping:</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">nr.notify(<span class="literal">nil</span>) <span class="comment">// 通知客户端可以进行查询请求</span></span><br></pre></td></tr></table></figure>
+<p>到此就完成线性一致性读的全过程。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/etcd/" rel="tag"># etcd</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/11/22/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/4.etcd-%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" rel="next" title="ETCD网络通信">
+                <i class="fa fa-chevron-left"></i> ETCD网络通信
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/11/24/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/6.etcd-ttl&lease/" rel="prev" title="TTL&Lease实现">
+                TTL&Lease实现 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#4-事务请求"><span class="nav-number">1.</span> <span class="nav-text">4. 事务请求</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#put-请求"><span class="nav-number">1.1.</span> <span class="nav-text">put 请求</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Leader接收请求，并广播消息"><span class="nav-number">1.1.1.</span> <span class="nav-text">Leader接收请求，并广播消息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Follower接收到Leader的广播，进行处理回复"><span class="nav-number">1.1.2.</span> <span class="nav-text">Follower接收到Leader的广播，进行处理回复</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Leader收到Follower的回复进行处理"><span class="nav-number">1.1.3.</span> <span class="nav-text">Leader收到Follower的回复进行处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#线性一致性读"><span class="nav-number">1.2.</span> <span class="nav-text">线性一致性读</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Leader节点收到请求后，广播心跳消息"><span class="nav-number">1.2.1.</span> <span class="nav-text">Leader节点收到请求后，广播心跳消息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Follower接收到Leader的心跳请求，并返回"><span class="nav-number">1.2.2.</span> <span class="nav-text">Follower接收到Leader的心跳请求，并返回</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Leader接收Follower回复，通知客户端请求继续"><span class="nav-number">1.2.3.</span> <span class="nav-text">Leader接收Follower回复，通知客户端请求继续</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

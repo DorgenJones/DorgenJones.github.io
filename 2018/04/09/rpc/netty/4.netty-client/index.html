@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="rpc,nio,netty," />
+
+
+<meta name="description" content="客户端请求发送与获取响应在Netty里，发送请求的过程可以分为两步：1. 将请求写到缓存队列中，2.将缓存队列中的请求进行 flush —– 调用原生的SocketChannel进行发送。 在客户端初始化时，讲到客户端的Channel会在Selector上注册OP_READ操作，当有服务端响应结果时，则触发OP_READ事件。 请求发送首先来看发送请求的过程：SocketChannel 有两个方法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Netty 客户端请求&amp;响应">
+<meta property="og:url" content="https://dorgenjones.github.io/2018/04/09/rpc/netty/4.netty-client/index.html">
+<meta property="og:site_name" content="Zamperini">
+<meta property="og:description" content="客户端请求发送与获取响应在Netty里，发送请求的过程可以分为两步：1. 将请求写到缓存队列中，2.将缓存队列中的请求进行 flush —– 调用原生的SocketChannel进行发送。 在客户端初始化时，讲到客户端的Channel会在Selector上注册OP_READ操作，当有服务端响应结果时，则触发OP_READ事件。 请求发送首先来看发送请求的过程：SocketChannel 有两个方法">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-04-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-02-13T11:06:01.857Z">
+<meta property="article:author" content="Zamperini">
+<meta property="article:tag" content="rpc">
+<meta property="article:tag" content="nio">
+<meta property="article:tag" content="netty">
+<meta name="twitter:card" content="summary">
+
+
+
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/2018/04/09/rpc/netty/4.netty-client/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>Netty 客户端请求&响应 | Zamperini</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zamperini</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2018/04/09/rpc/netty/4.netty-client/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Netty 客户端请求&响应</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-09T00:00:00+08:00">2018-04-09</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/netty/" itemprop="url" rel="index"><span itemprop="name">netty</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="客户端请求发送与获取响应"><a href="#客户端请求发送与获取响应" class="headerlink" title="客户端请求发送与获取响应"></a>客户端请求发送与获取响应</h1><p>在<code>Netty</code>里，发送请求的过程可以分为两步：1. 将请求写到缓存队列中，2.将缓存队列中的请求进行 <strong>flush</strong> —– 调用原生的<code>SocketChannel</code>进行发送。</p>
+<p><strong>在客户端初始化时</strong>，讲到客户端的<code>Channel</code>会在<code>Selector</code>上注册<code>OP_READ</code>操作，当有服务端响应结果时，则触发<code>OP_READ</code>事件。</p>
+<h2 id="请求发送"><a href="#请求发送" class="headerlink" title="请求发送"></a>请求发送</h2><p>首先来看发送请求的过程：<strong>SocketChannel</strong> 有两个方法用于发送请求，<code>write</code>和<code>writeAndFlush</code>，其中<code>write</code>用于将请求<code>ByteBuf</code>放入发送队列中，<code>writeAndFlush</code>则将请求发送到队列中，并把发送队列中的数据发送出去。这里以<code>writeAndFlush</code>来讲解整个过程<br>调用<code>writeAndFlush</code>方法最终会调用<code>AbstractChannelHandlerContext.write</code>方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">write</span><span class="params">(Object msg, <span class="keyword">boolean</span> flush, ChannelPromise promise)</span> </span>&#123;</span><br><span class="line">   AbstractChannelHandlerContext next = findContextOutbound();</span><br><span class="line">   <span class="keyword">final</span> Object m = pipeline.touch(msg, next);</span><br><span class="line">   EventExecutor executor = next.executor();</span><br><span class="line">   <span class="keyword">if</span> (executor.inEventLoop()) &#123;</span><br><span class="line">       <span class="keyword">if</span> (flush) &#123;</span><br><span class="line">           next.invokeWriteAndFlush(m, promise);</span><br><span class="line">       &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">           next.invokeWrite(m, promise);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       AbstractWriteTask task;</span><br><span class="line">       <span class="keyword">if</span> (flush) &#123;</span><br><span class="line">           task = WriteAndFlushTask.newInstance(next, m, promise);</span><br><span class="line">       &#125;  <span class="keyword">else</span> &#123;</span><br><span class="line">           task = WriteTask.newInstance(next, m, promise);</span><br><span class="line">       &#125;</span><br><span class="line">       safeExecute(executor, task, promise, m);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其判断发起请求操作 <code>channel</code> 的对应的线程上下文中，不是则创建任务并将其扔进<code>EventLoop</code>的任务队列中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">invokeWriteAndFlush</span><span class="params">(Object msg, ChannelPromise promise)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">if</span> (invokeHandler()) &#123;</span><br><span class="line">       invokeWrite0(msg, promise);</span><br><span class="line">       invokeFlush0();</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       writeAndFlush(msg, promise);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">invokeWrite0</span><span class="params">(Object msg, ChannelPromise promise)</span> </span>&#123;</span><br><span class="line">   ((ChannelOutboundHandler) handler()).write(<span class="keyword">this</span>, msg, promise);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">invokeFlush0</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   ((ChannelOutboundHandler) handler()).flush(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里就可以看到<code>invokeWrite0</code>和<code>invokeFlush0</code>两个过程：</p>
+<ol>
+<li>invokeWrite0调用链如下：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">HeadContext.write</span><br><span class="line">-&gt; AbstractChannel.unsafe.write</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">write</span><span class="params">(Object msg, ChannelPromise promise)</span> </span>&#123;</span><br><span class="line">  ChannelOutboundBuffer outboundBuffer = <span class="keyword">this</span>.outboundBuffer;</span><br><span class="line">  <span class="keyword">int</span> size;</span><br><span class="line">  msg = filterOutboundMessage(msg);</span><br><span class="line">  size = pipeline.estimatorHandle().size(msg);</span><br><span class="line">  <span class="keyword">if</span> (size &lt; <span class="number">0</span>) &#123;</span><br><span class="line">      size = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  outboundBuffer.addMessage(msg, size, promise);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addMessage</span><span class="params">(Object msg, <span class="keyword">int</span> size, ChannelPromise promise)</span> </span>&#123;</span><br><span class="line">   Entry entry = Entry.newInstance(msg, size, total(msg), promise);</span><br><span class="line">   <span class="keyword">if</span> (tailEntry == <span class="keyword">null</span>) &#123;</span><br><span class="line">       flushedEntry = <span class="keyword">null</span>;</span><br><span class="line">       tailEntry = entry;</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       Entry tail = tailEntry;</span><br><span class="line">       tail.next = entry;</span><br><span class="line">       tailEntry = entry;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">if</span> (unflushedEntry == <span class="keyword">null</span>) &#123;</span><br><span class="line">       unflushedEntry = entry;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最终可以看到，write的过程是将<code>msg</code>包装进<code>Entry</code>然后加到<code>outboundBuffer</code>中，并没有做真正的发送。</p>
+<p>在看<code>flush</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">flush</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  ChannelOutboundBuffer outboundBuffer = <span class="keyword">this</span>.outboundBuffer;</span><br><span class="line">  <span class="keyword">if</span> (outboundBuffer == <span class="keyword">null</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 将之前加进去的数据设置为flushed，可以开始发送</span></span><br><span class="line">  outboundBuffer.addFlush();</span><br><span class="line">  <span class="comment">// 将可以发送的消息进行发送</span></span><br><span class="line">  flush0();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>flush方法先讲<code>outboundBuffer</code>之前<code>add</code>的消息标记为已发送，然后调用<strong>flush0</strong>进行真正的发送。</p>
+<h2 id="获取响应"><a href="#获取响应" class="headerlink" title="获取响应"></a>获取响应</h2><p>当 <strong>Server</strong> 端接收到请求并处理后返回结果给<strong>Client</strong>端。<strong>Client</strong>端的<code>NioEventLoop.Selector</code>会告诉客户端数据已准备好可读触发<strong>unsafe.read</strong>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">read</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">final</span> ChannelConfig config = config();</span><br><span class="line">  <span class="keyword">final</span> ChannelPipeline pipeline = pipeline();</span><br><span class="line">  <span class="keyword">final</span> ByteBufAllocator allocator = config.getAllocator();</span><br><span class="line">  <span class="comment">// ByteBuf 内存分配器（内存分配策略是Netty里值得深入理解的一块，后文中我们将单独领出来说）</span></span><br><span class="line">  <span class="keyword">final</span> RecvByteBufAllocator.Handle allocHandle = recvBufAllocHandle();</span><br><span class="line">  allocHandle.reset(config);</span><br><span class="line">  ByteBuf byteBuf = <span class="keyword">null</span>;</span><br><span class="line">  <span class="keyword">boolean</span> close = <span class="keyword">false</span>;</span><br><span class="line">  <span class="keyword">do</span> &#123;</span><br><span class="line">      byteBuf = allocHandle.allocate(allocator);</span><br><span class="line">      <span class="comment">// 从SocketChannel中读取数据到byteBuf中</span></span><br><span class="line">      allocHandle.lastBytesRead(doReadBytes(byteBuf));</span><br><span class="line">      <span class="keyword">if</span> (allocHandle.lastBytesRead() &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">          byteBuf.release();</span><br><span class="line">          byteBuf = <span class="keyword">null</span>;</span><br><span class="line">          close = allocHandle.lastBytesRead() &lt; <span class="number">0</span>;</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      allocHandle.incMessagesRead(<span class="number">1</span>);</span><br><span class="line">      readPending = <span class="keyword">false</span>;</span><br><span class="line">      <span class="comment">// 触发数据读取事件，调用channelHanlder的channelRead方法</span></span><br><span class="line">      pipeline.fireChannelRead(byteBuf);</span><br><span class="line">      byteBuf = <span class="keyword">null</span>;</span><br><span class="line">  &#125; <span class="keyword">while</span> (allocHandle.continueReading());</span><br><span class="line">  allocHandle.readComplete();</span><br><span class="line">  <span class="comment">// 调用channelHandler的channelReadComplete方法</span></span><br><span class="line">  pipeline.fireChannelReadComplete();</span><br><span class="line">  <span class="keyword">if</span> (close) &#123;</span><br><span class="line">      closeOnRead(pipeline);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到大体流程是，先调用<strong>allocHandle</strong>分配一个<strong>ByteBuf</strong>，然后从<code>ScoketChannel</code>中读取数据，触发<strong>pipeline.fireChannelRead</strong>（执行<code>channelHandler</code>的<code>channelRead</code>方法）方法，读取完成后再执行<strong>pipeline.fireChannelReadComplete</strong>方法（执行<code>channelHandler</code>的<code>channelRead</code>方法）。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/rpc/" rel="tag"># rpc</a>
+          
+            <a href="/tags/nio/" rel="tag"># nio</a>
+          
+            <a href="/tags/netty/" rel="tag"># netty</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/08/rpc/netty/3.netty-nioeventloop/" rel="next" title="Netty NioEventLoop">
+                <i class="fa fa-chevron-left"></i> Netty NioEventLoop
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/11/rpc/netty/5.netty-server/" rel="prev" title="Netty 服务接收请求&响应">
+                Netty 服务接收请求&响应 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#客户端请求发送与获取响应"><span class="nav-number">1.</span> <span class="nav-text">客户端请求发送与获取响应</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#请求发送"><span class="nav-number">1.1.</span> <span class="nav-text">请求发送</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#获取响应"><span class="nav-number">1.2.</span> <span class="nav-text">获取响应</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

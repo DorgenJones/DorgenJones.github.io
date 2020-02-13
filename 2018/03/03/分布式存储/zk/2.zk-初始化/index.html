@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="zookeeper," />
+
+
+<meta name="description" content="2. 初始化过程下面，将从客户端初始化和服务端初始化两个方面来讲解ZK的初始化过程： 客户端初始化123456789101112131415161718192021222324public ZooKeeper(String connectString, int sessionTimeout, Watcher watcher, boolean canBeReadOnly, HostProvider">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Zookeeper 初始化">
+<meta property="og:url" content="https://dorgenjones.github.io/2018/03/03/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/zk/2.zk-%E5%88%9D%E5%A7%8B%E5%8C%96/index.html">
+<meta property="og:site_name" content="Zamperini">
+<meta property="og:description" content="2. 初始化过程下面，将从客户端初始化和服务端初始化两个方面来讲解ZK的初始化过程： 客户端初始化123456789101112131415161718192021222324public ZooKeeper(String connectString, int sessionTimeout, Watcher watcher, boolean canBeReadOnly, HostProvider">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://dorgenjones.github.io/2018/03/03/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/zk/2.zk-%E5%88%9D%E5%A7%8B%E5%8C%96/media/15274999409834/15276381215150.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2018/03/03/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/zk/2.zk-%E5%88%9D%E5%A7%8B%E5%8C%96/media/15269002735103/15273896493986.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2018/03/03/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/zk/2.zk-%E5%88%9D%E5%A7%8B%E5%8C%96/media/15269002735103/15273897358019.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2018/03/03/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/zk/2.zk-%E5%88%9D%E5%A7%8B%E5%8C%96/media/15269002735103/15273897358019.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2018/03/03/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/zk/2.zk-%E5%88%9D%E5%A7%8B%E5%8C%96/media/15269002735103/15274690874468.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2018/03/03/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/zk/2.zk-%E5%88%9D%E5%A7%8B%E5%8C%96/media/15269002735103/15274691255643.jpg">
+<meta property="article:published_time" content="2018-03-02T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-02-13T11:11:28.861Z">
+<meta property="article:author" content="Zamperini">
+<meta property="article:tag" content="zookeeper">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://dorgenjones.github.io/2018/03/03/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/zk/2.zk-%E5%88%9D%E5%A7%8B%E5%8C%96/media/15274999409834/15276381215150.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/2018/03/03/分布式存储/zk/2.zk-初始化/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>Zookeeper 初始化 | Zamperini</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zamperini</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2018/03/03/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/zk/2.zk-%E5%88%9D%E5%A7%8B%E5%8C%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Zookeeper 初始化</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-03T00:00:00+08:00">2018-03-03</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/zookeeper/" itemprop="url" rel="index"><span itemprop="name">zookeeper</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="2-初始化过程"><a href="#2-初始化过程" class="headerlink" title="2. 初始化过程"></a>2. 初始化过程</h1><p>下面，将从客户端初始化和服务端初始化两个方面来讲解ZK的初始化过程：</p>
+<h2 id="客户端初始化"><a href="#客户端初始化" class="headerlink" title="客户端初始化"></a>客户端初始化</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ZooKeeper</span><span class="params">(String connectString, <span class="keyword">int</span> sessionTimeout, Watcher watcher, <span class="keyword">boolean</span> canBeReadOnly, HostProvider aHostProvider, ZKClientConfig clientConfig)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">   <span class="keyword">if</span> (clientConfig == <span class="keyword">null</span>) &#123;</span><br><span class="line">       clientConfig = <span class="keyword">new</span> ZKClientConfig();</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">this</span>.clientConfig = clientConfig;</span><br><span class="line">   <span class="comment">// 观察者管理器</span></span><br><span class="line">   watchManager = defaultWatchManager();</span><br><span class="line">   watchManager.defaultWatcher = watcher;</span><br><span class="line">   ConnectStringParser connectStringParser = <span class="keyword">new</span> ConnectStringParser(</span><br><span class="line">           connectString);</span><br><span class="line">   hostProvider = aHostProvider;</span><br><span class="line"></span><br><span class="line">   <span class="comment">// ClientCnxn: client的通讯组件，负责socket通讯（发送请求等，且支持透明地切换到不同的Server）</span></span><br><span class="line">   <span class="comment">// ClientCnxnSocket : 真正通讯的组件，ClientCnxnSocketNIO、ClientCnxnSocketNetty</span></span><br><span class="line">   cnxn = <span class="keyword">new</span> ClientCnxn(connectStringParser.getChrootPath(),<span class="comment">// 客户端隔离命名空间，相当于试图模式。只对某个path的进行操作</span></span><br><span class="line">           hostProvider,<span class="comment">// 服务器提供者列表</span></span><br><span class="line">           sessionTimeout,<span class="comment">//会话超时时间</span></span><br><span class="line">           <span class="keyword">this</span>,</span><br><span class="line">           watchManager, <span class="comment">// 监听管理器</span></span><br><span class="line">           getClientCnxnSocket(),<span class="comment">// 客户端套接字通讯工具 ClientCnxnSocket 比如 ClientCnxnSocketNetty</span></span><br><span class="line">           canBeReadOnly);</span><br><span class="line">  <span class="comment">// 初始化</span></span><br><span class="line">   cnxn.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上面可以看到最主要的即是 <strong>ClientCnxn</strong>，深入进去可以看到：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ClientCnxn</span><span class="params">(String chrootPath, HostProvider hostProvider, <span class="keyword">int</span> sessionTimeout, ZooKeeper zooKeeper,</span></span></span><br><span class="line"><span class="function"><span class="params">            ClientWatchManager watcher, ClientCnxnSocket clientCnxnSocket,</span></span></span><br><span class="line"><span class="function"><span class="params">            <span class="keyword">long</span> sessionId, <span class="keyword">byte</span>[] sessionPasswd, <span class="keyword">boolean</span> canBeReadOnly)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">this</span>.zooKeeper = zooKeeper;</span><br><span class="line">   <span class="keyword">this</span>.watcher = watcher;</span><br><span class="line">   <span class="keyword">this</span>.sessionId = sessionId;</span><br><span class="line">   <span class="keyword">this</span>.sessionPasswd = sessionPasswd;</span><br><span class="line">   <span class="keyword">this</span>.sessionTimeout = sessionTimeout;</span><br><span class="line">   <span class="keyword">this</span>.hostProvider = hostProvider;</span><br><span class="line">   <span class="keyword">this</span>.chrootPath = chrootPath;</span><br><span class="line">   connectTimeout = sessionTimeout / hostProvider.size();</span><br><span class="line">   readTimeout = sessionTimeout * <span class="number">2</span> / <span class="number">3</span>;</span><br><span class="line">   readOnly = canBeReadOnly;</span><br><span class="line">   <span class="comment">// 发送请求的线程</span></span><br><span class="line">   sendThread = <span class="keyword">new</span> SendThread(clientCnxnSocket);</span><br><span class="line">   <span class="comment">// 事件线程，当注册的节点发生变化时，server端会通知client，EventThread用来获取通知，并触发相应的Watcher</span></span><br><span class="line">   eventThread = <span class="keyword">new</span> EventThread();</span><br><span class="line">   <span class="keyword">this</span>.clientConfig = zooKeeper.getClientConfig();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   sendThread.start();</span><br><span class="line">   eventThread.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>SendThread</code>是负责发送请求，而<code>EventThread</code>负责接收并处理事件。<br><strong>ZK Client</strong>发送请求的过程是非常简单的：将请求进行包装成<code>Packet</code>，放进双向阻塞队列<strong>outgoingQueue</strong>中。然后<code>SendThread</code>不停地从其中拿出请求向<code>Server</code>发送请求。<br>其过程是在<code>SendThread</code>的<code>run()</code>方法中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">// 引入 outgoingQueue</span></span><br><span class="line">  clientCnxnSocket.introduce(<span class="keyword">this</span>, sessionId, outgoingQueue);</span><br><span class="line">  clientCnxnSocket.updateNow();</span><br><span class="line">  clientCnxnSocket.updateLastSendAndHeard();</span><br><span class="line">  <span class="keyword">int</span> to;</span><br><span class="line">  <span class="keyword">long</span> lastPingRwServer = Time.currentElapsedTime();</span><br><span class="line">  <span class="comment">// 10 秒发一次 Ping 操作</span></span><br><span class="line">  <span class="keyword">final</span> <span class="keyword">int</span> MAX_SEND_PING_INTERVAL = <span class="number">10000</span>;</span><br><span class="line">  InetSocketAddress serverAddress = <span class="keyword">null</span>;</span><br><span class="line">  <span class="keyword">while</span> (state.isAlive()) &#123;</span><br><span class="line">      <span class="comment">// 链接断开时，重连</span></span><br><span class="line">      <span class="keyword">if</span> (!clientCnxnSocket.isConnected()) &#123;</span><br><span class="line">          <span class="keyword">if</span> (closing) &#123;</span><br><span class="line">              <span class="keyword">break</span>;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">if</span> (rwServerAddress != <span class="keyword">null</span>) &#123;</span><br><span class="line">              serverAddress = rwServerAddress;</span><br><span class="line">              rwServerAddress = <span class="keyword">null</span>;</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              <span class="comment">//如果所有的host都试了一遍，则停顿 1s</span></span><br><span class="line">              serverAddress = hostProvider.next(<span class="number">1000</span>);</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="comment">// 链接服务器，首次连接时同时</span></span><br><span class="line">          startConnect(serverAddress);</span><br><span class="line">          clientCnxnSocket.updateLastSendAndHeard();</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// ...</span></span><br><span class="line">      <span class="keyword">if</span> (state.isConnected()) &#123;</span><br><span class="line">          <span class="keyword">int</span> timeToNextPing = readTimeout / <span class="number">2</span> - clientCnxnSocket.getIdleSend() -</span><br><span class="line">                  ((clientCnxnSocket.getIdleSend() &gt; <span class="number">1000</span>) ? <span class="number">1000</span> : <span class="number">0</span>);</span><br><span class="line">          <span class="keyword">if</span> (timeToNextPing &lt;= <span class="number">0</span> || clientCnxnSocket.getIdleSend() &gt; MAX_SEND_PING_INTERVAL) &#123;</span><br><span class="line">              <span class="comment">//当有 MAX_SEND_PING_INTERVAL秒没发送请求，则发送 ping 心跳</span></span><br><span class="line">              sendPing();</span><br><span class="line">              clientCnxnSocket.updateLastSend();</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              <span class="keyword">if</span> (timeToNextPing &lt; to) &#123;</span><br><span class="line">                  to = timeToNextPing;</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">//对于只读的则重试ping到读写服务上</span></span><br><span class="line">      <span class="keyword">if</span> (state == States.CONNECTEDREADONLY) &#123;</span><br><span class="line">          <span class="keyword">long</span> now = Time.currentElapsedTime();</span><br><span class="line">          <span class="keyword">int</span> idlePingRwServer = (<span class="keyword">int</span>) (now - lastPingRwServer);</span><br><span class="line">          <span class="keyword">if</span> (idlePingRwServer &gt;= pingRwTimeout) &#123;</span><br><span class="line">              lastPingRwServer = now;</span><br><span class="line">              idlePingRwServer = <span class="number">0</span>;</span><br><span class="line">              pingRwTimeout =</span><br><span class="line">                      Math.min(<span class="number">2</span>*pingRwTimeout, maxPingRwTimeout);</span><br><span class="line">              pingRwServer();</span><br><span class="line">          &#125;</span><br><span class="line">          to = Math.min(to, pingRwTimeout - idlePingRwServer);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// clientCnxnSocket 从 outgoingQueue中取请求发送</span></span><br><span class="line">      clientCnxnSocket.doTransport(to, pendingQueue, ClientCnxn.<span class="keyword">this</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>SendThread</code>中不仅有调用<code>clientCnxnSocket</code>发送请求的逻辑，同时也维护着心跳逻辑，10秒内如果没有发送请求则发送一次心跳。<br>另外，值得一提的是，通过<code>startConnect(serverAddress)</code>完成与服务端的连接后，会触发一次<code>sendThread.primeConnection()</code>，它的作用是向服务端发起一次创建Session请求或者续联。另外，如果配置了<code>zookeeper.disableAutoWatchReset = false</code>会将本地的<code>Watcher</code>重新向连接的服务端注册一遍。</p>
+<p>当服务端返回时，则由<code>ClientCnxnSocketNetty.ZKClientHandler</code>进行处理，而其最终会调用<code>SendThread.readResponse</code>。在<code>readResponse</code>会根据返回的内容进行相应处理。如果返回的<strong>Xid</strong>为-1时，表示事件通知，反序列化后触发相应的<code>Wacther</code>。</p>
+<h2 id="服务端初始化"><a href="#服务端初始化" class="headerlink" title="服务端初始化"></a>服务端初始化</h2><p>服务端分为两种模式，单机模式和集群模式。后文重点介绍集群模式。<br><strong>ZK</strong>中集群模式下，单实例启动类为<code>QuorumPeerMain</code>。<br>首先调用<code>initializeAndRun</code>进行配置参数解析，然后开启数据定时清理任务，定时删除过期的快照文件等；<br>其次调用<code>runFromConfig</code>方法，进行实例化<code>QuorumPeer</code>，并初始化其参数。最后调用<code>QuorumPeer.start</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">runFromConfig</span><span class="params">(QuorumPeerConfig config)</span></span></span><br><span class="line"><span class="function">            <span class="keyword">throws</span> IOException, AdminServerException </span>&#123;</span><br><span class="line">   ServerCnxnFactory cnxnFactory = <span class="keyword">null</span>;</span><br><span class="line">   <span class="comment">//创建 服务端通讯组件 NIOServerCnxnFactory、NettyServerCnxnFactory</span></span><br><span class="line">   <span class="keyword">if</span> (config.getClientPortAddress() != <span class="keyword">null</span>) &#123;</span><br><span class="line">       cnxnFactory = ServerCnxnFactory.createFactory();</span><br><span class="line">       cnxnFactory.configure(config.getClientPortAddress(),</span><br><span class="line">               config.getMaxClientCnxns(),</span><br><span class="line">               <span class="keyword">false</span>);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">// ...</span></span><br><span class="line">   quorumPeer = getQuorumPeer();</span><br><span class="line">   <span class="comment">// 文件存储（事务日志与文件存储）</span></span><br><span class="line">   quorumPeer.setTxnFactory(<span class="keyword">new</span> FileTxnSnapLog(</span><br><span class="line">           config.getDataLogDir(),</span><br><span class="line">           config.getDataDir()));</span><br><span class="line">   <span class="comment">// 选举算法</span></span><br><span class="line">   quorumPeer.setElectionType(config.getElectionAlg());</span><br><span class="line">   <span class="comment">// sid</span></span><br><span class="line">   quorumPeer.setMyid(config.getServerId());</span><br><span class="line">   <span class="comment">//tickTime 时钟，最小时钟单位</span></span><br><span class="line">   quorumPeer.setTickTime(config.getTickTime());</span><br><span class="line">   quorumPeer.setMinSessionTimeout(config.getMinSessionTimeout());</span><br><span class="line">   quorumPeer.setMaxSessionTimeout(config.getMaxSessionTimeout());</span><br><span class="line">   quorumPeer.setZKDatabase(<span class="keyword">new</span> ZKDatabase(quorumPeer.getTxnFactory()));</span><br><span class="line">   quorumPeer.setQuorumVerifier(config.getQuorumVerifier(), <span class="keyword">false</span>);</span><br><span class="line">   <span class="keyword">if</span> (config.getLastSeenQuorumVerifier()!=<span class="keyword">null</span>) &#123;</span><br><span class="line">       quorumPeer.setLastSeenQuorumVerifier(config.getLastSeenQuorumVerifier(), <span class="keyword">false</span>);</span><br><span class="line">   &#125;</span><br><span class="line">   quorumPeer.initConfigInZKDatabase();</span><br><span class="line">   quorumPeer.setCnxnFactory(cnxnFactory);</span><br><span class="line">   <span class="comment">// PARTICIPANT, OBSERVER</span></span><br><span class="line">   quorumPeer.setLearnerType(config.getPeerType());</span><br><span class="line">   quorumPeer.setSyncEnabled(config.getSyncEnabled());</span><br><span class="line">   <span class="comment">// 法定人数是否监听所有ip</span></span><br><span class="line">   quorumPeer.setQuorumListenOnAllIPs(config.getQuorumListenOnAllIPs());</span><br><span class="line">   quorumPeer.setQuorumCnxnThreadsSize(config.quorumCnxnThreadsSize);</span><br><span class="line">   quorumPeer.initialize();</span><br><span class="line">   <span class="comment">// ...</span></span><br><span class="line">   <span class="comment">// 初始化</span></span><br><span class="line">   quorumPeer.start();</span><br><span class="line">   quorumPeer.join();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面来重点看<code>QuorumPeer</code>的初始化过程：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="comment">// 恢复数据，从快照里读，读完后再从事务日志中读；</span></span><br><span class="line">   <span class="comment">// 读取纪元，并做校验</span></span><br><span class="line">   loadDataBase();</span><br><span class="line">   <span class="comment">//绑定端口，开启面向client端的服务</span></span><br><span class="line">   startServerCnxnFactory();</span><br><span class="line">   <span class="comment">//初始化选举算法，并初始化选举通讯组件</span></span><br><span class="line">   startLeaderElection();</span><br><span class="line">   <span class="keyword">super</span>.start();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">loadDataBase</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="comment">// 恢复数据，从快照里读，读完后再从事务日志中读</span></span><br><span class="line">   zkDb.loadDataBase();</span><br><span class="line">   <span class="comment">// load the epochs</span></span><br><span class="line">   <span class="keyword">long</span> lastProcessedZxid = zkDb.getDataTree().lastProcessedZxid;</span><br><span class="line">   <span class="comment">// 获取纪元</span></span><br><span class="line">   <span class="keyword">long</span> epochOfZxid = ZxidUtils.getEpochFromZxid(lastProcessedZxid);</span><br><span class="line">   currentEpoch = readLongFromFile(CURRENT_EPOCH_FILENAME);</span><br><span class="line">   acceptedEpoch = readLongFromFile(ACCEPTED_EPOCH_FILENAME);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其过程主要分为以下几步：</p>
+<ol>
+<li>从快照文件中恢复原始数据，并读取 <strong>Epoch信息</strong>；</li>
+<li>绑定端口，开始接收请求；</li>
+<li>初始化选举算法，并初始化选举通讯组件；</li>
+<li>运行<code>QuorumPeer.run</code>方法启动服务：选举以及确定角色后提供服务。</li>
+</ol>
+<p>对于 <strong>1</strong> ，将在存储章节详细讲解。另外，因为选举算法是 <strong>ZK</strong> 的核心内容，也将另起一章进行介绍。下文将重点分析 选举的初始化工作以及选举后的服务器角色初始化工作。</p>
+<p><strong>首先来看选举初始化：</strong></p>
+<p>初始化过程会实例化类 <strong>QuorumCnxManager.Listener</strong> ，其会起一个 <code>ServerSocekt</code> 进行监听端口，接收其他 <code>Participant</code> 发给自己的选举相关请求。随后初始化<code>FastLeaderElection</code>对象，其内部会初始化两个阻塞队列<code>sendqueue</code>（发送队列）、<code>recvqueue</code>（接收队列）。同时实例化类<code>Messenger</code>，其内部会开启两个线程<code>WorkerSender</code>、<code>WorkerReceiver</code>，其工作原理如下：</p>
+<ol>
+<li><strong>发送</strong>：当选举算法中有发送请求时，会将请求放入<code>sendqueue</code>中，而<code>WorkerSender</code>会从<code>sendqueue</code>中拉取请求，然后交给<code>QuorumCnxManager</code>。<code>QuorumCnxManager</code>按 <strong>sid</strong> 调用<code>QuorumCnxManager</code>将<code>sendQueue</code>队列中的发送请求<code>ToSend</code>按sid丢给<code>queueSendMap.get(sid)</code>对应的队列中，若服务器与sid之间没有创建连接则创建连接，并同时启动对应的<code>RecvWorker</code>和<code>SendWorker</code>，<code>SendWorker</code>从阻塞队列<code>queueSendMap.get(sid)</code>中获取请求进行socket发送；</li>
+<li><strong>接收</strong>：刚介绍过<code>QuorumCnxManager</code>的 <strong>RecvWroker</strong> 用于接收请求，将请求包装进阻塞队列<code>recvQueue</code>中，而后<code>FastLeaderElection.WorkReceiver</code>线程会从中取请求进行消费。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> Election <span class="title">createElectionAlgorithm</span><span class="params">(<span class="keyword">int</span> electionAlgorithm)</span> </span>&#123;</span><br><span class="line">   Election le = <span class="keyword">null</span>;</span><br><span class="line">   <span class="comment">// 默认为 3</span></span><br><span class="line">   <span class="keyword">switch</span> (electionAlgorithm) &#123;</span><br><span class="line">   <span class="comment">// ...</span></span><br><span class="line">   <span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">       <span class="comment">// QuorumCnxManager 连接管理器，为每对服务器维持有且仅有一个连接，sid大的向sid小的建立连接。</span></span><br><span class="line">       qcm = createCnxnManager();</span><br><span class="line">       QuorumCnxManager.Listener listener = qcm.listener;</span><br><span class="line">       <span class="comment">// 监听服务端请求，接收请求</span></span><br><span class="line">       listener.start();</span><br><span class="line">       FastLeaderElection fle = <span class="keyword">new</span> FastLeaderElection(<span class="keyword">this</span>, qcm);</span><br><span class="line">       <span class="comment">//</span></span><br><span class="line">       fle.start();</span><br><span class="line">       le = fle;</span><br><span class="line">       <span class="keyword">break</span>;</span><br><span class="line">   <span class="comment">// ...</span></span><br><span class="line">   <span class="keyword">return</span> le;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">FastLeaderElection</span><span class="params">(QuorumPeer self, QuorumCnxManager manager)</span></span>&#123;</span><br><span class="line">   <span class="keyword">this</span>.stop = <span class="keyword">false</span>;</span><br><span class="line">   <span class="keyword">this</span>.manager = manager;</span><br><span class="line">   starter(self, manager);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">starter</span><span class="params">(QuorumPeer self, QuorumCnxManager manager)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">this</span>.self = self;</span><br><span class="line">   proposedLeader = -<span class="number">1</span>;</span><br><span class="line">   proposedZxid = -<span class="number">1</span>;</span><br><span class="line">   <span class="comment">//发送队列</span></span><br><span class="line">   sendqueue = <span class="keyword">new</span> LinkedBlockingQueue&lt;&gt;();</span><br><span class="line">   <span class="comment">//接收队列</span></span><br><span class="line">   recvqueue = <span class="keyword">new</span> LinkedBlockingQueue&lt;&gt;();</span><br><span class="line">   <span class="keyword">this</span>.messenger = <span class="keyword">new</span> Messenger(manager);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>初始化完选举算法后，服务开始正式启动运行。<br>服务启动开始时，是<code>LOOKING</code>状态。选举完成后就会变成<code>OBSERVING</code>|<code>FOLLOWING</code>|<code>LEADING</code>状态。<br>在<code>LOOKING</code>阶段，如果配置了<code>readonlymode.enabled</code>则在选举完成前开启只读服务<code>ReadOnlyZooKeeperServer</code>，当选举完成后卸载只读服务。<br>调用 <code>makeLEStrategy().lookForLeader()</code>开启选举。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   updateThreadName();</span><br><span class="line">   <span class="comment">//... 向 jmx注册 服务节点</span></span><br><span class="line">   <span class="keyword">while</span> (running) &#123;</span><br><span class="line">       <span class="keyword">switch</span> (getPeerState()) &#123;</span><br><span class="line">       <span class="keyword">case</span> LOOKING:</span><br><span class="line">           LOG.info(<span class="string">"LOOKING"</span>);</span><br><span class="line">           <span class="comment">// readOnly开启状态下，允许在初始化完成前接收读请求</span></span><br><span class="line">           <span class="keyword">if</span> (Boolean.getBoolean(<span class="string">"readonlymode.enabled"</span>)) &#123;</span><br><span class="line">               LOG.info(<span class="string">"Attempting to start ReadOnlyZooKeeperServer"</span>);</span><br><span class="line">               <span class="comment">// 先开启个readOnly服务提供读服务</span></span><br><span class="line">               <span class="keyword">final</span> ReadOnlyZooKeeperServer roZk =</span><br><span class="line">                       <span class="keyword">new</span> ReadOnlyZooKeeperServer(logFactory, <span class="keyword">this</span>, <span class="keyword">this</span>.zkDb);</span><br><span class="line">               Thread roZkMgr = <span class="keyword">new</span> Thread() &#123;</span><br><span class="line">                   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                       <span class="keyword">try</span> &#123;</span><br><span class="line">                           <span class="comment">// lower-bound grace period to 2 secs</span></span><br><span class="line">                           sleep(Math.max(<span class="number">2000</span>, tickTime));</span><br><span class="line">                           <span class="keyword">if</span> (ServerState.LOOKING.equals(getPeerState())) &#123;</span><br><span class="line">                               roZk.startup();</span><br><span class="line">                           &#125;</span><br><span class="line">                       &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                           LOG.info(<span class="string">"Interrupted while attempting to start ReadOnlyZooKeeperServer, not started"</span>);</span><br><span class="line">                       &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                           LOG.error(<span class="string">"FAILED to start ReadOnlyZooKeeperServer"</span>, e);</span><br><span class="line">                       &#125;</span><br><span class="line">                   &#125;</span><br><span class="line">               &#125;;</span><br><span class="line">               <span class="keyword">try</span> &#123;</span><br><span class="line">                   roZkMgr.start();</span><br><span class="line">                   reconfigFlagClear();</span><br><span class="line">                   <span class="keyword">if</span> (shuttingDownLE) &#123;</span><br><span class="line">                       shuttingDownLE = <span class="keyword">false</span>;</span><br><span class="line">                       startLeaderElection();</span><br><span class="line">                   &#125;</span><br><span class="line">                   <span class="comment">// 开始运行选举算法</span></span><br><span class="line">                   setCurrentVote(makeLEStrategy().lookForLeader());</span><br><span class="line">               &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                   <span class="comment">// 选主结束后关闭 读服务</span></span><br><span class="line">                   roZkMgr.interrupt();</span><br><span class="line">                   roZk.shutdown();</span><br><span class="line">               &#125;</span><br><span class="line">           &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               reconfigFlagClear();</span><br><span class="line">               <span class="keyword">if</span> (shuttingDownLE) &#123;</span><br><span class="line">                   shuttingDownLE = <span class="keyword">false</span>;</span><br><span class="line">                   startLeaderElection();</span><br><span class="line">               &#125;</span><br><span class="line">               setCurrentVote(makeLEStrategy().lookForLeader());</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">break</span>;</span><br><span class="line">       <span class="keyword">case</span> OBSERVING:</span><br><span class="line">           <span class="keyword">try</span> &#123;</span><br><span class="line">               setObserver(makeObserver(logFactory));</span><br><span class="line">               observer.observeLeader();</span><br><span class="line">           &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">               observer.shutdown();</span><br><span class="line">               setObserver(<span class="keyword">null</span>);</span><br><span class="line">               updateServerState();</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">break</span>;</span><br><span class="line">       <span class="keyword">case</span> FOLLOWING:</span><br><span class="line">           <span class="keyword">try</span> &#123;</span><br><span class="line">               setFollower(makeFollower(logFactory));</span><br><span class="line">               follower.followLeader();</span><br><span class="line">           &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">               follower.shutdown();</span><br><span class="line">               setFollower(<span class="keyword">null</span>);</span><br><span class="line">               updateServerState();</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">break</span>;</span><br><span class="line">       <span class="keyword">case</span> LEADING:</span><br><span class="line">           <span class="comment">// 设置为leading开启</span></span><br><span class="line">           <span class="keyword">try</span> &#123;</span><br><span class="line">               setLeader(makeLeader(logFactory));</span><br><span class="line">               <span class="comment">//开启acceptor接收follwer和observer的请求</span></span><br><span class="line">               leader.lead();</span><br><span class="line">               setLeader(<span class="keyword">null</span>);</span><br><span class="line">           &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">               <span class="keyword">if</span> (leader != <span class="keyword">null</span>) &#123;</span><br><span class="line">                   leader.shutdown(<span class="string">"Forcing shutdown"</span>);</span><br><span class="line">                   setLeader(<span class="keyword">null</span>);</span><br><span class="line">               &#125;</span><br><span class="line">               updateServerState();</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">break</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       start_fle = Time.currentElapsedTime();</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当选举完成后，每个服务器就知道自己的角色，是<code>OBSERVER</code>、<code>FOLLOWER</code>还是<code>LEADER</code>。</p>
+<ol>
+<li><code>Observer</code>：当服务器角色是<code>Observer</code>时，其首先创建<code>Observer</code>以及<code>ObserverZooKeeperServer</code>，然后调用<code>observeLeader</code>与<code>Leader</code>建立连接。一开始发送 <code>OBSERVERINFO</code> 获取<code>Leader</code>的<code>newLeaderZxid</code>，然后开始与Leader的同步<code>syncWithLeader</code>，数据同步分为三种类型<code>DIFF</code>、<code>SNAP</code>、<code>TUNC</code>，具体后文将详细介绍。完成同步后，接收到<code>Leader</code>发来的<code>UPTODATE</code>命令，将<code>ObserverZooKeeperServer</code>与之前的<code>ServerCnxnFactory</code>绑定上（当有客户端请求来时，会将请求转发到<code>ObserverZooKeeperServer</code>，其他角色也是同样的道理）。最后调用<code>xxZooKeeperServer.startup()</code>建立起每个<strong>Server</strong>的处理器链路（每个角色最大差别即表现在处理器链上），具体见<a href="">ZK角色介绍</a>。</li>
+<li><code>Follower</code>：其与<code>Observer</code>的过程大致相同，不同点在于一开始其向<code>Leader</code>发送的命令是<code>Follwer</code>。</li>
+<li><code>Leader</code>：在创建<code>Leader</code>时，会开启一个<code>SeverSocket</code>，并监听端口接收请求。<code>Leader.lead</code>方法则开始初始化<code>Leader</code>，首先加载数据库，然后开启线程<code>LearnerCnxAcceptor</code>，接收来自<code>Learner</code>的请求。当接收到一半以上的<code>NEWLEADER</code>后才开始启动服务对外服务。一样也会调用<code>LeaderZookeeperServer.startup</code>建立起处理链。最后会开启一个<code>ping</code>服务，每两个<code>tick</code>一个周期。<ul>
+<li>对于每个连接上来的<code>Learner</code>，<code>Leader</code>都会创建一个<code>LearnHandler</code>。其负责与<code>Learner</code>间的交互。数据同步等。</li>
+<li>初始化完成后，就开始接收<code>Learner</code>发送的请求。</li>
+</ul>
+</li>
+</ol>
+<p>每个角色最大的不同即是其所对应的<code>ZookeeperServer</code>不同，而每个<code>ZookeeperServer</code>的本质不同在于其处理器链的不同。</p>
+<p><img src="media/15274999409834/15276381215150.jpg" alt=""></p>
+<ul>
+<li><p><strong>Leader的处理链：</strong><br><img src="media/15269002735103/15273896493986.jpg" alt=""></p>
+</li>
+<li><p><strong>Follower的处理链：</strong><br><img src="media/15269002735103/15273897358019.jpg" alt=""></p>
+</li>
+<li><p><strong>Observer的处理链</strong><br><img src="media/15269002735103/15273897358019.jpg" alt=""></p>
+</li>
+</ul>
+<p><strong>每个处理器的作用如下：</strong><br><img src="media/15269002735103/15274690874468.jpg" alt=""><br><img src="media/15269002735103/15274691255643.jpg" alt=""></p>
+<h3 id="Reference"><a href="#Reference" class="headerlink" title="Reference:"></a>Reference:</h3><ul>
+<li>《从Paxos到ZooKeeper 分布式一致性原理与实践》</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/zookeeper/" rel="tag"># zookeeper</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/08/15/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/hystrix/5.hystrix-%E6%8F%92%E4%BB%B6/" rel="next" title="Hystrix-插件">
+                <i class="fa fa-chevron-left"></i> Hystrix-插件
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/03/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/zk/1.zk-%E8%A7%92%E8%89%B2%E4%BB%8B%E7%BB%8D/" rel="prev" title="Zookeeper 整体介绍">
+                Zookeeper 整体介绍 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#2-初始化过程"><span class="nav-number">1.</span> <span class="nav-text">2. 初始化过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#客户端初始化"><span class="nav-number">1.1.</span> <span class="nav-text">客户端初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务端初始化"><span class="nav-number">1.2.</span> <span class="nav-text">服务端初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Reference"><span class="nav-number">1.2.1.</span> <span class="nav-text">Reference:</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="k8s," />
+
+
+<meta name="description" content="3. controller-managercontroller-manager是整个k8s的大脑，其由kube-conrtoller-manager和cloud-controller-manager组成。其中clound-controller-manager用来配合云服务提供商的控制，因此本章将不对其做详细描述。controller-manager中包含众多控制器见附件^1，通过这些控制器来完成集">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kube-controller-manager">
+<meta property="og:url" content="https://dorgenjones.github.io/2020/02/06/k8s/5.k8s-controllermanager/index.html">
+<meta property="og:site_name" content="Zamperini">
+<meta property="og:description" content="3. controller-managercontroller-manager是整个k8s的大脑，其由kube-conrtoller-manager和cloud-controller-manager组成。其中clound-controller-manager用来配合云服务提供商的控制，因此本章将不对其做详细描述。controller-manager中包含众多控制器见附件^1，通过这些控制器来完成集">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://dorgenjones.github.io/2020/02/06/k8s/5.k8s-controllermanager/media/15810704432183/15812219131772.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2020/02/06/k8s/5.k8s-controllermanager/media/15810704432183/15812690927770.jpg">
+<meta property="article:published_time" content="2020-02-05T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-02-13T11:03:08.964Z">
+<meta property="article:author" content="Zamperini">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://dorgenjones.github.io/2020/02/06/k8s/5.k8s-controllermanager/media/15810704432183/15812219131772.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/2020/02/06/k8s/5.k8s-controllermanager/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>kube-controller-manager | Zamperini</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zamperini</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2020/02/06/k8s/5.k8s-controllermanager/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">kube-controller-manager</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-06T00:00:00+08:00">2020-02-06</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="3-controller-manager"><a href="#3-controller-manager" class="headerlink" title="3. controller-manager"></a>3. controller-manager</h1><p><code>controller-manager</code>是整个<code>k8s</code>的大脑，<br>其由<code>kube-conrtoller-manager</code>和<code>cloud-controller-manager</code>组成。其中<code>clound-controller-manager</code>用来配合云服务提供商的控制，因此本章将不对其做详细描述。<br><code>controller-manager</code>中包含众多控制器见附件^1，通过这些控制器来完成集群管理的作用。监控集群状态，并确保集群处于预期的状态。<br>本节，将从如下几个方面来讲解<code>controller-manager</code>的工作原理：</p>
+<ol>
+<li>启动过程</li>
+<li>单次部署的执行过程</li>
+<li>pod自动横向伸缩工作原理</li>
+</ol>
+<h2 id="3-1-启动过程"><a href="#3-1-启动过程" class="headerlink" title="3.1 启动过程"></a>3.1 启动过程</h2><p><code>controller-manager</code>启动入口<code>cmd/kube-controller-manager/controller-manager.go</code>，与<code>apiserver</code>一样其也是基于<code>CLI</code>框架<code>Cobra</code>来实现。<br>其初始化过程如下：</p>
+<ol>
+<li>首先创建一个带有默认参数的<code>KubeControllerManagerOption</code>，用于构建控制器管理器；<ul>
+<li>其中带有各控制器创建的配置参数</li>
+</ul>
+</li>
+<li>通过<code>cobra</code>将输入参数应用到<code>KubeControllerManagerOption</code>上，运行前，会先对参数进行校验；</li>
+<li>跟据<code>KubeControllerManagerOptions</code>构建创建众多控制器的配置参数<code>kubecontrollerconfig.Config</code><ol>
+<li>跟据输入参数构建与<code>apiserver</code>交互的<code>client</code>；</li>
+<li>创建用于选主的通信客户端<code>leaderElectionClient</code>；</li>
+<li>创建一个事件记录器，用于记录事件并将事件以<code>v1.Event</code>发送给<code>apiserver</code>；</li>
+<li>将<code>KubeControllerManagerOptions</code>中的配置应用到<code>kubecontrollerconfig.Config</code>。</li>
+</ol>
+</li>
+<li>开启运行<code>控制器</code>管理器。<ol>
+<li>为<code>controller-manager</code>创建两个http服务，分别用来做健康检查、配置查询；</li>
+<li>若配置需要选主，则先选主（没有那么复杂， 只是先到先得的原则）。若选主成功则开始初始化其内部组件，众多控制器；</li>
+<li>运行组件<ul>
+<li>创建控制器上下文<code>ControllerContext</code>，实际是提前构建一些通用的组件<ol>
+<li>分别创建两个<code>Informer</code>工厂，<code>shared-informers</code>以及<code>metadata-informers</code>；</li>
+<li>等待<code>apiserver</code>就绪，最多等待<code>10s</code>；</li>
+<li>查询<code>apiserver</code>中所有可用的资源；</li>
+<li>创建云提供商工具<ul>
+<li>跟据控制器上下文来开启控制器</li>
+</ul>
+<ol>
+<li>开启<code>ServiceAccount</code>控制器；</li>
+<li><code>app/controllermanager.go.NewControllerInitializer</code>方法中保存了所有控制器的初始化函数，遍历并执行所有控制器的初始化函数，开启这些控制器的执行。比如<code>DeploymentController</code>、<code>ReplicaSetController</code>等；</li>
+</ol>
+<ul>
+<li>开始两个<code>Informer</code>工厂，开始同步并监听资源更新。</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+<p>到此就完成了<code>controller-manager</code>的初始化过程。<br>下面我们以<code>DeploymentController</code>来讲解其初始化详细过程，<code>DeploymentController</code>的初始化函数是<code>startDeploymentController</code>：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">dc, err := deployment.NewDeploymentController(</span><br><span class="line">	ctx.InformerFactory.Apps().V1().Deployments(),</span><br><span class="line">	ctx.InformerFactory.Apps().V1().ReplicaSets(),</span><br><span class="line">	ctx.InformerFactory.Core().V1().Pods(),</span><br><span class="line">	ctx.ClientBuilder.ClientOrDie(<span class="string">"deployment-controller"</span>),</span><br><span class="line">)</span><br><span class="line"><span class="keyword">go</span> dc.Run(<span class="keyword">int</span>(ctx.ComponentConfig.DeploymentController.ConcurrentDeploymentSyncs), ctx.Stop)</span><br></pre></td></tr></table></figure>
+<p>可以看到，其关注监听<code>Deployment</code>、<code>ReplicaSets</code>和<code>Pod</code>资源。再继续查看<code>DeploymentController</code>的创建过程，其关注这三种资源，并且添加事件监听器，当<code>Deployment</code>资源更新时回调<code>addDeplotment\updateDeployment\deleteDeployment</code>方法，<code>ReplicaSets</code>和<code>Pod</code>的更新也会回调<code>DeploymentController</code>的相应方法。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">dc := &amp;DeploymentController&#123;</span><br><span class="line">	client:        client,</span><br><span class="line">	eventRecorder: eventBroadcaster.NewRecorder(scheme.Scheme, v1.EventSource&#123;Component: <span class="string">"deployment-controller"</span>&#125;),</span><br><span class="line">	queue:         workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), <span class="string">"deployment"</span>),</span><br><span class="line">&#125;</span><br><span class="line">dc.rsControl = controller.RealRSControl&#123;</span><br><span class="line">	KubeClient: client,</span><br><span class="line">	Recorder:   dc.eventRecorder,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">dInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">	AddFunc:    dc.addDeployment,</span><br><span class="line">	UpdateFunc: dc.updateDeployment,</span><br><span class="line">	DeleteFunc: dc.deleteDeployment,</span><br><span class="line">&#125;)</span><br><span class="line">rsInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">	AddFunc:    dc.addReplicaSet,</span><br><span class="line">	UpdateFunc: dc.updateReplicaSet,</span><br><span class="line">	DeleteFunc: dc.deleteReplicaSet,</span><br><span class="line">&#125;)</span><br><span class="line">podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">	DeleteFunc: dc.deletePod,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>创建完成后，调用<code>Run</code>方法开始运行<code>DeploymentController</code>，当然运行前需要这三种资源都从<code>apiserver</code>同步到其本地，然后开启多个协程执行<code>worker</code>逻辑。<br><code>worker</code>从<code>Controller</code>自身的<code>queue</code>中阻塞式等待数据，然后执行<code>syncDeploymet</code>方法，这里则是其的核心处理逻辑。</p>
+<h2 id="3-2-pod单次部署执行过程"><a href="#3-2-pod单次部署执行过程" class="headerlink" title="3.2 pod单次部署执行过程"></a>3.2 pod单次部署执行过程</h2><p>  单次执行<code>Deployment</code>进行部署时，其经历主过程如下：<code>DeploymenetController</code>接收创建<code>Deployment</code>的请求，进行解析创建<code>ReplicaSet</code>资源，而后<code>ReplicaSetController</code>接收到创建<code>ReplicaSet</code>的请求则创建响应的<code>Pod</code>资源信息。<br>除了简单部署之外，各控制器组件同时需要保障部署运行实情与<code>期望</code>一致。以下就是部署过程的简要流程图：</p>
+<p><img src="media/15810704432183/15812219131772.jpg" alt=""></p>
+<p>下面将详细介绍其执行流程：</p>
+<ol>
+<li><code>kubectl</code>执行<code>create deployment.yml</code>命令后，<code>apiserver</code>接收请求，并将其保存到<code>etcd</code>中；</li>
+<li>由于<code>controller-manager</code>中的<code>DeploymentController</code>，所以变更会推送到<code>DeploymentController</code>的<code>deploymentInformer</code>中，而<code>deploymentInformer</code>则会回调<code>DeploymentController.addDeployment</code>方法；</li>
+<li><code>addDeployment</code>方法并不会立即处理<code>Deployment</code>，而是将该<code>Deployment</code>生成的唯一<strong>key</strong> 入队列<code>queue</code>（该队列支持限流）；</li>
+<li><code>DeploymentController.processBexrWorkItem</code>会阻塞等待队列中的资源更新（系统可以启动多个工作协程同时监听该队列，以提升吞吐），最后会调用<strong>核心方法</strong><code>syncDeployment</code>进行处理；</li>
+<li><code>DeploymentController.syncDeployment</code>方法不仅处理初次部署的情况，同时也负责更新以及由其发起的部署集群发生变化的处理逻辑：<ol>
+<li>通过<code>key</code>获取发生变更的<code>Deployment</code>；</li>
+<li>获取该<code>Deployment</code>创建的<code>ReplicaSet</code>，这里因为是新创建的<code>Deployment</code>所以查询不到<code>ReplicaSet</code>；</li>
+<li>获取该<code>Deployment</code>间接创建的所有<code>Pod</code></li>
+<li>若<code>Deployment</code>的属性<code>DeletionTimestamp</code>不为空时表示该<code>Deployment</code>被删除，则只同步状态；</li>
+<li>检查<code>Deployment</code>是否被暂停或者恢复，并设置相应的状态，若被暂停则进一步进行清理；</li>
+<li>若该<code>Deployment</code>是进行回滚操作，则执行<code>rollback</code>回滚相应逻辑；</li>
+<li>检查<code>Deployment</code>是否需要进行扩缩容（通过检查其对应的<code>ReplicaSet</code>所有的分片数与理想状态是否一致来判断）</li>
+<li>若是扩缩容事件，则执行同步方法<code>sync</code></li>
+<li>若不是，则是初次创建，部署时有两种策略：<strong>Recreate</strong>、<strong>RollingUpdate</strong>（针对升级的情况，默认是<strong>RollingUpdate</strong>），这里我们就以<code>RollingUpdate</code>为例来查看其执行过程（<code>DeploymentController.rolloutRolling</code>）：<ol>
+<li>首先会获取所有新老<code>ReplicaSet</code>。当不存在<code>ReplicaSet</code>时，则跟据<code>Deployment</code>属性创建一个<code>ReplicaSet</code>，并发送到<code>apiserver</code>（<code>DeploymentController.getNewReplicaSet</code>）；</li>
+<li>更新<code>Deployment</code>的状态</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><code>ReplicaSetController</code>监听<code>ReplicaSet</code>的更新，上面<code>DeploymentController</code>创建<code>ReplicaSet</code>后，<code>ReplicaSetController</code>会受到通知（与<code>DeploymentController</code>执行方式一样，也通过<code>queue</code>和多个<code>worker</code>来处理更新）并最终调用<code>ReplicaSetController.syncReplicaSet</code>方法：<ol>
+<li>获取同一命名空间内的所有存活的<code>Pod</code>；</li>
+<li>并通过<code>ReplicaSet</code>的<code>Selector</code>筛选出由其创建的<code>Pod</code>；</li>
+<li><code>manageReplicas</code>方法管理<code>ReplicaSet</code>，计算已经创建的<code>Pod</code>数和<code>ReplicaSet</code>的预期的<code>Pod</code>差值<ul>
+<li>当<code>Pod</code>数不足时，则依次跟据<code>ReplicaSet</code>的配置<code>PodTemplateSepc</code>创建<code>Pod</code>，同时设置上<code>Pod</code>的<code>OwnerRefernce</code>（用于<code>gc</code>）；</li>
+<li>当<code>Pod</code>数过多时，则并发删除多余的<code>Pod</code>。</li>
+</ul>
+</li>
+<li>更新<code>ReplicaSet</code>的状态。</li>
+</ol>
+</li>
+</ol>
+<p>到此就完成了<code>Pod</code>的创建，但创建的<code>Pod</code>还不能工作，需要被调度到某个<code>Node</code>上才能运行。至于应该被调度到哪个节点上，这就涉及到调度器的实现逻辑，将在下节<code>scheduler</code>中介绍。</p>
+<h2 id="3-3-pod自动横向伸缩"><a href="#3-3-pod自动横向伸缩" class="headerlink" title="3.3 pod自动横向伸缩"></a>3.3 pod自动横向伸缩</h2><p><code>k8s</code>中负责<code>pod</code>自动横向伸缩的控制器叫<code>HorizontalController</code>。首先看其控制器初始化：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">startHPAController</span><span class="params">(ctx ControllerContext)</span> <span class="params">(http.Handler, <span class="keyword">bool</span>, error)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 若此项为true，则表示从组合API服务获取指标数据，而不是通过apiserver</span></span><br><span class="line">	<span class="keyword">if</span> ctx.ComponentConfig.HPAController.HorizontalPodAutoscalerUseRESTClients &#123;</span><br><span class="line">		<span class="keyword">return</span> startHPAControllerWithRESTClient(ctx)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> startHPAControllerWithLegacyClient(ctx)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">startHPAControllerWithRESTClient</span><span class="params">(ctx ControllerContext)</span> <span class="params">(http.Handler, <span class="keyword">bool</span>, error)</span></span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">	<span class="comment">// 创建获取指标的客户端</span></span><br><span class="line">	metricsClient := metrics.NewRESTMetricsClient(</span><br><span class="line">		resourceclient.NewForConfigOrDie(clientConfig),</span><br><span class="line">		custom_metrics.NewForConfig(clientConfig, ctx.RESTMapper, apiVersionsGetter),</span><br><span class="line">		external_metrics.NewForConfigOrDie(clientConfig),</span><br><span class="line">	)</span><br><span class="line">	<span class="keyword">return</span> startHPAControllerWithMetricsClient(ctx, metricsClient)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">startHPAControllerWithMetricsClient</span><span class="params">(ctx ControllerContext, metricsClient metrics.MetricsClient)</span> <span class="params">(http.Handler, <span class="keyword">bool</span>, error)</span></span> &#123;</span><br><span class="line">  <span class="comment">// scale类型解析器，用于给定特定资源解析出奇`Scacle`子资源类型</span></span><br><span class="line">	scaleKindResolver := scale.NewDiscoveryScaleKindResolver(hpaClient.Discovery())</span><br><span class="line">	scaleClient, err := scale.NewForConfig(hpaClientConfig, ctx.RESTMapper, dynamic.LegacyAPIPathResolverFunc, scaleKindResolver)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">false</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// 创建控制器，并异步运行</span></span><br><span class="line">	<span class="keyword">go</span> podautoscaler.NewHorizontalController(</span><br><span class="line">		hpaClient.CoreV1(),</span><br><span class="line">		scaleClient,</span><br><span class="line">		hpaClient.AutoscalingV1(),</span><br><span class="line">		ctx.RESTMapper,</span><br><span class="line">		metricsClient,</span><br><span class="line">		ctx.InformerFactory.Autoscaling().V1().HorizontalPodAutoscalers(),</span><br><span class="line">		ctx.InformerFactory.Core().V1().Pods(),</span><br><span class="line">		ctx.ComponentConfig.HPAController.HorizontalPodAutoscalerSyncPeriod.Duration,</span><br><span class="line">		ctx.ComponentConfig.HPAController.HorizontalPodAutoscalerDownscaleStabilizationWindow.Duration,</span><br><span class="line">		ctx.ComponentConfig.HPAController.HorizontalPodAutoscalerTolerance,</span><br><span class="line">		ctx.ComponentConfig.HPAController.HorizontalPodAutoscalerCPUInitializationPeriod.Duration,</span><br><span class="line">		ctx.ComponentConfig.HPAController.HorizontalPodAutoscalerInitialReadinessDelay.Duration,</span><br><span class="line">	).Run(ctx.Stop)</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">true</span>, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewHorizontalController</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">	evtNamespacer v1core.EventsGetter,</span></span></span><br><span class="line"><span class="function"><span class="params">	scaleNamespacer scaleclient.ScalesGetter,</span></span></span><br><span class="line"><span class="function"><span class="params">	hpaNamespacer autoscalingclient.HorizontalPodAutoscalersGetter,</span></span></span><br><span class="line"><span class="function"><span class="params">	mapper apimeta.RESTMapper,</span></span></span><br><span class="line"><span class="function"><span class="params">	metricsClient metricsclient.MetricsClient,</span></span></span><br><span class="line"><span class="function"><span class="params">	hpaInformer autoscalinginformers.HorizontalPodAutoscalerInformer,</span></span></span><br><span class="line"><span class="function"><span class="params">	podInformer coreinformers.PodInformer,</span></span></span><br><span class="line"><span class="function"><span class="params">	resyncPeriod time.Duration,</span></span></span><br><span class="line"><span class="function"><span class="params">	downscaleStabilisationWindow time.Duration,</span></span></span><br><span class="line"><span class="function"><span class="params">	tolerance <span class="keyword">float64</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">	cpuInitializationPeriod,</span></span></span><br><span class="line"><span class="function"><span class="params">	delayOfInitialReadinessStatus time.Duration,</span></span></span><br><span class="line"><span class="function"><span class="params"></span></span></span><br><span class="line"><span class="function"><span class="params">)</span> *<span class="title">HorizontalController</span></span> &#123;</span><br><span class="line">	hpaController := &amp;HorizontalController&#123;</span><br><span class="line">		eventRecorder:                recorder,</span><br><span class="line">		scaleNamespacer:              scaleNamespacer,</span><br><span class="line">		hpaNamespacer:                hpaNamespacer,</span><br><span class="line">		downscaleStabilisationWindow: downscaleStabilisationWindow,</span><br><span class="line">		queue:                        workqueue.NewNamedRateLimitingQueue(NewDefaultHPARateLimiter(resyncPeriod), <span class="string">"horizontalpodautoscaler"</span>),</span><br><span class="line">		mapper:                       mapper,</span><br><span class="line">		recommendations:              <span class="keyword">map</span>[<span class="keyword">string</span>][]timestampedRecommendation&#123;&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">   <span class="comment">// 监听资源更新并回调相应的处理函数</span></span><br><span class="line">	hpaInformer.Informer().AddEventHandlerWithResyncPeriod(</span><br><span class="line">		cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">			AddFunc:    hpaController.enqueueHPA,</span><br><span class="line">			UpdateFunc: hpaController.updateHPA,</span><br><span class="line">			DeleteFunc: hpaController.deleteHPA,</span><br><span class="line">		&#125;,</span><br><span class="line">		resyncPeriod,</span><br><span class="line">	)</span><br><span class="line">	<span class="comment">// 创建分片计算器，基于目标资源利用率来计算预期的分片数</span></span><br><span class="line">	replicaCalc := NewReplicaCalculator(</span><br><span class="line">		metricsClient,</span><br><span class="line">		hpaController.podLister,</span><br><span class="line">		tolerance,</span><br><span class="line">		cpuInitializationPeriod,</span><br><span class="line">		delayOfInitialReadinessStatus,</span><br><span class="line">	)</span><br><span class="line">	hpaController.replicaCalc = replicaCalc</span><br><span class="line">	<span class="keyword">return</span> hpaController</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>HorizontalController</code>的初始化过程流程主要做了以下几件事：</p>
+<ol>
+<li>创建<code>Metrics</code>查询客户端；</li>
+<li>创建分片计算器；</li>
+<li>创建<code>hpa</code>资源<code>informer</code>，监听该资源变更并回调相应的函数<code>enqueueHPA</code>、<code>updateHPA</code>、<code>deleteHPA</code></li>
+</ol>
+<p>下面将来详细介绍其运行原理：<br>通过<code>kubectl</code>执行<code>autoscale</code>命令<code>kubectl autoscale deployment nginx-deployment --cpu-percent=30 --min=7 --max=8</code>后，<strong>HorizontalController</strong>会接收到<code>HorizontalPodAutoscaler</code>新增消息，最终会执行<code>HorizontalController.reconcileAutoscaler</code>方法。该方法是控制器的<strong>核心逻辑</strong>，其执行过程如下：</p>
+<ol>
+<li>通过<code>hpa</code>的属性获取对应资源（可以是<code>Deployment</code>也可以是其他）的<code>Scale</code>中的分片数信息；</li>
+<li>进行逻辑判断：<ol>
+<li>若当前分片数为0但最小分片数不为0，则不进行自动扩容；</li>
+<li>若当前分片数大于<code>hpa</code>定义的最大分片数则将目标分片数（<code>desiredReplicas</code>）设置成最大分片数；</li>
+<li>若当前分片数小于<code>hpa</code>定义的最小分片数则将目标分片数设置成该最小分片数；</li>
+<li>都不满足的话则执行第三步跟据<code>Metrics</code>信息计算需要部署的分片数</li>
+</ol>
+</li>
+<li>执行<code>HorizontalController.computeReplicasForMetrics</code>方法计算目标分片数：<ol>
+<li>定义<code>hpa</code>时可以定义多个指标维度的扩缩容策略，比如<code>cpu</code>等。因此这里会按每个指标信息依次计算目标分片数，最后取最大值作为最终的目标值；</li>
+<li>对于指标（<code>MetricSpec</code>），<code>k8s</code>对齐进行了分类，主要分为四类，没类的计算方式也不同：<ol>
+<li><strong>Object：</strong> 描述 <code>k8s</code> 对象，如<code>hits-per-second</code>；</li>
+<li><strong>Pods：</strong> 描述目标中每个<code>Pod</code>信息，如<code>transactions-processed-per-second</code>，而这些值在比较前会进行求平均；</li>
+<li><strong>Resource：</strong>是<code>k8s</code>中一个知名度量信息，在<code>request</code>和<code>limit</code>中进行定义的资源；</li>
+<li><strong>External：</strong>拓展指标信息，来自于<code>k8s</code>集群之外的信息。<ol start="3">
+<li>下面以<code>Resource</code>为例，来讲解其计算过程（<code>HorizontalController.computeStatusForResourceMetric</code>）：</li>
+</ol>
+</li>
+<li>最终调用的是<code>ReplicaCalculator</code>分片计算器的<code>GetRawResourceReplicas</code>方法；</li>
+<li>首先，通过<code>metricsClient</code>查询每个<code>Pod</code>的<code>Metrics</code>信息；</li>
+<li>进行以下条件判断和计算目标分片数<ul>
+<li>首先计算当前测量的<code>metric</code>的平均值和目标值的比例（<code>usageRatio</code>）；</li>
+<li>若没有未就绪的<code>pod</code>且当前指标大于目标值时：<ul>
+<li>当差值在<strong>10%</strong>（默认<code>可容忍值</code>）之内，则直接<strong>返回</strong>原值；</li>
+<li>若大于<strong>10%</strong>时，则<strong>返回</strong>分片数：<code>usageRatio</code>乘以当前<code>Pod</code>数；</li>
+</ul>
+</li>
+<li>如有<code>Pod</code>未收集到指标信息<ul>
+<li>当<code>usageRatio</code>小于0，将未收集到的指标设置零时为<code>目标值</code>；</li>
+<li>若<code>usageRatio</code>大于0，将未收集的指标设置零时为<code>0</code>；<ul>
+<li>当<code>usageRatio</code>大于0，将所有未就绪的<code>Pod</code>指标设置为<code>0</code></li>
+<li>对修改过的数据重新计算<code>usageRatio</code>；</li>
+<li>当新的<code>usageRatio&lt;1.1</code>(0.1是容忍度)或者<code>oldUageRatio&lt;1&amp;&amp;newUsageRatio&gt;1</code>或者<code>oldUageRatio&gt;1&amp;&amp;newUsageRatio&lt;1</code>时，直接返回原值；</li>
+<li>否则返回<code>newUsageRatio</code>乘以所有<code>pod</code>数量（也及以<code>newUsageRatio</code>比例来扩容）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>并不是计算出来就用这个值</strong>，还需要对伸缩速率做一次调整(<code>normalizeDesiredReplicas</code>)：<ul>
+<li><strong>根据历史值来调整该值</strong>（<code>stabilizeRecommendation</code>）：<ul>
+<li><code>HPA</code>中保存每次计算结果和时间戳，<code>timestampedRecommendation</code>；</li>
+<li><code>HPA</code>启动时会设置一个窗口期<code>downscaleStabilisationWindow</code>（默认<code>5min</code>）</li>
+<li>找到窗口期之内历史计算结果，若历史推荐分片数比当前推荐的大，则覆盖当前的</li>
+</ul>
+</li>
+<li><strong>速率限制</strong>（<code>convertDesiredReplicasWithRules</code>）<ul>
+<li>防止扩容过快，限制最大不能超过当前实例数的两倍；<ol start="4">
+<li>获取目标分片数时，若与原值不相等则通过<code>Scales</code>接口将分片数修改成目标值（实际，<code>Scales</code>只是一个包装，其实质是更新<code>Deployment</code>的<code>Replica</code>只）</li>
+<li>当<code>DeploymentController</code>接收到更新后，就会引发其扩缩容操作，上一小节中已经介绍。<br>到此，<code>HPA</code>的单次操作执行流程就介绍完了，下面以一张图来简要描述该过程：<br><img src="media/15810704432183/15812690927770.jpg" alt=""></li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="附件"><a href="#附件" class="headerlink" title="附件"></a>附件</h2><h3 id="1-控制器列表"><a href="#1-控制器列表" class="headerlink" title="1. 控制器列表"></a>1. 控制器列表</h3><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">controllers := <span class="keyword">map</span>[<span class="keyword">string</span>]InitFunc&#123;&#125;</span><br><span class="line">controllers[<span class="string">"endpoint"</span>] = startEndpointController</span><br><span class="line">controllers[<span class="string">"endpointslice"</span>] = startEndpointSliceController</span><br><span class="line">controllers[<span class="string">"replicationcontroller"</span>] = startReplicationController</span><br><span class="line">controllers[<span class="string">"podgc"</span>] = startPodGCController</span><br><span class="line">controllers[<span class="string">"resourcequota"</span>] = startResourceQuotaController</span><br><span class="line">controllers[<span class="string">"namespace"</span>] = startNamespaceController</span><br><span class="line">controllers[<span class="string">"serviceaccount"</span>] = startServiceAccountController</span><br><span class="line">controllers[<span class="string">"garbagecollector"</span>] = startGarbageCollectorController</span><br><span class="line">controllers[<span class="string">"daemonset"</span>] = startDaemonSetController</span><br><span class="line">controllers[<span class="string">"job"</span>] = startJobController</span><br><span class="line">controllers[<span class="string">"deployment"</span>] = startDeploymentController</span><br><span class="line">controllers[<span class="string">"replicaset"</span>] = startReplicaSetController</span><br><span class="line">controllers[<span class="string">"horizontalpodautoscaling"</span>] = startHPAController</span><br><span class="line">controllers[<span class="string">"disruption"</span>] = startDisruptionController</span><br><span class="line">controllers[<span class="string">"statefulset"</span>] = startStatefulSetController</span><br><span class="line">controllers[<span class="string">"cronjob"</span>] = startCronJobController</span><br><span class="line">controllers[<span class="string">"csrsigning"</span>] = startCSRSigningController</span><br><span class="line">controllers[<span class="string">"csrapproving"</span>] = startCSRApprovingController</span><br><span class="line">controllers[<span class="string">"csrcleaner"</span>] = startCSRCleanerController</span><br><span class="line">controllers[<span class="string">"ttl"</span>] = startTTLController</span><br><span class="line">controllers[<span class="string">"bootstrapsigner"</span>] = startBootstrapSignerController</span><br><span class="line">controllers[<span class="string">"tokencleaner"</span>] = startTokenCleanerController</span><br><span class="line">controllers[<span class="string">"nodeipam"</span>] = startNodeIpamController</span><br><span class="line">controllers[<span class="string">"nodelifecycle"</span>] = startNodeLifecycleController</span><br><span class="line"><span class="keyword">if</span> loopMode == IncludeCloudLoops &#123;</span><br><span class="line">	controllers[<span class="string">"service"</span>] = startServiceController</span><br><span class="line">	controllers[<span class="string">"route"</span>] = startRouteController</span><br><span class="line">	controllers[<span class="string">"cloud-node-lifecycle"</span>] = startCloudNodeLifecycleController</span><br><span class="line">&#125;</span><br><span class="line">controllers[<span class="string">"persistentvolume-binder"</span>] = startPersistentVolumeBinderController</span><br><span class="line">controllers[<span class="string">"attachdetach"</span>] = startAttachDetachController</span><br><span class="line">controllers[<span class="string">"persistentvolume-expander"</span>] = startVolumeExpandController</span><br><span class="line">controllers[<span class="string">"clusterrole-aggregation"</span>] = startClusterRoleAggregrationController</span><br><span class="line">controllers[<span class="string">"pvc-protection"</span>] = startPVCProtectionController</span><br><span class="line">controllers[<span class="string">"pv-protection"</span>] = startPVProtectionController</span><br><span class="line">controllers[<span class="string">"ttl-after-finished"</span>] = startTTLAfterFinishedController</span><br><span class="line">controllers[<span class="string">"root-ca-cert-publisher"</span>] = startRootCACertPublisher</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/k8s/" rel="tag"># k8s</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/02/05/k8s/4.k8s-informer/" rel="next" title="通信组件 Informer">
+                <i class="fa fa-chevron-left"></i> 通信组件 Informer
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/02/07/k8s/6.k8s-scheduler/" rel="prev" title="kube-scheduler">
+                kube-scheduler <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#3-controller-manager"><span class="nav-number">1.</span> <span class="nav-text">3. controller-manager</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-启动过程"><span class="nav-number">1.1.</span> <span class="nav-text">3.1 启动过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-pod单次部署执行过程"><span class="nav-number">1.2.</span> <span class="nav-text">3.2 pod单次部署执行过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-pod自动横向伸缩"><span class="nav-number">1.3.</span> <span class="nav-text">3.3 pod自动横向伸缩</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#附件"><span class="nav-number">1.4.</span> <span class="nav-text">附件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-控制器列表"><span class="nav-number">1.4.1.</span> <span class="nav-text">1. 控制器列表</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

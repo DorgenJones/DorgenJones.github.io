@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="istio,servicemesh," />
+
+
+<meta name="description" content="MCP协议&amp;Galley[TOC] MCP协议 MCP协议全称是 Mesh Configuration Protocol。 在Istio历史版本里，基于k8s来存储数据导致其与k8s耦合，限制了Istio的拓展性（非k8s机制则无法使用）。 MCP协议的出现即是为了解决与k8s耦合的问题。MCP定义了一套配置订阅与下发的标准协议，Pilot和Mixer 作为MCP client，任何实现了">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Istio MCP&amp;Galley">
+<meta property="og:url" content="https://dorgenjones.github.io/2019/10/15/istio/3.istio-mcp&galley/index.html">
+<meta property="og:site_name" content="Zamperini">
+<meta property="og:description" content="MCP协议&amp;Galley[TOC] MCP协议 MCP协议全称是 Mesh Configuration Protocol。 在Istio历史版本里，基于k8s来存储数据导致其与k8s耦合，限制了Istio的拓展性（非k8s机制则无法使用）。 MCP协议的出现即是为了解决与k8s耦合的问题。MCP定义了一套配置订阅与下发的标准协议，Pilot和Mixer 作为MCP client，任何实现了">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/10/15/istio/3.istio-mcp&galley/media/15769877121453/15776177806339.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/10/15/istio/3.istio-mcp&galley/media/15769877121453/15780350474622.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/10/15/istio/3.istio-mcp&galley/media/15769877121453/15780373176301.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/10/15/istio/3.istio-mcp&galley/media/15769877121453/15780405468904.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/10/15/istio/3.istio-mcp&galley/media/15769877121453/15780623306136.jpg">
+<meta property="og:image" content="https://dorgenjones.github.io/2019/10/15/istio/3.istio-mcp&galley/media/15769877121453/15779491994478.jpg">
+<meta property="article:published_time" content="2019-10-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-02-13T11:02:59.006Z">
+<meta property="article:author" content="Zamperini">
+<meta property="article:tag" content="istio">
+<meta property="article:tag" content="servicemesh">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://dorgenjones.github.io/2019/10/15/istio/3.istio-mcp&galley/media/15769877121453/15776177806339.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/2019/10/15/istio/3.istio-mcp&galley/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>Istio MCP&Galley | Zamperini</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zamperini</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2019/10/15/istio/3.istio-mcp&galley/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Istio MCP&Galley</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-15T00:00:00+08:00">2019-10-15</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/istio/" itemprop="url" rel="index"><span itemprop="name">istio</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="MCP协议-amp-Galley"><a href="#MCP协议-amp-Galley" class="headerlink" title="MCP协议&amp;Galley"></a>MCP协议&amp;Galley</h1><p>[TOC]</p>
+<h2 id="MCP协议"><a href="#MCP协议" class="headerlink" title="MCP协议"></a>MCP协议</h2><ul>
+<li><code>MCP</code>协议全称是 <code>Mesh Configuration Protocol</code>。</li>
+<li>在<code>Istio</code>历史版本里，基于<code>k8s</code>来存储数据导致其与<code>k8s</code>耦合，限制了<code>Istio</code>的拓展性（非<code>k8s</code>机制则无法使用）。</li>
+<li><code>MCP</code>协议的出现即是为了解决与<code>k8s</code>耦合的问题。<code>MCP</code>定义了一套配置订阅与下发的标准协议，<code>Pilot</code>和<code>Mixer</code> 作为<code>MCP client</code>，任何实现了<code>MCP</code>协议的Server(如<code>Galley</code>)通过 <code>MCP协议</code>向<code>Pilot</code>下发配置。</li>
+</ul>
+<p><code>MCP</code>中对配置生生产者和消费者进行了如下抽象：</p>
+<ul>
+<li><code>source</code>：配置源，即<code>Istio</code>的<code>Galley</code>(配置中心)，对应的是Grpc中定义的 <strong>Service:</strong> <code>ResourceSource</code>；</li>
+<li><code>sink</code>：配置消费者，即<code>Istio</code>中的<code>Pilot</code>、<code>Mixer</code>，对应的Grpc中定义的<code>ResourceSink</code>；</li>
+<li><code>resource</code>：配置资源的抽象定义。</li>
+</ul>
+<hr>
+<ol>
+<li>通常情况下，<code>source</code>作为Grpc的server，提供<code>ResourceSource</code>服务；<code>sink</code>作为Grpc的client，提供<code>ResourceSink</code>服务，<code>sink</code>主动向<code>source</code>发起连接，请求资源。当有资源更新时<code>source</code>将信息push给<code>sink</code>；</li>
+<li>但<code>MCP</code>也支持一些特殊场景，<code>Source</code> 作为<strong>Client</strong> 向<code>Sink</code> <strong>Server</strong>建立新连接，然后<code>Sever</code>向<code>Client</code>发起资源请求（实际还是<code>Sink</code>请求<code>Source</code>，只是<code>Sink</code>作为Server，让<code>Source</code>连上来）。</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">participant Sink(Pilot|Mixer) as sink</span><br><span class="line">participant Source(Galley) as source</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">note right of sink: stream established</span><br><span class="line">sink-&gt;source:conn:&#x3D; grpc.Dial</span><br><span class="line">sink-&gt;source: svc:&#x3D;mcp.NewResourceSourceService(conn)</span><br><span class="line">sink-&gt;source: stream:&#x3D;svc.EstablishResourceStream()</span><br><span class="line">sink-&gt;source: stream:&#x3D;stream.Send(RequestResources)</span><br><span class="line">source--&gt;sink: Resources:&#x3D; stream.Recv()</span><br><span class="line"></span><br><span class="line">note right of sink: request Resources</span><br><span class="line">sink-&gt;source: stream:&#x3D; RequestResources&#123;Collection&#x3D;VirtualService,nonce&#x3D;&#125;</span><br><span class="line">source--&gt;sink: Resources&#123;Collection&#x3D;VirtualService, nonce&#x3D;1, reources&#x3D;&#123;&#123;foo,v1&#125;,&#123;bar,v2&#125;&#125;&#125;</span><br><span class="line">sink-&gt;source: stream:&#x3D; RequestResources&#123;Collection&#x3D;VirtualService,nonce&#x3D;1&#125;(ACK)</span><br><span class="line"></span><br><span class="line">note right of sink: push Resources</span><br><span class="line">source--&gt;sink: Resources&#123;Collection&#x3D;VirtualService, nonce&#x3D;2, reources&#x3D;&#123;&#123;foo,v2&#125;,&#123;bar,v3&#125;&#125;&#125;</span><br><span class="line">sink-&gt;source: stream:&#x3D; RequestResources&#123;Collection&#x3D;VirtualService,nonce&#x3D;2&#125;(ACK)</span><br><span class="line"></span><br><span class="line">note right of sink: error Push</span><br><span class="line">source--&gt;sink: Resources&#123;Collection&#x3D;VirtualService, nonce&#x3D;3, reources&#x3D;&#123;&#123;foo,v3&#125;,&#123;bar,v4&#125;&#125;&#125;</span><br><span class="line">sink-&gt;source: stream:&#x3D; RequestResources&#123;Collection&#x3D;VirtualService,nonce&#x3D;3&#125;(NACK)</span><br></pre></td></tr></table></figure>
+
+<p><code>MCP</code>中<code>Sink</code>与<code>Source</code>交互接口定义：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ResourceSource_EstablishResourceStreamClient <span class="keyword">interface</span> &#123;</span><br><span class="line">	Send(*RequestResources) error</span><br><span class="line">	Recv() (*Resources, error)</span><br><span class="line">	grpc.ClientStream</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Galley"><a href="#Galley" class="headerlink" title="Galley"></a>Galley</h2><p>前面介绍了 <code>MCP</code> 协议，接下来我们先介绍下<code>Galley</code>以及其工作原理，然后再以其与<code>Pilot</code>的交互流程讲解 <code>MCP</code> 的工作原理。</p>
+<p><code>Galley</code> 主要负责两方面的功能：<strong>配置验证</strong>（校验配置的正确性）以及<strong>配置管理</strong>（<code>输入、转换、分发</code>）</p>
+<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><p><code>Galley</code>启动入口位置：<code>galley/cmd/galley/main.go</code>。<br>首先，创建<code>server.Args</code>，通过参数初始化之后调用<code>server.New</code>创建<code>Galley</code><strong>Server</strong>。然后调用其<code>Start</code>方法开启<code>Galley</code>服务。</p>
+<p>创建<code>Server</code>的处理过程如下：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(a *settings.Args)</span> *<span class="title">Server</span></span> &#123;</span><br><span class="line">    <span class="comment">// 创建存活探针</span></span><br><span class="line">	liveness := components.NewProbe(&amp;a.Liveness)</span><br><span class="line">	s.host.Add(liveness)</span><br><span class="line">	 <span class="comment">// 创建可读探针</span></span><br><span class="line">	readiness := components.NewProbe(&amp;a.Readiness)</span><br><span class="line">	s.host.Add(readiness)</span><br><span class="line">	<span class="comment">// 创建配置校验管理器</span></span><br><span class="line">	validation := components.NewValidation(a.KubeConfig, a.ValidationArgs, liveness.Controller(), readiness.Controller())</span><br><span class="line">	s.host.Add(validation)</span><br><span class="line">	<span class="comment">// 创建配置处理器</span></span><br><span class="line">	<span class="keyword">if</span> a.UseOldProcessor &#123;</span><br><span class="line">		s.p = components.NewProcessing(a)</span><br><span class="line">		s.host.Add(s.p)</span><br><span class="line">		t := s.p.ConfigZTopic()</span><br><span class="line">		topics = <span class="built_in">append</span>(topics, t)</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		s.p2 = components.NewProcessing2(a)</span><br><span class="line">		s.host.Add(s.p2)</span><br><span class="line">		t := s.p2.ConfigZTopic()</span><br><span class="line">		topics = <span class="built_in">append</span>(topics, t)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 创建监控接口</span></span><br><span class="line">	mon := components.NewMonitoring(a.MonitoringPort)</span><br><span class="line">	s.host.Add(mon)</span><br><span class="line">	<span class="comment">// 与Pilot一样，ControlZ 运维接口</span></span><br><span class="line">	clz := components.NewCtrlz(a.IntrospectionOptions, topics...)</span><br><span class="line">	s.host.Add(clz)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Galley</code> 让所有组件都实现 <code>Component</code>接口，其定义了<code>Start</code>方法和<code>Stop</code>方法。<code>Server</code>创建所有组件后执行所有组件的<code>Start</code>方法，当<code>Server</code>要退出时执行<code>Stop</code>方法。</p>
+<hr>
+<h3 id="配置校验器"><a href="#配置校验器" class="headerlink" title="配置校验器"></a>配置校验器</h3><p><code>Istio</code> 中配置非常之多，而 <code>Istio</code> 配置数据的主要来源是 <code>k8s</code>。在 <code>k8s</code> 中创建各种类型的配置 <code>CRD</code> 资源，<code>Istio</code> 通过监听这种类型资源进行处理转换后下发给 <code>Envoy</code>。配置资源如果任意设置可能会导致意想不到的结果，而 <code>k8s</code> 提供了一种叫<code>Admission WebHooks</code>的拓展，用来支持对配置的验证工作。<br>工作原理如下：</p>
+<ul>
+<li>向<code>k8s</code>中注入用于准入的 <code>WebHookConfiguration</code>（配置校验服务器信息），在<code>k8s</code>中有配置输入时，会向配置的校验服务器发起准入请求；</li>
+<li>校验服务器会拿到请求中的资源信息，根据其配置的规则进行校验，若不通过，则返回告诉<code>k8s</code>拒绝，并输入具体信息；否则返回成功。</li>
+</ul>
+<p><img src="media/15769877121453/15776177806339.jpg" alt=""></p>
+<h4 id="初始化-1"><a href="#初始化-1" class="headerlink" title="初始化"></a>初始化</h4><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">webhookServerReady := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">stopCh := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line"><span class="keyword">if</span> params.EnableValidation &#123;</span><br><span class="line">    <span class="comment">//创建与运行校验模块</span></span><br><span class="line">	<span class="keyword">go</span> validation.RunValidation(webhookServerReady, stopCh, params, kubeConfig, liveness, readiness)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> params.EnableReconcileWebhookConfiguration &#123;</span><br><span class="line">    <span class="comment">//创建ValidatingWebhookConfiguration，并向k8s注入此WebhookConfiguration</span></span><br><span class="line">	<span class="keyword">go</span> validation.ReconcileWebhookConfiguration(webhookServerReady, stopCh, params, kubeConfig)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其过程分为两步：创建并运行校验模块，当校验模块就绪后向 <code>k8s</code> 注入<code>WebhookConfiguration</code>。<br>首先，先看校验模块的初始化过程：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">RunValidation</span><span class="params">(ready <span class="keyword">chan</span>&lt;- <span class="keyword">struct</span>&#123;&#125;, stopCh <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, vc *WebhookParameters, kubeConfig <span class="keyword">string</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">	livenessProbeController, readinessProbeController probe.Controller)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 创建默认的Mixer的校验器</span></span><br><span class="line">	mixerValidator := mixervalidate.NewDefaultValidator(<span class="literal">false</span>)</span><br><span class="line">	<span class="comment">// 创建与k8s交互的客户端</span></span><br><span class="line">	clientset, err := kube.CreateClientset(kubeConfig, <span class="string">""</span>)</span><br><span class="line">	vc.MixerValidator = mixerValidator</span><br><span class="line">	<span class="comment">// 所有Istio的模型</span></span><br><span class="line">	vc.PilotDescriptor = schemas.Istio</span><br><span class="line">	vc.Clientset = clientset</span><br><span class="line">	<span class="comment">// 创建WebHook处理器，并对外输出http操作接口</span></span><br><span class="line">	wh, err := NewWebhook(*vc)</span><br><span class="line">	   |- wh := &amp;Webhook&#123;</span><br><span class="line">    		server: &amp;http.Server&#123;</span><br><span class="line">    			Addr: fmt.Sprintf(<span class="string">":%v"</span>, p.Port),</span><br><span class="line">    		&#125;,</span><br><span class="line">    		descriptor:                    p.PilotDescriptor,</span><br><span class="line">    		validator:                     p.MixerValidator,</span><br><span class="line">    		clientset:                     p.Clientset,</span><br><span class="line">	   |- h.HandleFunc(<span class="string">"/admitpilot"</span>, wh.serveAdmitPilot)</span><br><span class="line">	   |- h.HandleFunc(<span class="string">"/admitmixer"</span>, wh.serveAdmitMixer)</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">	<span class="keyword">go</span> wh.Run(ready, stopCh)</span><br><span class="line">	   |- <span class="keyword">go</span> wh.server.ListenAndServeTLS(<span class="string">""</span>, <span class="string">""</span>) <span class="comment">// 监听端口</span></span><br><span class="line">	   |-	wh.waitForEndpointReady <span class="comment">// 等待资源初始化完成</span></span><br><span class="line">	       |- store, controller := cache.NewInformer(wh.createInformerEndpointSource(wh.clientset, wh.deploymentAndServiceNamespace, wh.serviceName)...</span><br><span class="line">	       |- <span class="comment">// 等待资源同步完成</span></span><br><span class="line">	       |- cache.WaitForCacheSync(stopCh, controller.HasSynced)</span><br><span class="line">	       |- <span class="comment">//检查节点是否准备就绪：</span></span><br><span class="line">	       |- ready := endpointReady(store, queue, wh.deploymentAndServiceNamespace, wh.serviceName)</span><br><span class="line">	   |-	ready &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125; <span class="comment">//发送信号标识可以向k8s注册此准入检测点</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ReconcileWebhookConfiguration</span><span class="params">(webhookServerReady, stopCh &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;,</span></span></span><br><span class="line"><span class="function"><span class="params">	vc *WebhookParameters, kubeConfig <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">	clientset, err := kube.CreateClientset(kubeConfig, <span class="string">""</span>)</span><br><span class="line">	<span class="comment">// 创建 WebhookConfigController</span></span><br><span class="line">	whc, err := NewWebhookConfigController(*vc)</span><br><span class="line">	&lt;-webhookServerReady <span class="comment">// 等待检验模块就绪</span></span><br><span class="line">	whc.reconcile(stopCh)</span><br><span class="line">	   |- whc.rebuildWebhookConfig() <span class="comment">// 跟据配置构建Webhook配置</span></span><br><span class="line">	   |- whc.createOrUpdateWebhookConfig() <span class="comment">// 向`k8s`发起创建`webhook`</span></span><br></pre></td></tr></table></figure>
+<p>总结其过程：首先创建默认的校验器，其次创建<code>WebHook</code>监听端口并添加指定路径的处理函数，最后通过查询<code>k8s</code>查询到节点可读时告知<code>WebhookController</code>向<code>k8s</code>注册<code>ValidatingWebhookConfiguration</code>。</p>
+<h4 id="校验"><a href="#校验" class="headerlink" title="校验"></a>校验</h4><p>接下来，继续跟进具体的校验逻辑，对于<code>Pilot</code>配置逻辑校验入口<code>admitPilot</code>；而对于<code>Mixer</code>配置逻辑校验入口为<code>admitMixer</code>。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(wh *Webhook)</span> <span class="title">admitPilot</span><span class="params">(request *AdmissionRequest)</span> *<span class="title">AdmissionResponse</span></span> &#123;</span><br><span class="line">    <span class="comment">// 只校验创建和修改操作</span></span><br><span class="line">    <span class="keyword">switch</span> request.Operation &#123;</span><br><span class="line">	<span class="keyword">case</span> admissionv1beta1.Create, admissionv1beta1.Update:</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		<span class="keyword">return</span> &amp;admissionv1beta1.AdmissionResponse&#123;Allowed: <span class="literal">true</span>&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 解码，并判断是否是Istio关注的类型，若不是则返回无法识别的类型</span></span><br><span class="line">	<span class="keyword">var</span> obj crd.IstioKind</span><br><span class="line">	yaml.Unmarshal(request.Object.Raw, &amp;obj)</span><br><span class="line">	s, exists := wh.descriptor.GetByType(crd.CamelCaseToKebabCase(obj.Kind))</span><br><span class="line">	<span class="comment">// 进行类型转换</span></span><br><span class="line">	out, err := crd.ConvertObject(s, &amp;obj, wh.domainSuffix)</span><br><span class="line">	<span class="comment">// 调用Schema中配置的Validate进行实体校验</span></span><br><span class="line">	s.Validate(out.Name, out.Namespace, out.Spec)</span><br><span class="line">	<span class="comment">// 对属性进行检查，查看必备字段是否无缺失</span></span><br><span class="line">	checkFields(request.Object.Raw, request.Kind.Kind, request.Namespace, obj.Name)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>总结，<code>Pilot</code>的校验过程较简单，主要检查：</p>
+<ul>
+<li>解码是否正常；</li>
+<li>是否能转换成Istio类型；</li>
+<li>是否符合Schema中配置的<code>Validate</code>函数；</li>
+<li>必须属性是否无缺失</li>
+</ul>
+<p><code>Mixer</code>配置校验过程如下：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span> request.Operation &#123;</span><br><span class="line"><span class="keyword">case</span> admissionv1beta1.Create, admissionv1beta1.Update:</span><br><span class="line">	ev.Type = store.Update</span><br><span class="line">	<span class="keyword">var</span> obj unstructured.Unstructured</span><br><span class="line">	<span class="comment">// 解码</span></span><br><span class="line">	yaml.Unmarshal(request.Object.Raw, &amp;obj)</span><br><span class="line">	ev.Value = mixerCrd.ToBackEndResource(&amp;obj)</span><br><span class="line">	ev.Key.Name = ev.Value.Metadata.Name</span><br><span class="line">  <span class="comment">// 检查必备字段是否无缺失</span></span><br><span class="line">	checkFields(request.Object.Raw, request.Kind.Kind, request.Namespace, ev.Key.Name)</span><br><span class="line"><span class="keyword">case</span> <span class="comment">//...</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> ev.Type == store.Update &#123;</span><br><span class="line">    <span class="comment">// 执行校验</span></span><br><span class="line">    wh.validator.Validate(ev)</span><br><span class="line">    |- _, ok := v.kinds[bev.Key.Kind] <span class="comment">// 查看是否关注此类型配置</span></span><br><span class="line">    |- ev, err := store.ConvertValue(*bev, v.kinds) <span class="comment">// 根据类型进行转换成mixer定义的对象</span></span><br><span class="line">    |- v.config.ApplyEvent([]*store.Event&#123;&amp;ev&#125;) <span class="comment">// 应用该变化</span></span><br><span class="line">    |- v.config.BuildSnapshot() <span class="comment">// 基于现有所有配置构建一次快照，若成功代表配置无异常</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>总结其过程如下：</p>
+<ul>
+<li>解码，若解码异常则返回失败</li>
+<li>必备字段是否无缺失</li>
+<li>是否是<code>Mixer</code>关注的类型</li>
+<li>是否能转换成<code>Mixer</code>中定义的类型所对应的对象</li>
+<li>应用变更</li>
+<li>查看是否能成功构建快照成功（之所以这么做的原因是：<code>Mixer</code>中配置之间存在一定的关联性（<code>adapter</code>、<code>template</code>…），只校验单个实体是不够的）</li>
+</ul>
+<h3 id="配置管理"><a href="#配置管理" class="headerlink" title="配置管理"></a>配置管理</h3><p><code>Galley</code>中负责配置管理组件是<code>Processing</code>，它有两个版本<code>Processing</code>和<code>Processing2</code>，下面我们将主要研究<code>Processing2</code>的实现。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 资源快照的缓存</span></span><br><span class="line"><span class="comment">// 索引方法：如果不是SyntheticServiceEntry类型的资源则用默认的快照资源，否则是的话则用为SyntheticServiceEntry单独构建的快照。</span></span><br><span class="line">mcpCache := snapshot.New(groups.IndexFunction)</span><br><span class="line"><span class="keyword">return</span> &amp;Processing2&#123;</span><br><span class="line">	args:         a,</span><br><span class="line">	mcpCache:     mcpCache,</span><br><span class="line">	configzTopic: configz.CreateTopic(mcpCache),</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>processing2</code>由以下几个组件组成：</p>
+<ul>
+<li><code>Source</code>:配置源，如k8s、fs；</li>
+<li><code>Runtime</code>:<code>Galley</code>中最复杂的模块，它将<code>Source</code>、<code>Transform</code>、<code>Snapshotter</code>、<code>distributor</code>连接在一起。<ul>
+<li><code>runtime</code>中创建带有状态机机制的组件 <strong>session</strong> 来追踪开始、结束事件处理循环<ul>
+<li><code>inactive</code>:未激活状态；</li>
+<li><code>starting</code>:当会话开始时，即转变为开始状态。为了避免在启动阶段阻塞并可以正确处理所有生命周期事件，其是一个很短暂的状态。当所有数据源初始化完成时，它将会被转换成<code>buffering</code>状态。</li>
+<li><code>buffering</code>: 此阶段，所有数据源都已经初始化完成，但还没收到<code>meshconfig</code>时间。所有非<code>meshconfig</code>事件都将会被缓存，直到<code>meshconfig</code>到达；</li>
+<li><code>processing</code>: 一旦接收到<code>meshconfig</code>后，<code>runtime</code>将开始做配置转换并开始分发缓存的事件到各转换器。当接收到<code>reset</code>事件或者收到<code>meshconfig</code>的变更时，<code>session</code>将转换成<code>inactive</code>状态或者创建新的<code>session</code>。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>snapshot.Cache</code>: 配置快照</li>
+</ul>
+<p><strong>processing2</strong> 初始化流程实现如下：</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Processing2)</span> <span class="title">Start</span><span class="params">()</span> <span class="params">(err error)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 创建本地文件类型的配置源</span></span><br><span class="line">    mesh = meshcfgNewFS(p.args.MeshConfigFile)</span><br><span class="line">    <span class="comment">// 从本地文件`metadata.yaml`中加载所有元数据信息</span></span><br><span class="line">    m := metadata.MustGet()</span><br><span class="line">    <span class="comment">// 根据元数据中转换配置以及其他配置构建类型转换器提供者逻辑，即告知输入参数类型、输出参数类型，以及转换函数实现</span></span><br><span class="line">    transformProviders := transforms.Providers(m)</span><br><span class="line">    <span class="keyword">var</span> colsInSnapshots collection.Names</span><br><span class="line">    <span class="comment">// 默认输入参数中，Snapshots包含Default和SyntheticServiceEntry。从元数据中获取所有在这些Snapshot中的集合</span></span><br><span class="line">    <span class="keyword">for</span> _, c := <span class="keyword">range</span> m.AllCollectionsInSnapshots(p.args.Snapshots) &#123;</span><br><span class="line">		colsInSnapshots = <span class="built_in">append</span>(colsInSnapshots, collection.NewName(c))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 过滤出所有需要的k8s资源信息（这里有个判断，如果Galley不充当服务发现角色则过滤掉k8s内置的资源信息，如k8s的Service\Node\Endpoint等）</span></span><br><span class="line">	kubeResources := kuberesource.DisableExcludedKubeResources(m.KubeSource().Resources(), transformProviders,</span><br><span class="line">		colsInSnapshots, p.args.ExcludedResourceKinds, p.args.EnableServiceDiscovery)</span><br><span class="line">	<span class="comment">// 创建 k8s来源的数据源，其会对k8s中所有`crd`资源进行watch</span></span><br><span class="line">	src, updater, err = p.createSourceAndStatusUpdater(kubeResources)</span><br><span class="line">	<span class="comment">// 分配器</span></span><br><span class="line">	<span class="keyword">var</span> distributor snapshotter.Distributor = snapshotter.NewMCPDistributor(p.mcpCache)</span><br><span class="line">	<span class="comment">// 创建运行时，进行一些快照以及分类内容的初始化</span></span><br><span class="line">	p.runtime, err = processorInitialize(processorSettings)</span><br><span class="line">	|-	<span class="comment">//... 初始化快照参数（更新策略，是否防抖动）</span></span><br><span class="line">	|- procProvider := <span class="function"><span class="keyword">func</span><span class="params">(o processing.ProcessorOptions)</span> <span class="title">event</span>.<span class="title">Processor</span></span> &#123;</span><br><span class="line">		xforms := settings.TransformProviders.Create(o)</span><br><span class="line">		s, err := snapshotter.NewSnapshotter(xforms, options)</span><br><span class="line">		<span class="keyword">return</span> s</span><br><span class="line">	   &#125;</span><br><span class="line">	|- processing.NewRuntime(rtOpt) <span class="comment">//创建运行时，并向配置源注册事件处理器</span></span><br><span class="line">	   |- r := &amp;Runtime&#123;</span><br><span class="line">		      options: o.Clone(),</span><br><span class="line">	      &#125;</span><br><span class="line">	   |- h := event.HandlerFromFn(r.handle)</span><br><span class="line">	   |- o.Source.Dispatch(h)   </span><br><span class="line">	<span class="comment">// 创建 grpc sever   </span></span><br><span class="line">	p.grpcServer = grpc.NewServer(grpcOptions...)</span><br><span class="line">	<span class="comment">// 向指定地址服务器发起建立连接，并对对方提供配置服务（galley中特别的设计，client_source模式）</span></span><br><span class="line">	p.callOut, err = newCallout(p.args.SinkAddress, p.args.SinkAuthMode, md, options)</span><br><span class="line">	<span class="comment">//创建 MCP Server Source</span></span><br><span class="line">	p.mcpSource = source.NewServer(options, serverOptions)</span><br><span class="line">	<span class="comment">// 将MCP Server注册到grpc server上对外提供服务</span></span><br><span class="line">	mcp.RegisterResourceSourceServer(p.grpcServer, p.mcpSource)</span><br><span class="line">	<span class="comment">//</span></span><br><span class="line">	p.runtime.Start()</span><br><span class="line">	|- <span class="keyword">go</span> r.run(...) <span class="comment">// 异步运行</span></span><br><span class="line">	   |- se, done := newSession(sid, r.options) <span class="comment">// 创建并初始化配置处理会话</span></span><br><span class="line">		|- r.session.Store(se)</span><br><span class="line">		|- se.start()</span><br><span class="line">		  |- s.transitionTo(starting) <span class="comment">//更改状态</span></span><br><span class="line">		  |- <span class="keyword">go</span> s.startSources()</span><br><span class="line">		    |- s.options.Source.Start() <span class="comment">//开始所有配置源组件</span></span><br><span class="line">		    |- 当Source初始化成功后，会向runtime发送一个<span class="string">`FullSync`</span>事件。</span><br><span class="line">	gs.Serve(l) <span class="comment">// 开启grpc服务</span></span><br><span class="line">	p.callOut.run()</span><br><span class="line">	|- conn, err := c.pt.grpcDial(c.address, c.do...) <span class="comment">// dial</span></span><br><span class="line">	|- client := mcp.NewResourceSinkClient(conn) <span class="comment">// 创建Mcp sink client</span></span><br><span class="line">	|- mcpClient := c.pt.sourceNewClient(client, c.so) <span class="comment">// 创建mcp client</span></span><br><span class="line">	|- mcpClient.Run(ctx) <span class="comment">// 运行 client_source</span></span><br><span class="line">	   |- c.sendTriggerResponse(stream) <span class="comment">// $triggerCollection（特别记号）</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>总结其流程如下：</p>
+<ol>
+<li>初始化配置源<code>Source</code>: <code>meshSource</code>(文件配置源)、<code>apiServer.Source</code>（k8s crd配置源）；</li>
+<li>解析配置文件中的元数据，初始化转换器提供者；</li>
+<li>创建并初始化 <code>Runtime</code>；</li>
+<li>创建<code>Callout</code>(将<code>galley</code>作为<code>client</code>方式为目标服务提供配置服务)；</li>
+<li>创建 <strong>gRpc Service</strong> <code>mcpSource</code>，为配置使用方服务；</li>
+<li>启动 <code>Runtime</code>，过程比较复杂，下面将详细介绍；</li>
+<li>启动<code>grpc</code>提供服务；</li>
+<li>启动<code>callout</code>连接到目标服务，对其提供服务。</li>
+</ol>
+<p>可以看到<code>Runtime</code>是<code>Galley</code>的核心，对接各种配置源，并进行配置转换。而<code>mcpSource</code>是用来对配置客户端提供服务的，他们之间通过<code>mcpCache</code>进行衔接。<code>Runtime</code>经过一系列处理后构建<code>Snapshot</code>，然后将快照传进<code>mcpCache</code>。<code>mcpSource</code>从<code>mcpCache</code>中获取配置信息，同时监听<code>mcpCache</code>的配置变更并push到客户端。</p>
+<p><code>Runtime</code>启动流程大致如下：<br><img src="media/15769877121453/15780350474622.jpg" alt=""></p>
+<p>总结起来，<code>Galley</code>整体架构如下：<br><img src="media/15769877121453/15780373176301.jpg" alt=""></p>
+<h4 id="配置处理流程"><a href="#配置处理流程" class="headerlink" title="配置处理流程"></a>配置处理流程</h4><ol>
+<li>当<code>client</code>首次与<strong>gRpcServer</strong>建立连接后，会从<code>stream</code>中获取其节点信息<code>PeerInfo</code>，同时从<code>PeerInfo</code>中截取<code>AuthInfo</code>进行校验；</li>
+<li><code>mcpSource</code>调用<code>Processtream</code>方法对<code>Stream</code>进行处理：<ul>
+<li>首先为每个客户端创建一个<code>connection</code>对象，用来保存其元信息（节点信息、订阅类型以及订阅类型的监听状态等）</li>
+<li>然后会同时监听<code>connection</code>的请求通道<code>reuqestC</code>和向其推送信息的队列<code>queue</code></li>
+</ul>
+</li>
+</ol>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> connection <span class="keyword">struct</span> &#123;</span><br><span class="line">    peerAddr <span class="keyword">string</span></span><br><span class="line">    stream   Stream</span><br><span class="line">    id       <span class="keyword">int64</span></span><br><span class="line">    streamNonce <span class="keyword">int64</span> <span class="comment">// 请求-响应记号 // 只有在server端每次发送数据时才会修改该值</span></span><br><span class="line">    requestC <span class="keyword">chan</span> *mcp.RequestResources</span><br><span class="line">    watches  <span class="keyword">map</span>[<span class="keyword">string</span>]*watch <span class="comment">//每种类型配置的监听状态</span></span><br><span class="line">    watcher  Watcher <span class="comment">// mcpCache</span></span><br><span class="line">    queue *internal.UniqueQueue</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>初次请求处理流程如下：</strong><br><img src="media/15769877121453/15780405468904.jpg" alt=""></p>
+<p><strong>变更下发流程如下：</strong><br>以<code>apiServer</code>为配置源，资源 <code>VirtualService</code> 为例来讲解配置下发流程：<br><img src="media/15769877121453/15780623306136.jpg" alt=""><br>可以看出其流程非常之长，但概括起来其过程：</p>
+<ul>
+<li><strong>Source变更</strong> -&gt; <strong>Runtime进行转换</strong> -&gt; <strong>Cache更新快照</strong> -&gt; <strong>connectin连接下发更新</strong></li>
+</ul>
+<h2 id="附件"><a href="#附件" class="headerlink" title="附件"></a>附件</h2><ol>
+<li><code>metadata.yaml</code> 元数据配置文件<br><img src="media/15769877121453/15779491994478.jpg" alt=""></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/istio/" rel="tag"># istio</a>
+          
+            <a href="/tags/servicemesh/" rel="tag"># servicemesh</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/10/14/istio/2.istio-pilot/" rel="next" title="Istio Pilot">
+                <i class="fa fa-chevron-left"></i> Istio Pilot
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/11/19/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/1.etcd-%E7%AE%80%E4%BB%8B/" rel="prev" title="ETCD简介">
+                ETCD简介 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#MCP协议-amp-Galley"><span class="nav-number">1.</span> <span class="nav-text">MCP协议&amp;Galley</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#MCP协议"><span class="nav-number">1.1.</span> <span class="nav-text">MCP协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Galley"><span class="nav-number">1.2.</span> <span class="nav-text">Galley</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化"><span class="nav-number">1.2.1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置校验器"><span class="nav-number">1.2.2.</span> <span class="nav-text">配置校验器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#初始化-1"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#校验"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">校验</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置管理"><span class="nav-number">1.2.3.</span> <span class="nav-text">配置管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置处理流程"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">配置处理流程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#附件"><span class="nav-number">1.3.</span> <span class="nav-text">附件</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

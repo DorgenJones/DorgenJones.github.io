@@ -5,7 +5,7 @@
   
 
 
-<html class="theme-next gemini use-motion" lang="zh-CN">
+<html class="theme-next mist use-motion" lang="zh-CN">
 <head>
   <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -75,7 +75,7 @@
   var NexT = window.NexT || {};
   var CONFIG = {
     root: '/',
-    scheme: 'Gemini',
+    scheme: 'Mist',
     version: '6.0.3',
     sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: false,
@@ -112,7 +112,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://dorgenjones.github.io/media/15512352647387.jpg">
 <meta property="article:published_time" content="2019-11-19T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-02-13T12:30:42.329Z">
+<meta property="article:modified_time" content="2020-02-25T04:24:51.481Z">
 <meta property="article:author" content="Zamperini">
 <meta property="article:tag" content="etcd">
 <meta name="twitter:card" content="summary">
@@ -378,9 +378,9 @@
 <p>准备好创建<code>etcd</code>节点后开始初始化节点信息：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">etcdserver/NewServer(srvcfg)</span><br><span class="line">|- fileutil.TouchDirAll(cfg.DataDir) <span class="comment">//检查是否可以获取目录权限：DataDir:"集群名.etcd"</span></span><br><span class="line">|- fileutil.TouchDirAll(cfg.SnapDir()) <span class="comment">// 检查是佛偶可以获取快照目录权限 ”集群名.etcd/member/snap“</span></span><br><span class="line">|- snap.New(cfg.Logger, cfg.SnapDir()) <span class="comment">//创建快照管理器</span></span><br><span class="line">|- be := openBackend(cfg) <span class="comment">// 创建数据库后端，其底层使用boltDB存储数据，然后在其之上进行了一次封装：包括批量提交事务。（关于存储的内容，我们后面讲单独讲解）</span></span><br><span class="line">|- rafthttp.NewRoundTripper(cfg.PeerTLSInfo, cfg.peerDialTimeout()) <span class="comment">// 创建一个RoundTripper，其作用是封装一个具有执行一次http事务，为一个http request获取response的对象</span></span><br></pre></td></tr></table></figure>
 <p>初始化快照管理器和数据库后端后，就会根据一系列条件来决定怎样启动节点：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> !haveWAL &amp;&amp; !cfg.NewCluster:<span class="comment">// 非新集群，同事也没有WAL文件</span></span><br><span class="line">	<span class="comment">// 首先进行一些校验工作：比如判断本地集群成员列表是否与远程其他节点的成本列表配置是否相同</span></span><br><span class="line">	<span class="comment">// 判断集群每个节点的版本是否兼容</span></span><br><span class="line">	id, n, s, w = startNode(cfg, cl, <span class="literal">nil</span>)</span><br><span class="line">	<span class="keyword">case</span> !haveWAL &amp;&amp; cfg.NewCluster: <span class="comment">// 新集群，且没有WAL文件</span></span><br><span class="line">	<span class="comment">// 此处就是接着 PeerURLsMapAndToken的处理，如果配置`Discovery`参数，etcd则进行自发现流程 `v2discovery.JoinCluster`</span></span><br><span class="line">	id, n, s, w = startNode(cfg, cl, cl.MemberIDs())</span><br><span class="line">	<span class="keyword">case</span> haveWAL:                  <span class="comment">// 非新集群，且有WAL文件</span></span><br><span class="line">	<span class="comment">// 首先读取快照文件</span></span><br><span class="line">	<span class="comment">// 从快照文件中恢复数据库后端</span></span><br><span class="line">	snapshot, err = ss.Load()</span><br><span class="line">	<span class="comment">// 调用restartNode方法重启节点</span></span><br><span class="line">	id, cl, n, s, w = restartNode(cfg, snapshot)</span><br><span class="line">	<span class="comment">// 其再从wal内进一步恢复内容</span></span><br><span class="line">	<span class="keyword">default</span>:   <span class="comment">//异常情况</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> !haveWAL &amp;&amp; !cfg.NewCluster:<span class="comment">// 非新集群且也没有WAL文件</span></span><br><span class="line">	<span class="comment">// 首先进行一些校验工作：比如判断本地集群成员列表是否与远程其他节点的成本列表配置是否相同</span></span><br><span class="line">	<span class="comment">// 判断集群每个节点的版本是否兼容</span></span><br><span class="line">	id, n, s, w = startNode(cfg, cl, <span class="literal">nil</span>)</span><br><span class="line">	<span class="keyword">case</span> !haveWAL &amp;&amp; cfg.NewCluster: <span class="comment">// 新集群，且没有WAL文件</span></span><br><span class="line">	<span class="comment">// 此处就是接着 PeerURLsMapAndToken的处理，如果配置`Discovery`参数，etcd则进行自发现流程 `v2discovery.JoinCluster`</span></span><br><span class="line">	id, n, s, w = startNode(cfg, cl, cl.MemberIDs())</span><br><span class="line">	<span class="keyword">case</span> haveWAL:                  <span class="comment">// 非新集群，且有WAL文件</span></span><br><span class="line">	<span class="comment">// 首先读取快照文件</span></span><br><span class="line">	<span class="comment">// 从快照文件中恢复数据库后端</span></span><br><span class="line">	snapshot, err = ss.Load()</span><br><span class="line">	<span class="comment">// 调用restartNode方法重启节点</span></span><br><span class="line">	id, cl, n, s, w = restartNode(cfg, snapshot)</span><br><span class="line">	<span class="comment">// 其再从wal内进一步恢复内容</span></span><br><span class="line">	<span class="keyword">default</span>:   <span class="comment">//异常情况</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>创建完<code>raft.Node</code>并绑定相应<strong>raft</strong>后，继续初始化:</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">|- stats.NewServerStats <span class="comment">// 初始化统计计数</span></span><br><span class="line">|- stats.NewLeaderStats</span><br><span class="line">|- heartbeat := time.Duration(cfg.TickMs) * time.Millisecond <span class="comment">// 初始化心跳参数</span></span><br><span class="line">|- 创建 <span class="string">`EtcdServer`</span>：同时创建 <span class="string">`RaftNode`</span>、初始化ID生成器</span><br><span class="line">    |- newRaftNode  </span><br><span class="line">|- lease.NewLessor <span class="comment">//创建或恢复租约管理器</span></span><br><span class="line">|- srv.kv = mvcc.New(srv.getLogger(), srv.be, srv.lessor, &amp;srv.consistIndex) <span class="comment">// 创建KV存储器，其封装了backend、TreeIndex、Lessor，另外其内部也运行着 Watch 机制。（后续独立章节详细解析）</span></span><br><span class="line">|- srv.applyV3Base = srv.newApplierV3Backend() <span class="comment">// 创建 ApplierV3 接口实现，其用于处理v3 raft消息，为应用层的操作。</span></span><br><span class="line">|- restoreAlarms <span class="comment">// 恢复报警设置，如要是节点存储的报警：如空间不足、崩溃</span></span><br><span class="line">|- tr := &amp;rafthttp.Transport&#123;...&#125; <span class="comment">// 创建Transporter，其用于向其他节点发送raft消息，并从其他节点获取raft消息。</span></span><br><span class="line">|- 每个remotes执行：tr.AddRemote(m.ID, m.PeerURLs) <span class="comment">// 初始化与每个Learner的通信</span></span><br><span class="line">|- 每个Members执行：tr.AddPeer(m.ID, m.PeerURLs) <span class="comment">// 初始化与每个Member节点的通信</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">|- stats.NewServerStats <span class="comment">// 初始化统计计数</span></span><br><span class="line">|- stats.NewLeaderStats</span><br><span class="line">|- heartbeat := time.Duration(cfg.TickMs) * time.Millisecond <span class="comment">// 初始化心跳参数</span></span><br><span class="line">|- 创建 <span class="string">`EtcdServer`</span>：同时创建 <span class="string">`RaftNode`</span>、初始化ID生成器</span><br><span class="line">    |- newRaftNode  </span><br><span class="line">|- lease.NewLessor <span class="comment">//创建或恢复租约管理器</span></span><br><span class="line">|- srv.kv = mvcc.New(srv.getLogger(), srv.be, srv.lessor, &amp;srv.consistIndex) <span class="comment">// 创建KV存储器，其封装了backend、TreeIndex、Lessor，另外其内部也运行着 Watch 机制。（后续独立章节详细解析）</span></span><br><span class="line">|- srv.applyV3Base = srv.newApplierV3Backend() <span class="comment">// 创建 ApplierV3 接口实现，其用于处理v3 raft消息，为应用层的操作。</span></span><br><span class="line">|- restoreAlarms <span class="comment">// 恢复报警，如要是节点存储的报警：如空间不足、崩溃时替换`applyV3`做配置限制或拒绝请求</span></span><br><span class="line">|- tr := &amp;rafthttp.Transport&#123;...&#125; <span class="comment">// 创建Transporter，其用于向其他节点发送raft消息，并从其他节点获取raft消息。</span></span><br><span class="line">|- 每个remotes执行：tr.AddRemote(m.ID, m.PeerURLs) <span class="comment">// 初始化与每个Learner的通信</span></span><br><span class="line">|- 每个Members执行：tr.AddPeer(m.ID, m.PeerURLs) <span class="comment">// 初始化与每个Member节点的通信</span></span><br></pre></td></tr></table></figure>
 <p>下面来看<code>raftNode</code>的详细创建过程：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">newRaftNode(</span><br><span class="line">	raftNodeConfig&#123;</span><br><span class="line">		Node:        n,</span><br><span class="line">		heartbeat:   heartbeat,</span><br><span class="line">		raftStorage: s,</span><br><span class="line">		storage:     NewStorage(w, ss),</span><br><span class="line">	&#125;,</span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">newRaftNode</span><span class="params">(cfg raftNodeConfig)</span> *<span class="title">raftNode</span></span> &#123;</span><br><span class="line">	r := &amp;raftNode&#123;</span><br><span class="line">		lg:             cfg.lg,</span><br><span class="line">		tickMu:         <span class="built_in">new</span>(sync.Mutex),</span><br><span class="line">		raftNodeConfig: cfg,</span><br><span class="line">		td:         contention.NewTimeoutDetector(<span class="number">2</span> * cfg.heartbeat),</span><br><span class="line">		readStateC: <span class="built_in">make</span>(<span class="keyword">chan</span> raft.ReadState, <span class="number">1</span>),</span><br><span class="line">		msgSnapC:   <span class="built_in">make</span>(<span class="keyword">chan</span> raftpb.Message, maxInFlightMsgSnap),</span><br><span class="line">		applyc:     <span class="built_in">make</span>(<span class="keyword">chan</span> apply),</span><br><span class="line">		stopped:    <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;),</span><br><span class="line">		done:       <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;),</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 开始心跳 Ticker</span></span><br><span class="line">	r.ticker = time.NewTicker(r.heartbeat)</span><br><span class="line">	<span class="keyword">return</span> r</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>可以看出<code>raftNode</code>和<code>raft.node</code>之间的关系。通过<code>raftNode</code>可以直接访问<code>raft.node</code>的所有公有方法。</p>
@@ -418,6 +418,8 @@
 <p>最后补充说明下<code>etcd</code>的<code>proxy</code>模式：<br><code>etcd</code>可以通过命令<code>./etcd –proxy on  –listen-client-urls</code>的形式启动代理模式。代理模式下，它的作用是一个反向代理，接收客户端请求，然后转发到<code>etcd</code>集群。<br>代理模式有2种运行形式：<code>readwrite</code>和<code>readonly</code>，默认情况下为<code>readwrite</code>，即会将读写请求都进行转发，而<code>readonly</code>形式下，则只转发读请求，写请求将报<code>5xx</code>错误，</p>
 <p><strong>IDEA</strong>中启动ETCD方式：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">debug方式运行三个终端程序 <span class="string">`etcd/main.go`</span> 并设置如下参数：</span><br><span class="line">--name infra1 --listen-client-urls http:<span class="comment">//127.0.0.1:2379 --advertise-client-urls http://127.0.0.1:2379 --listen-peer-urls http://127.0.0.1:12380 --initial-advertise-peer-urls http://127.0.0.1:12380 --initial-cluster-token etcd-cluster-1 --initial-cluster infra1=http://127.0.0.1:12380,infra2=http://127.0.0.1:22380,infra3=http://127.0.0.1:32380 --initial-cluster-state new --enable-pprof --logger=zap --log-outputs=stderr</span></span><br><span class="line">--name infra2 --listen-client-urls http:<span class="comment">//127.0.0.1:22379 --advertise-client-urls http://127.0.0.1:22379 --listen-peer-urls http://127.0.0.1:22380 --initial-advertise-peer-urls http://127.0.0.1:22380 --initial-cluster-token etcd-cluster-1 --initial-cluster infra1=http://127.0.0.1:12380,infra2=http://127.0.0.1:22380,infra3=http://127.0.0.1:32380 --initial-cluster-state new --enable-pprof --logger=zap --log-outputs=stderr</span></span><br><span class="line">--name infra3 --listen-client-urls http:<span class="comment">//127.0.0.1:32379 --advertise-client-urls http://127.0.0.1:32379 --listen-peer-urls http://127.0.0.1:32380 --initial-advertise-peer-urls http://127.0.0.1:32380 --initial-cluster-token etcd-cluster-1 --initial-cluster infra1=http://127.0.0.1:12380,infra2=http://127.0.0.1:22380,infra3=http://127.0.0.1:32380 --initial-cluster-state new --enable-pprof --logger=zap --log-outputs=stderr</span></span><br></pre></td></tr></table></figure>
+
+
 
       
     </div>
@@ -567,7 +569,7 @@
                 
                   <a href="/archives/%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-count">56</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -659,7 +661,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">22</span>
+                      
+                    
+                    <span class="site-state-item-count">23</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -759,7 +763,7 @@
 
 
 
-  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.3</div>
 
 
 
@@ -847,13 +851,6 @@
 
   
   
-
-
-  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
-
-  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
-
-
 
   
   <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.3"></script>

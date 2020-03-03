@@ -55,7 +55,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://dorgenjones.github.io/media/15813607449175.jpg">
 <meta property="article:published_time" content="2020-02-06T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-02-13T12:08:56.509Z">
+<meta property="article:modified_time" content="2020-03-03T14:10:05.098Z">
 <meta property="article:author" content="Zamperini">
 <meta property="article:tag" content="k8s">
 <meta name="twitter:card" content="summary">
@@ -217,7 +217,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-13 20:08:56" itemprop="dateModified" datetime="2020-02-13T20:08:56+08:00">2020-02-13</time>
+                <time title="修改时间：2020-03-03 22:10:05" itemprop="dateModified" datetime="2020-03-03T22:10:05+08:00">2020-03-03</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -372,6 +372,8 @@
 <p>直接添加到<code>activeQ</code>队列中，并且从<code>unschedulableQ</code>和<code>podbackoff!</code>中删除。</p>
 <p>弹出方法<code>Pop</code>：</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *PriorityQueue)</span> <span class="title">Pop</span><span class="params">()</span> <span class="params">(*framework.PodInfo, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> p.activeQ.Len() == <span class="number">0</span> &#123;</span><br><span class="line">	   <span class="comment">//阻塞等待条件</span></span><br><span class="line">		p.cond.Wait()</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 从大根堆中弹出权重最大的`pod`返回</span></span><br><span class="line">	obj, err := p.activeQ.Pop()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	pInfo := obj.(*framework.PodInfo)</span><br><span class="line">	pInfo.Attempts++</span><br><span class="line">	p.schedulingCycle++</span><br><span class="line">	<span class="keyword">return</span> pInfo, err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
 
     </div>
 

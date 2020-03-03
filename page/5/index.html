@@ -1,52 +1,109 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
 
 
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
 
 
-<script id="hexo-configurations">
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
   var NexT = window.NexT || {};
   var CONFIG = {
-    hostname: new URL('https://dorgenjones.github.io').hostname,
     root: '/',
     scheme: 'Gemini',
-    version: '7.7.1',
-    exturl: false,
-    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":true},
-    copycode: {"enable":false,"show_result":false,"style":null},
-    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
-    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: false,
-    mediumzoom: false,
+    fastclick: false,
     lazyload: false,
-    pangu: false,
-    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     algolia: {
-      appID: '',
+      applicationID: '',
       apiKey: '',
       indexName: '',
       hits: {"per_page":10},
       labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
-    },
-    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
-    path: '',
-    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+    }
   };
 </script>
 
-  <meta property="og:type" content="website">
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+<meta property="og:type" content="website">
 <meta property="og:title" content="Zamperini">
 <meta property="og:url" content="https://dorgenjones.github.io/page/5/index.html">
 <meta property="og:site_name" content="Zamperini">
@@ -54,18 +111,20 @@
 <meta property="article:author" content="Zamperini">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://dorgenjones.github.io/page/5/">
 
 
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/page/5/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
   CONFIG.page = {
     sidebar: "",
-    isHome: true,
-    isPost: false
   };
 </script>
-
   <title>Zamperini</title>
   
 
@@ -74,279 +133,228 @@
 
 
 
+
+
+
   <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
 
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
 
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
   </style>
 </noscript>
 
-</head>
+<meta name="generator" content="Hexo 4.2.0"></head>
 
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left 
+  page-home">
     <div class="headband"></div>
 
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-meta">
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
 
-    <div>
-      <a href="/" class="brand" rel="start">
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
         <span class="site-title">Zamperini</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
+      
+        <p class="site-subtitle"></p>
+      
   </div>
 
   <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
   </div>
 </div>
-
 
 <nav class="site-nav">
   
-  <ul id="menu" class="menu">
+
+  
+    <ul id="menu" class="menu">
+      
+        
         <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
-
-  </li>
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
         <li class="menu-item menu-item-about">
-
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
-
-  </li>
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
         <li class="menu-item menu-item-tags">
-
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">23</span></a>
-
-  </li>
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
         <li class="menu-item menu-item-categories">
-
-    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">11</span></a>
-
-  </li>
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
         <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">56</span></a>
+      
+    </ul>
+  
 
-  </li>
-  </ul>
-
+  
 </nav>
-</div>
+
+
+  
+
+
+
+ </div>
     </header>
 
     
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
 
 
-    <main class="main">
+    <main id="main" class="main">
       <div class="main-inner">
         <div class="content-wrap">
-          
-
-          <div class="content">
+          <div id="content" class="content">
             
-
-  <div class="posts-expand">
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
-      <meta itemprop="name" content="Zamperini">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zamperini">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2019/01/03/database/zbera/zebra/" class="post-title-link" itemprop="url">数据库中间件Zebra</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2019-01-03 14:51:53" itemprop="dateCreated datePublished" datetime="2019-01-03T14:51:53+08:00">2019-01-03</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-13 20:12:56" itemprop="dateModified" datetime="2020-02-13T20:12:56+08:00">2020-02-13</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/database/" itemprop="url" rel="index">
-                    <span itemprop="name">database</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
+  <section id="posts" class="posts-expand">
     
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
       
-          <h1 id="Zebra"><a href="#Zebra" class="headerlink" title="Zebra"></a>Zebra</h1><p>[TOC]</p>
-<h2 id="Zebra是什么？能干甚么？"><a href="#Zebra是什么？能干甚么？" class="headerlink" title="Zebra是什么？能干甚么？"></a>Zebra是什么？能干甚么？</h2><p><code>Zebra</code>是一个在JDBC协议上开发的<strong>数据库连接池中间件</strong>，它不是真连接池(与DB直接交互的连接池)，而是对连接池做了一层包装。<br><img src="/media/15117842144905.jpg" alt><br><strong>功能：</strong></p>
-<ol>
-<li>支持适配目前主流的数据库连接池（如上图）</li>
-<li>读写分离、分库分表</li>
-<li>支持配置动态修改生效(连接池的配置、用户密码、数据库节点访问路由负载均衡配置)</li>
-<li>CAT全方位监控（SQL执行情况、数据库连接数、端到端监控）</li>
-<li>支持压测(改写表名)、SQL限流、黑白名单、SQL改写、<a href="https://wiki-in.sankuai.com/pages/viewpage.action?pageId=1169090716" target="_blank" rel="noopener">SQL审计</a>(日志审计，SQL安全监控)…</li>
-</ol>
-<h2 id="同类产品有哪些，以及比较？"><a href="#同类产品有哪些，以及比较？" class="headerlink" title="同类产品有哪些，以及比较？"></a>同类产品有哪些，以及比较？</h2><table>
-<thead>
-<tr>
-<th>类别</th>
-<th>案例</th>
-<th>优点</th>
-<th>缺点</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>基于代理</td>
-<td>mycat、cobor、atlas、jed</td>
-<td>多语言支持、节省数据库连接</td>
-<td>风险大(链路长)、实现难度大、共享连接时有风险</td>
-</tr>
-<tr>
-<td>基于客户端(jdbc层)</td>
-<td>tddl</td>
-<td>直连数据库(风险较小)、更灵活</td>
-<td>对于每种语言都需要重写sdk、富客户端的常见缺点</td>
-</tr>
-</tbody></table>
-<p><strong>基于代理：</strong><br><img src="/media/15117932686716.jpg" alt></p>
-<p><strong>基于客户端：</strong><br><img src="/media/15117932921029.jpg" alt="set up-w500"></p>
-<blockquote>
-<p>公司目前：北京侧 <code>Altas</code>居多，也有<code>Atlas</code>与<code>zebra</code>搭配使用（使用其压测处理、SQL监控特性），上海侧统一使用<code>zebra</code>。趋势是转向<strong>Zebra</strong>。<a href="https://wiki-ini.sankuai.com/pages/viewpage.action?pageId=686244717" target="_blank" rel="noopener">Atlas与Zebra的对比</a>。<strong>zebra秒杀Atlas?</strong><br><a href="https://wiki-ini.sankuai.com/pages/viewpage.action?pageId=1114400138" target="_blank" rel="noopener">数据库中间件比较</a></p>
-</blockquote>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/01/03/database/zbera/zebra/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
 
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
+  
+
   
   
   
 
-        
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2018/04/26/rpc/dubbo/6.dubbo-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
       <meta itemprop="name" content="Zamperini">
       <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Zamperini">
     </span>
+
+    
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/04/26/rpc/dubbo/6.dubbo-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/" class="post-title-link" itemprop="url">Dubbo 负载均衡</a>
-        </h1>
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/04/26/rpc/dubbo/6.dubbo-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/" itemprop="url">Dubbo 负载均衡</a></h1>
+        
 
         <div class="post-meta">
-            <span class="post-meta-item">
+          <span class="post-time">
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-26T00:00:00+08:00">2018-04-26</time>
+            
 
-              <time title="创建时间：2018-04-26 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-26T00:00:00+08:00">2018-04-26</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-13 19:07:15" itemprop="dateModified" datetime="2020-02-13T19:07:15+08:00">2020-02-13</time>
-              </span>
-            <span class="post-meta-item">
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/dubbo/" itemprop="url" rel="index">
-                    <span itemprop="name">dubbo</span>
-                  </a>
-                </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/dubbo/" itemprop="url" rel="index"><span itemprop="name">dubbo</span></a></span>
+
+                
+                
+              
             </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
 
           
 
         </div>
       </header>
+    
 
     
     
@@ -354,6 +362,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
+      
+
+      
+        
           <h1 id="负载均衡"><a href="#负载均衡" class="headerlink" title="负载均衡"></a>负载均衡</h1><h2 id="一致性HASH算法"><a href="#一致性HASH算法" class="headerlink" title="一致性HASH算法"></a>一致性HASH算法</h2><p>适合场景：</p>
 <ul>
 <li><strong>均衡性(Balance)</strong>：<br>  平衡性是指哈希的结果能够尽可能分布到所有的缓冲中去，这样可以使得所有的缓冲空间都得到利用。很多哈希算法都能够满足这一条件。</li>
@@ -367,80 +379,136 @@
 <p>##</p>
 
           <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/04/26/rpc/dubbo/6.dubbo-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/04/26/rpc/dubbo/6.dubbo-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
     </div>
+    
+    
+    
 
     
+
     
+
     
-      <footer class="post-footer">
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
         <div class="post-eof"></div>
-      </footer>
+      
+    </footer>
+  </div>
+  
+  
+  
   </article>
+
+
+    
+      
+
+  
+
   
   
   
 
-        
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2018/04/25/rpc/dubbo/5.dubbo-%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
       <meta itemprop="name" content="Zamperini">
       <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Zamperini">
     </span>
+
+    
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/04/25/rpc/dubbo/5.dubbo-%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8/" class="post-title-link" itemprop="url">Dubbo 服务调用</a>
-        </h1>
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/04/25/rpc/dubbo/5.dubbo-%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8/" itemprop="url">Dubbo 服务调用</a></h1>
+        
 
         <div class="post-meta">
-            <span class="post-meta-item">
+          <span class="post-time">
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-25T00:00:00+08:00">2018-04-25</time>
+            
 
-              <time title="创建时间：2018-04-25 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-25T00:00:00+08:00">2018-04-25</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-13 20:10:39" itemprop="dateModified" datetime="2020-02-13T20:10:39+08:00">2020-02-13</time>
-              </span>
-            <span class="post-meta-item">
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/dubbo/" itemprop="url" rel="index">
-                    <span itemprop="name">dubbo</span>
-                  </a>
-                </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/dubbo/" itemprop="url" rel="index"><span itemprop="name">dubbo</span></a></span>
+
+                
+                
+              
             </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
 
           
 
         </div>
       </header>
+    
 
     
     
@@ -448,6 +516,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
+      
+
+      
+        
           <h1 id="服务调用过程解析"><a href="#服务调用过程解析" class="headerlink" title="服务调用过程解析"></a>服务调用过程解析</h1><p>服务过程解析部分我们分两部分来讲，客户端发送请求、接收结果和服务端接受请求、响应结果过程。</p>
 <h2 id="客户端发送请求、接收结果"><a href="#客户端发送请求、接收结果" class="headerlink" title="客户端发送请求、接收结果"></a>客户端发送请求、接收结果</h2><p>首先，调用客户端方法时，首先被<code>InvokerInvocationHandler</code>拦截，</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">   String methodName = method.getName();</span><br><span class="line">   Class&lt;?&gt;[] parameterTypes = method.getParameterTypes();</span><br><span class="line">   <span class="keyword">if</span> (method.getDeclaringClass() == Object<span class="class">.<span class="keyword">class</span>) </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> method.invoke(invoker, args);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">if</span> (<span class="string">"toString"</span>.equals(methodName) &amp;&amp; parameterTypes.length == <span class="number">0</span>) &#123;</span><br><span class="line">       <span class="keyword">return</span> invoker.toString();</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">if</span> (<span class="string">"hashCode"</span>.equals(methodName) &amp;&amp; parameterTypes.length == <span class="number">0</span>) &#123;</span><br><span class="line">       <span class="keyword">return</span> invoker.hashCode();</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">if</span> (<span class="string">"equals"</span>.equals(methodName) &amp;&amp; parameterTypes.length == <span class="number">1</span>) &#123;</span><br><span class="line">       <span class="keyword">return</span> invoker.equals(args[<span class="number">0</span>]);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">//在服务引用过程分析中，提到这里的invoker。当不是没有`injvm`、`url`配置时，invoker是 XxxClusterInvoker</span></span><br><span class="line">   <span class="keyword">return</span> invoker.invoke(<span class="keyword">new</span> RpcInvocation(method, args)).recreate();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -457,80 +529,136 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Result <span class="title">doInvoke</span><span class="params">(Invocation invocation, <span class="keyword">final</span> List&lt;Invoker&lt;T&gt;&gt; invokers, LoadBalance loadbalance)</span> <span class="keyword">throws</span> RpcException </span>&#123;</span><br><span class="line">   List&lt;Invoker&lt;T&gt;&gt; copyinvokers = invokers;</span><br><span class="line">   <span class="comment">//失败重试次数</span></span><br><span class="line">   <span class="keyword">int</span> len = getUrl().getMethodParameter(invocation.getMethodName(), Constants.RETRIES_KEY, Constants.DEFAULT_RETRIES) + <span class="number">1</span>;</span><br><span class="line">   <span class="keyword">if</span> (len &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">       len = <span class="number">1</span>;</span><br><span class="line">   &#125;</span><br><span class="line">   List&lt;Invoker&lt;T&gt;&gt; invoked = <span class="keyword">new</span> ArrayList&lt;Invoker&lt;T&gt;&gt;(copyinvokers.size()); <span class="comment">// invoked invokers.</span></span><br><span class="line">    <span class="comment">//len-1次重试</span></span><br><span class="line">   <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; len; i++) &#123;</span><br><span class="line">       <span class="keyword">if</span> (i &gt; <span class="number">0</span>) &#123;</span><br><span class="line">           checkWhetherDestroyed();</span><br><span class="line">           copyinvokers = list(invocation);</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">//</span></span><br><span class="line">       Invoker&lt;T&gt; invoker = select(loadbalance, invocation, copyinvokers, invoked);</span><br><span class="line">       invoked.add(invoker);</span><br><span class="line">       RpcContext.getContext().setInvokers((List) invoked);</span><br><span class="line">       <span class="keyword">try</span> &#123;</span><br><span class="line">           Result result = invoker.invoke(invocation);</span><br><span class="line">           <span class="keyword">return</span> result;</span><br><span class="line">       &#125;...</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">protected</span> Invoker&lt;T&gt; <span class="title">select</span><span class="params">(LoadBalance loadbalance, Invocation invocation, List&lt;Invoker&lt;T&gt;&gt; invokers, List&lt;Invoker&lt;T&gt;&gt; selected)</span> <span class="keyword">throws</span> RpcException </span>&#123;</span><br><span class="line">   <span class="keyword">if</span> (invokers == <span class="keyword">null</span> || invokers.isEmpty())</span><br><span class="line">       <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">   String methodName = invocation == <span class="keyword">null</span> ? <span class="string">""</span> : invocation.getMethodName();</span><br><span class="line">   <span class="keyword">boolean</span> sticky = invokers.get(<span class="number">0</span>).getUrl().getMethodParameter(methodName, Constants.CLUSTER_STICKY_KEY, Constants.DEFAULT_CLUSTER_STICKY);</span><br><span class="line">   &#123;</span><br><span class="line">       <span class="comment">//如果带有粘性设置，则直接返回之前保存的`stickyInvoker`</span></span><br><span class="line">       <span class="keyword">if</span> (stickyInvoker != <span class="keyword">null</span> &amp;&amp; !invokers.contains(stickyInvoker)) &#123;</span><br><span class="line">           stickyInvoker = <span class="keyword">null</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">if</span> (sticky &amp;&amp; stickyInvoker != <span class="keyword">null</span> &amp;&amp; (selected == <span class="keyword">null</span> || !selected.contains(stickyInvoker))) &#123;</span><br><span class="line">           <span class="keyword">if</span> (availablecheck &amp;&amp; stickyInvoker.isAvailable()) &#123;</span><br><span class="line">               <span class="keyword">return</span> stickyInvoker;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">// 负载均衡器根据策略选出一个Invoker，这里的Invoker是DubboInvoker</span></span><br><span class="line">   Invoker&lt;T&gt; invoker = doSelect(loadbalance, invocation, invokers, selected);</span><br><span class="line"></span><br><span class="line">   <span class="keyword">if</span> (sticky) &#123;</span><br><span class="line">       stickyInvoker = invoker;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> invoker;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>接下来看<code>DubboInvoker</code>的处理逻辑。</p>
           <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/04/25/rpc/dubbo/5.dubbo-%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/04/25/rpc/dubbo/5.dubbo-%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
     </div>
+    
+    
+    
 
     
+
     
+
     
-      <footer class="post-footer">
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
         <div class="post-eof"></div>
-      </footer>
+      
+    </footer>
+  </div>
+  
+  
+  
   </article>
+
+
+    
+      
+
+  
+
   
   
   
 
-        
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2018/04/24/rpc/dubbo/4.dubbo-%E6%9C%8D%E5%8A%A1%E5%BC%95%E7%94%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
       <meta itemprop="name" content="Zamperini">
       <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Zamperini">
     </span>
+
+    
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/04/24/rpc/dubbo/4.dubbo-%E6%9C%8D%E5%8A%A1%E5%BC%95%E7%94%A8/" class="post-title-link" itemprop="url">Dubbo 服务引用</a>
-        </h1>
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/04/24/rpc/dubbo/4.dubbo-%E6%9C%8D%E5%8A%A1%E5%BC%95%E7%94%A8/" itemprop="url">Dubbo 服务引用</a></h1>
+        
 
         <div class="post-meta">
-            <span class="post-meta-item">
+          <span class="post-time">
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-24T00:00:00+08:00">2018-04-24</time>
+            
 
-              <time title="创建时间：2018-04-24 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-24T00:00:00+08:00">2018-04-24</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-13 20:10:19" itemprop="dateModified" datetime="2020-02-13T20:10:19+08:00">2020-02-13</time>
-              </span>
-            <span class="post-meta-item">
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/dubbo/" itemprop="url" rel="index">
-                    <span itemprop="name">dubbo</span>
-                  </a>
-                </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/dubbo/" itemprop="url" rel="index"><span itemprop="name">dubbo</span></a></span>
+
+                
+                
+              
             </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
 
           
 
         </div>
       </header>
+    
 
     
     
@@ -538,6 +666,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
+      
+
+      
+        
           <h1 id="服务引用过程解析"><a href="#服务引用过程解析" class="headerlink" title="服务引用过程解析"></a>服务引用过程解析</h1><p>调用服务时，在XML中配置<code>&lt;dubbo:reference&gt;</code>和注册中心即可像调用一个内存方法一样调用远端服务。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;dubbo:registry address=<span class="string">"multicast://224.5.6.7:1234"</span>/&gt;</span><br><span class="line">&lt;dubbo:reference id=<span class="string">"demoService"</span> check=<span class="string">"false"</span> <span class="class"><span class="keyword">interface</span></span>=<span class="string">"com.alibaba.dubbo.demo.DemoService"</span> loadbalance=<span class="string">"leastactive"</span>/&gt;</span><br></pre></td></tr></table></figure>
 <p><code>&lt;dubbo:reference&gt;</code>同样是由<code>DubboBeanDefinitionParser</code>进行解析，其被解析后成实例<code>ReferenceBean</code>。因此，其是服务引用过程的关键。<br><img src="/media/15202605904632.jpg" alt><br>可以看出，它是一个工厂Bean(实现<code>FactoryBean</code>接口)、<code>InitializingBean</code>接口。因此当有服务引用<code>demoService</code>时，会调用<code>getObject()</code>返回代理的对象。所以<code>getObject()</code>即是关键服务。因为实现了<code>InitializingBean</code>所以在向Spring暴露bean之前会调用<code>afterPropertiesSet</code>方法。<code>RefrenceBean</code>的<code>afterPropertiesSet</code>方法作用跟<code>ServiceBean</code>的<code>afterPropertiesSet</code>一样，从Spring容器中获取<code>Consumer</code>、<code>Application</code>、<code>Module</code>、<code>Registeries</code>、<code>Monitor</code>、<code>Protocol</code>对象设置到其属性中。</p>
@@ -548,80 +680,136 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> T <span class="title">createProxy</span><span class="params">(Map&lt;String, String&gt; map)</span> </span>&#123;</span><br><span class="line">   URL tmpUrl = <span class="keyword">new</span> URL(<span class="string">"temp"</span>, <span class="string">"localhost"</span>, <span class="number">0</span>, map);</span><br><span class="line">   <span class="comment">// 当用户配置了url属性，则创建的是点对点的服务。</span></span><br><span class="line">   <span class="keyword">if</span> (url != <span class="keyword">null</span> &amp;&amp; url.length() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">       String[] us = Constants.SEMICOLON_SPLIT_PATTERN.split(url);</span><br><span class="line">       <span class="keyword">if</span> (us != <span class="keyword">null</span> &amp;&amp; us.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">           <span class="keyword">for</span> (String u : us) &#123;</span><br><span class="line">               URL url = URL.valueOf(u);</span><br><span class="line">               <span class="keyword">if</span> (url.getPath() == <span class="keyword">null</span> || url.getPath().length() == <span class="number">0</span>) &#123;</span><br><span class="line">                   url = url.setPath(interfaceName);</span><br><span class="line">               &#125;</span><br><span class="line">               <span class="keyword">if</span> (Constants.REGISTRY_PROTOCOL.equals(url.getProtocol())) &#123;</span><br><span class="line">                   urls.add(url.addParameterAndEncoded(Constants.REFER_KEY, StringUtils.toQueryString(map)));</span><br><span class="line">               &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                   urls.add(ClusterUtils.mergeUrl(url, map));</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       <span class="comment">//获取注册中心的配置，装配URL</span></span><br><span class="line">       <span class="comment">//URL示例:registry://224.5.6.7:1234/com.alibaba.dubbo.registry.RegistryService?application=demo-consumer&amp;dubbo=2.0.0&amp;pid=1269&amp;qos.port=33333&amp;registry=multicast&amp;timestamp=1520264898587</span></span><br><span class="line">       List&lt;URL&gt; us = loadRegistries(<span class="keyword">false</span>);</span><br><span class="line">       <span class="keyword">if</span> (us != <span class="keyword">null</span> &amp;&amp; !us.isEmpty()) &#123;</span><br><span class="line">           <span class="keyword">for</span> (URL u : us) &#123;</span><br><span class="line">               URL monitorUrl = loadMonitor(u);</span><br><span class="line">               <span class="keyword">if</span> (monitorUrl != <span class="keyword">null</span>) &#123;</span><br><span class="line">                   map.put(Constants.MONITOR_KEY, URL.encode(monitorUrl.toFullString()));</span><br><span class="line">               &#125;</span><br><span class="line">               urls.add(u.addParameterAndEncoded(Constants.REFER_KEY, StringUtils.toQueryString(map)));</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">if</span> (urls.size() == <span class="number">1</span>) &#123;</span><br><span class="line">       <span class="comment">//之前的章节里说过，refprotocol是Protocol的自适应对象，其在执行refer时，会获取`url.getProtocol()`属性决定调用哪个拓展。</span></span><br><span class="line">       <span class="comment">//根据上面的URL可知是RegistryProtocol</span></span><br><span class="line">       invoker = refprotocol.refer(interfaceClass, urls.get(<span class="number">0</span>));</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       List&lt;Invoker&lt;?&gt;&gt; invokers = <span class="keyword">new</span> ArrayList&lt;Invoker&lt;?&gt;&gt;();</span><br><span class="line">       URL registryURL = <span class="keyword">null</span>;</span><br><span class="line">       <span class="keyword">for</span> (URL url : urls) &#123;</span><br><span class="line">           invokers.add(refprotocol.refer(interfaceClass, url));</span><br><span class="line">           <span class="keyword">if</span> (Constants.REGISTRY_PROTOCOL.equals(url.getProtocol())) &#123;</span><br><span class="line">               registryURL = url; <span class="comment">// use last registry url</span></span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">if</span> (registryURL != <span class="keyword">null</span>) &#123; <span class="comment">// registry url is available</span></span><br><span class="line">           <span class="comment">// use AvailableCluster only when register's cluster is available</span></span><br><span class="line">           URL u = registryURL.addParameter(Constants.CLUSTER_KEY, AvailableCluster.NAME);</span><br><span class="line">           invoker = cluster.join(<span class="keyword">new</span> StaticDirectory(u, invokers));</span><br><span class="line">       &#125; <span class="keyword">else</span> &#123; <span class="comment">// not a registry url</span></span><br><span class="line">           invoker = cluster.join(<span class="keyword">new</span> StaticDirectory(invokers));</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">// create service proxy</span></span><br><span class="line">   <span class="comment">//经过上面的处理后，invoker现在已是XxxClusterInvoker，下面我们以FailoverClusterInvoker为例来</span></span><br><span class="line">   <span class="keyword">return</span> (T) proxyFactory.getProxy(invoker);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><code>proxyFactory</code>是个扩展点，有<code>JdkProxyFactory</code>和<code>JavassistProxyFactory</code>。进一步可以看到，配置的拦截器都是<code>InvokerInvocationHandler</code>。因此当调用<code>Client</code>方法时，都会被其拦截，调用其<code>invoke</code>方法。</p>
           <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/04/24/rpc/dubbo/4.dubbo-%E6%9C%8D%E5%8A%A1%E5%BC%95%E7%94%A8/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/04/24/rpc/dubbo/4.dubbo-%E6%9C%8D%E5%8A%A1%E5%BC%95%E7%94%A8/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
     </div>
+    
+    
+    
 
     
+
     
+
     
-      <footer class="post-footer">
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
         <div class="post-eof"></div>
-      </footer>
+      
+    </footer>
+  </div>
+  
+  
+  
   </article>
+
+
+    
+      
+
+  
+
   
   
   
 
-        
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2018/04/23/rpc/dubbo/3.dubbo-%E6%9C%8D%E5%8A%A1%E5%8F%91%E5%B8%83/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
       <meta itemprop="name" content="Zamperini">
       <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Zamperini">
     </span>
+
+    
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/04/23/rpc/dubbo/3.dubbo-%E6%9C%8D%E5%8A%A1%E5%8F%91%E5%B8%83/" class="post-title-link" itemprop="url">Dubbo 服务暴露</a>
-        </h1>
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/04/23/rpc/dubbo/3.dubbo-%E6%9C%8D%E5%8A%A1%E5%8F%91%E5%B8%83/" itemprop="url">Dubbo 服务暴露</a></h1>
+        
 
         <div class="post-meta">
-            <span class="post-meta-item">
+          <span class="post-time">
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-23T00:00:00+08:00">2018-04-23</time>
+            
 
-              <time title="创建时间：2018-04-23 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-23T00:00:00+08:00">2018-04-23</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-13 19:07:00" itemprop="dateModified" datetime="2020-02-13T19:07:00+08:00">2020-02-13</time>
-              </span>
-            <span class="post-meta-item">
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/dubbo/" itemprop="url" rel="index">
-                    <span itemprop="name">dubbo</span>
-                  </a>
-                </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/dubbo/" itemprop="url" rel="index"><span itemprop="name">dubbo</span></a></span>
+
+                
+                
+              
             </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
 
           
 
         </div>
       </header>
+    
 
     
     
@@ -629,6 +817,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
+      
+
+      
+        
           <h1 id="服务暴露过程解析"><a href="#服务暴露过程解析" class="headerlink" title="服务暴露过程解析"></a>服务暴露过程解析</h1><p>当在XML文件中配置下面内容，启动时<code>Dubbo</code>即会发布<code>demoService</code>服务，服务调用者皆可并在注册中心查到此服务提供者，并向其发起调用：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;dubbo:application name=<span class="string">"demo-provider"</span>/&gt;</span><br><span class="line">&lt;dubbo:registry address=<span class="string">"multicast://224.5.6.7:1234"</span>/&gt;</span><br><span class="line">&lt;dubbo:protocol name=<span class="string">"dubbo"</span> port=<span class="string">"32321"</span>/&gt;</span><br><span class="line">&lt;bean id=<span class="string">"demoService"</span> <span class="class"><span class="keyword">class</span></span>=<span class="string">"com.alibaba.dubbo.demo.provider.DemoServiceImpl"</span>/&gt;</span><br><span class="line"><span class="comment">//服务发布</span></span><br><span class="line">&lt;dubbo:service <span class="class"><span class="keyword">interface</span></span>=<span class="string">"com.alibaba.dubbo.demo.DemoService"</span> ref=<span class="string">"demoService"</span>/&gt;</span><br></pre></td></tr></table></figure>
 <p>其中<code>&lt;dubbo:service&gt;</code>用来初始化发布服务，其会被<code>DubboBeanDefinitionParser</code>解析成<code>ServiceBean</code>，并放在Spring容器中。<code>afterPropertiesSet</code>方法初始化<code>ServiceBean</code>。</p>
@@ -642,32 +834,218 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">doExportUrls</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="comment">//获取注册中心的URL，向多个注册中心发布服务</span></span><br><span class="line">   List&lt;URL&gt; registryURLs = loadRegistries(<span class="keyword">true</span>);</span><br><span class="line">   <span class="comment">// protocols即为`ServiceBean`初始化时从`Spring`容器中获取的对象集合</span></span><br><span class="line">   <span class="comment">//用Protocol挨个暴露服务</span></span><br><span class="line">   <span class="keyword">for</span> (ProtocolConfig protocolConfig : protocols) &#123;</span><br><span class="line">       doExportUrlsFor1Protocol(protocolConfig, registryURLs);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">doExportUrlsFor1Protocol</span><span class="params">(ProtocolConfig protocolConfig, List&lt;URL&gt; registryURLs)</span> </span>&#123;</span><br><span class="line">   String name = protocolConfig.getName();</span><br><span class="line">   <span class="keyword">if</span> (name == <span class="keyword">null</span> || name.length() == <span class="number">0</span>) &#123;</span><br><span class="line">       name = <span class="string">"dubbo"</span>;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">// 拼装参数</span></span><br><span class="line">   Map&lt;String, String&gt; map = <span class="keyword">new</span> HashMap&lt;String, String&gt;();</span><br><span class="line">   map.put(Constants.SIDE_KEY, Constants.PROVIDER_SIDE);</span><br><span class="line">   map.put(Constants.DUBBO_VERSION_KEY, Version.getVersion());</span><br><span class="line">   map.put(Constants.TIMESTAMP_KEY, String.valueOf(System.currentTimeMillis()));</span><br><span class="line">   <span class="keyword">if</span> (ConfigUtils.getPid() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">       map.put(Constants.PID_KEY, String.valueOf(ConfigUtils.getPid()));</span><br><span class="line">   &#125;</span><br><span class="line">   appendParameters(map, application);</span><br><span class="line">   appendParameters(map, <span class="keyword">module</span>);</span><br><span class="line">   appendParameters(map, provider, Constants.DEFAULT_KEY);</span><br><span class="line">   appendParameters(map, protocolConfig);</span><br><span class="line">   appendParameters(map, <span class="keyword">this</span>);</span><br><span class="line">   ...</span><br><span class="line">   String scope = url.getParameter(Constants.SCOPE_KEY);</span><br><span class="line">   <span class="comment">// scope为local时，只向本地暴露服务</span></span><br><span class="line">   <span class="keyword">if</span> (!Constants.SCOPE_REMOTE.toString().equalsIgnoreCase(scope)) &#123;</span><br><span class="line">      exportLocal(url);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">// scope为remote时，向注册中心暴露服务</span></span><br><span class="line">   <span class="keyword">if</span> (!Constants.SCOPE_LOCAL.toString().equalsIgnoreCase(scope)) &#123;</span><br><span class="line">     <span class="keyword">if</span> (logger.isInfoEnabled()) &#123;</span><br><span class="line">         logger.info(<span class="string">"Export dubbo service "</span> + interfaceClass.getName() + <span class="string">" to url "</span> + url);</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">if</span> (registryURLs != <span class="keyword">null</span> &amp;&amp; !registryURLs.isEmpty()) &#123;</span><br><span class="line">         <span class="keyword">for</span> (URL registryURL : registryURLs) &#123;</span><br><span class="line">         <span class="comment">// registryURL:</span></span><br><span class="line">             url = url.addParameterIfAbsent(<span class="string">"dynamic"</span>, registryURL.getParameter(<span class="string">"dynamic"</span>));</span><br><span class="line">             URL monitorUrl = loadMonitor(registryURL);</span><br><span class="line">             <span class="keyword">if</span> (monitorUrl != <span class="keyword">null</span>) &#123;</span><br><span class="line">                 url = url.addParameterAndEncoded(Constants.MONITOR_KEY, monitorUrl.toFullString());</span><br><span class="line">             &#125;</span><br><span class="line">             <span class="keyword">if</span> (logger.isInfoEnabled()) &#123;</span><br><span class="line">                 logger.info(<span class="string">"Register dubbo service "</span> + interfaceClass.getName() + <span class="string">" url "</span> + url + <span class="string">" to registry "</span> + registryURL);</span><br><span class="line">             &#125;</span><br><span class="line">             <span class="comment">//通过代理工厂生成一个Invoker</span></span><br><span class="line">             Invoker&lt;?&gt; invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));</span><br><span class="line">             <span class="comment">//创建一个代理Invoker，包装Invoker并带有元数据</span></span><br><span class="line">             DelegateProviderMetaDataInvoker wrapperInvoker = <span class="keyword">new</span> DelegateProviderMetaDataInvoker(invoker, <span class="keyword">this</span>);</span><br><span class="line">            <span class="comment">//调用protocol暴露服务    </span></span><br><span class="line">             Exporter&lt;?&gt; exporter = protocol.export(wrapperInvoker);</span><br><span class="line">             exporters.add(exporter);</span><br><span class="line">         &#125;</span><br><span class="line">     &#125; ...</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>接下来，就是<code>Protocol</code>进行暴露以及发布服务：<br><code>ServiceBean</code>中的<code>Protocol</code>对应的是自适应类型<code>Protocol</code>，调用<code>export</code>方法时，其会根据参数Invoker的URL属性<code>url.getProtocol()</code>来判定调用哪个<code>Protocol</code>对象。上文中的<code>registryURL.getProtocol</code>为<code>registry</code>，所以回去调用<code>RegistryProtocol</code>（会先调用包装类<code>ProtocolListenerWrapper</code>、<code>ProtocolFilterWrapper</code>）。</p>
           <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/04/23/rpc/dubbo/3.dubbo-%E6%9C%8D%E5%8A%A1%E5%8F%91%E5%B8%83/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/04/23/rpc/dubbo/3.dubbo-%E6%9C%8D%E5%8A%A1%E5%8F%91%E5%B8%83/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
     </div>
+    
+    
+    
 
     
+
     
+
     
-      <footer class="post-footer">
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
         <div class="post-eof"></div>
-      </footer>
+      
+    </footer>
+  </div>
+  
+  
+  
   </article>
+
+
+    
+      
+
+  
+
   
   
   
 
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2018/04/22/rpc/dubbo/2.dubbo-spi/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/04/22/rpc/dubbo/2.dubbo-spi/" itemprop="url">Dubbo SPI拓展机制</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-22T00:00:00+08:00">2018-04-22</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/dubbo/" itemprop="url" rel="index"><span itemprop="name">dubbo</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="SPI拓展机制（IOC、AOP、自适应拓展）"><a href="#SPI拓展机制（IOC、AOP、自适应拓展）" class="headerlink" title="SPI拓展机制（IOC、AOP、自适应拓展）"></a>SPI拓展机制（IOC、AOP、自适应拓展）</h1><p>Dubbo 官方文档 <a href="http://dubbo.io/books/dubbo-dev-book/SPI.html" target="_blank" rel="noopener">拓展点加载</a> 介绍了Dubbo的<strong>SPI拓展机制</strong>，总结起来如下：</p>
+<blockquote>
+<ol>
+<li>是<code>JDK SPI</code>的加强版：<ul>
+<li>只有使用的时候才会实例化拓展点，而摒弃<code>JDK SPI</code>一次性实例化所有拓展点</li>
+<li>增加了对IOC、AOP的支持</li>
+</ul>
+</li>
+<li>拓展的方法：在扩展类的 jar 包内，放置扩展点配置文件 <code>META-INF/dubbo/接口全限定名</code>，内容为：配置名=扩展实现类全限定名，多个实现类用换行符分隔。即可被Dubbo自动加载。</li>
+<li>扩展点的特性：<ul>
+<li>扩展点自动装配(<strong>IOC</strong>)：加载扩展点时，扩展点实现类的成员如果为其它扩展点类型，在会自动注入依赖的扩展点；</li>
+<li>扩展点自动包装：<strong>AOP</strong>的一种实现方式，为拓展点自动添加一层包装，将某些可拓展的共有逻辑放在包装类(Wrapper)中。调用时，会先调用包装类的逻辑再调用拓展点的内容；</li>
+<li>扩展点<strong>自适应</strong>：在拓展点方法执行的时候，根据调用的参数(<strong>URL</strong>)决定调用的是哪个拓展点实现，而不会在初始化时就直接指定是哪个拓展点；</li>
+<li>扩展点自动激活：对于集合类拓展点，可以同时加载多个实现。自动激活可以简化配置，且可以编排它们的顺序。</li>
+</ul>
+</li>
+</ol>
+</blockquote>
+<p><code>ExtensionLoader</code>是实现其SPI拓展机制的关键类，Dubbo会为每种类型拓展点都创建有一个<code>ExtensionLoader</code>实例:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">ExtensionLoader&lt;T&gt; <span class="title">getExtensionLoader</span><span class="params">(Class&lt;T&gt; type)</span> </span>&#123;</span><br><span class="line">   <span class="comment">//首先从缓存里获取</span></span><br><span class="line">   ExtensionLoader&lt;T&gt; loader = (ExtensionLoader&lt;T&gt;) EXTENSION_LOADERS.get(type);</span><br><span class="line">   <span class="keyword">if</span> (loader == <span class="keyword">null</span>) &#123;</span><br><span class="line">       EXTENSION_LOADERS.putIfAbsent(type, <span class="keyword">new</span> ExtensionLoader&lt;T&gt;(type));</span><br><span class="line">       loader = (ExtensionLoader&lt;T&gt;) EXTENSION_LOADERS.get(type);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> loader;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//私有构造函数</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="title">ExtensionLoader</span><span class="params">(Class&lt;?&gt; type)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">this</span>.type = type;</span><br><span class="line">   objectFactory = (type == ExtensionFactory.class ? null : ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其最主要的属性如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//所处理的拓展点类型（接口类型）</span></span><br><span class="line">Class&lt;?&gt; type;</span><br><span class="line"><span class="comment">//拓展点工厂，用于在拓展点注入属性时获取属性的实例（从SPI中获取或者从Spring的上下文中获取）</span></span><br><span class="line">ExtensionFactory objectFactory;</span><br><span class="line"><span class="comment">//拓展点类和名称的映射</span></span><br><span class="line">ConcurrentMap&lt;Class&lt;?&gt;, String&gt; cachedNames = <span class="keyword">new</span> ConcurrentHashMap&lt;Class&lt;?&gt;, String&gt;();</span><br><span class="line"><span class="comment">// 名称和类的映射，类可能有多个名称</span></span><br><span class="line">Holder&lt;Map&lt;String, Class&lt;?&gt;&gt;&gt; cachedClasses = <span class="keyword">new</span> Holder&lt;Map&lt;String, Class&lt;?&gt;&gt;&gt;();</span><br><span class="line"><span class="comment">// 名称与激活拓展点注解的映射。</span></span><br><span class="line">Map&lt;String, Activate&gt; cachedActivates = <span class="keyword">new</span> ConcurrentHashMap&lt;String, Activate&gt;();</span><br><span class="line"><span class="comment">//名称与拓展点实例的映射，一般一个拓展点只会有一个实例</span></span><br><span class="line">ConcurrentMap&lt;String, Holder&lt;Object&gt;&gt; cachedInstances = <span class="keyword">new</span></span><br><span class="line">ConcurrentHashMap&lt;String, Holder&lt;Object&gt;&gt;();</span><br><span class="line"><span class="comment">// 自适应拓展点实例</span></span><br><span class="line">Holder&lt;Object&gt; cachedAdaptiveInstance = <span class="keyword">new</span> Holder&lt;Object&gt;();</span><br><span class="line"><span class="comment">//自实例拓展点类型</span></span><br><span class="line">Class&lt;?&gt; cachedAdaptiveClass = <span class="keyword">null</span>;</span><br><span class="line">String cachedDefaultName;</span><br><span class="line"><span class="comment">//包装类集合 AOP</span></span><br><span class="line">Set&lt;Class&lt;?&gt;&gt; cachedWrapperClasses;</span><br></pre></td></tr></table></figure>
+
+<p>对外暴露的最主要的方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//获取自适应拓展</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">getAdaptiveExtension</span><span class="params">()</span></span>;</span><br><span class="line"><span class="comment">//根据name获取特定的拓展实例</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">getExtension</span><span class="params">(String name)</span></span>;</span><br><span class="line"><span class="comment">// 根据条件获取当前扩展可自动激活的实现</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> List&lt;T&gt; <span class="title">getActivateExtension</span><span class="params">(URL url, String[] values, String group)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>Dubbo初始化时，获取拓展点时一般是调用<code>getActivateExtension</code>获取自适应拓展点，然后在运行时调用方法时，根据实时的参数<code>URL</code>确定拓展点实例的name，调用<code>getExtension(name)</code>获取实例。下面我们依次看这三个实现方法：</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/04/22/rpc/dubbo/2.dubbo-spi/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
   </div>
+  
+  
+  
+  </article>
+
+
+    
+  </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/4/">&lt;i class&#x3D;&quot;fa fa-angle-left&quot;&gt;&lt;&#x2F;i&gt;</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/6/">&lt;i class&#x3D;&quot;fa fa-angle-right&quot;&gt;&lt;&#x2F;i&gt;</a>
   </nav>
 
 
@@ -675,126 +1053,227 @@
           </div>
           
 
-<script>
-  window.addEventListener('tabs:register', () => {
-    let activeClass = CONFIG.comments.activeClass;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
         </div>
+        
           
   
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
   </div>
 
-  <aside class="sidebar">
+  <aside id="sidebar" class="sidebar">
+    
     <div class="sidebar-inner">
 
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
+      
 
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-      </div>
-      <!--/noindex-->
+      
 
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="Zamperini"
-      src="/images/avator.png">
-  <p class="site-author-name" itemprop="name">Zamperini</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
-        
-          <span class="site-state-item-count">56</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-categories">
-            <a href="/categories/">
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avator.png"
+                alt="Zamperini" />
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
           
-        <span class="site-state-item-count">11</span>
-        <span class="site-state-item-name">分类</span></a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
           
-        <span class="site-state-item-count">23</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="https://github.com/DorgenJones" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;DorgenJones" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="mailto:dblpfilter@163.com" title="E-Mail → mailto:dblpfilter@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="https://weibo.com/u/1938368215" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1938368215" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
-      </span>
-  </div>
 
+          
 
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/DorgenJones" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:dblpfilter@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/u/1938368215" target="_blank" title="Weibo">
+                      
+                        <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                  </span>
+                
+            </div>
+          
 
-      </div>
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+
+      
 
     </div>
   </aside>
-  <div id="sidebar-dimmer"></div>
 
 
+        
       </div>
     </main>
 
-    <footer class="footer">
+    <footer id="footer" class="footer">
       <div class="footer-inner">
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2020</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.2.0
-  </div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
   <span class="post-meta-divider">|</span>
-  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.7.1
-  </div>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
 
         
 
@@ -804,25 +1283,110 @@
 
 
 
-
+        
       </div>
     </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
   </div>
 
   
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
 
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/pisces.js"></script>
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
 
 
-<script src="/js/next-boot.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
 
 
 
@@ -838,10 +1402,26 @@
 
 
 
+  
 
 
 
 
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
 
   
 

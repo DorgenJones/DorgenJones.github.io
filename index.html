@@ -1,52 +1,109 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
 
 
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
 
 
-<script id="hexo-configurations">
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
   var NexT = window.NexT || {};
   var CONFIG = {
-    hostname: new URL('https://dorgenjones.github.io').hostname,
     root: '/',
     scheme: 'Gemini',
-    version: '7.7.1',
-    exturl: false,
-    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":true},
-    copycode: {"enable":false,"show_result":false,"style":null},
-    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
-    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: false,
-    mediumzoom: false,
+    fastclick: false,
     lazyload: false,
-    pangu: false,
-    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     algolia: {
-      appID: '',
+      applicationID: '',
       apiKey: '',
       indexName: '',
       hits: {"per_page":10},
       labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
-    },
-    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
-    path: '',
-    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+    }
   };
 </script>
 
-  <meta property="og:type" content="website">
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+<meta property="og:type" content="website">
 <meta property="og:title" content="Zamperini">
 <meta property="og:url" content="https://dorgenjones.github.io/index.html">
 <meta property="og:site_name" content="Zamperini">
@@ -54,18 +111,20 @@
 <meta property="article:author" content="Zamperini">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://dorgenjones.github.io/">
 
 
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
   CONFIG.page = {
     sidebar: "",
-    isHome: true,
-    isPost: false
   };
 </script>
-
   <title>Zamperini</title>
   
 
@@ -74,161 +133,228 @@
 
 
 
+
+
+
   <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
 
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
 
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
   </style>
 </noscript>
 
-</head>
+<meta name="generator" content="Hexo 4.2.0"></head>
 
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left 
+  page-home">
     <div class="headband"></div>
 
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-meta">
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
 
-    <div>
-      <a href="/" class="brand" rel="start">
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
         <span class="site-title">Zamperini</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
+      
+        <p class="site-subtitle"></p>
+      
   </div>
 
   <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
   </div>
 </div>
-
 
 <nav class="site-nav">
   
-  <ul id="menu" class="menu">
+
+  
+    <ul id="menu" class="menu">
+      
+        
         <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
-
-  </li>
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
         <li class="menu-item menu-item-about">
-
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
-
-  </li>
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
         <li class="menu-item menu-item-tags">
-
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">23</span></a>
-
-  </li>
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
         <li class="menu-item menu-item-categories">
-
-    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">11</span></a>
-
-  </li>
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
         <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">56</span></a>
+      
+    </ul>
+  
 
-  </li>
-  </ul>
-
+  
 </nav>
-</div>
+
+
+  
+
+
+
+ </div>
     </header>
 
     
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
 
 
-    <main class="main">
+    <main id="main" class="main">
       <div class="main-inner">
         <div class="content-wrap">
-          
-
-          <div class="content">
+          <div id="content" class="content">
             
+  <section id="posts" class="posts-expand">
+    
+      
 
-  <div class="posts-expand">
-        
+  
+
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2020/02/11/hello-world/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
       <meta itemprop="name" content="Zamperini">
       <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Zamperini">
     </span>
+
+    
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/11/hello-world/" class="post-title-link" itemprop="url">主页</a>
-        </h1>
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/02/11/hello-world/" itemprop="url">主页</a></h1>
+        
 
         <div class="post-meta">
-            <span class="post-meta-item">
+          <span class="post-time">
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-11T17:45:17+08:00">2020-02-11</time>
+            
 
-              <time title="创建时间：2020-02-11 17:45:17" itemprop="dateCreated datePublished" datetime="2020-02-11T17:45:17+08:00">2020-02-11</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-03-03 21:31:37" itemprop="dateModified" datetime="2020-03-03T21:31:37+08:00">2020-03-03</time>
-              </span>
-            <span class="post-meta-item">
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E4%B8%BB%E9%A1%B5/" itemprop="url" rel="index">
-                    <span itemprop="name">主页</span>
-                  </a>
-                </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E4%B8%BB%E9%A1%B5/" itemprop="url" rel="index"><span itemprop="name">主页</span></a></span>
+
+                
+                
+              
             </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
 
           
 
         </div>
       </header>
+    
 
     
     
@@ -236,6 +362,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
+      
+
+      
+        
           <h1 id="关于我"><a href="#关于我" class="headerlink" title="关于我"></a>关于我</h1><p>中国科学技术大学计算机硕士毕业，毕业以来一直在美团猫眼，先后从事交易系统研发、基础架构中间件研发，目前专注于 <strong>服务治理 &amp; Service Mesh</strong> 方向。更多信息见 <a href="/about">关于我</a></p>
 <p>个人爱好：跑步（<code>半马</code>）、游泳、骑行、电影</p>
 <h1 id="关于本博客"><a href="#关于本博客" class="headerlink" title="关于本博客"></a>关于本博客</h1><p>基于 <a href="https://hexo.io/" target="_blank" rel="noopener"><strong>Hexo</strong></a> +<a href="https://github.com/theme-next/hexo-theme-next" target="_blank" rel="noopener"><strong>Next主题</strong></a>+ <a href="https://zh.mweb.im/" target="_blank" rel="noopener"><strong>MWeb</strong></a> 搭建。</p>
@@ -245,80 +375,136 @@
 </ol>
 
           <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/02/11/hello-world/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/02/11/hello-world/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
     </div>
+    
+    
+    
 
     
+
     
+
     
-      <footer class="post-footer">
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
         <div class="post-eof"></div>
-      </footer>
+      
+    </footer>
+  </div>
+  
+  
+  
   </article>
+
+
+    
+      
+
+  
+
   
   
   
 
-        
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2020/02/07/k8s/6.k8s-scheduler/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
       <meta itemprop="name" content="Zamperini">
       <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Zamperini">
     </span>
+
+    
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/07/k8s/6.k8s-scheduler/" class="post-title-link" itemprop="url">kube-scheduler</a>
-        </h1>
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/02/07/k8s/6.k8s-scheduler/" itemprop="url">kube-scheduler</a></h1>
+        
 
         <div class="post-meta">
-            <span class="post-meta-item">
+          <span class="post-time">
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-07T00:00:00+08:00">2020-02-07</time>
+            
 
-              <time title="创建时间：2020-02-07 00:00:00" itemprop="dateCreated datePublished" datetime="2020-02-07T00:00:00+08:00">2020-02-07</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-03-03 22:10:05" itemprop="dateModified" datetime="2020-03-03T22:10:05+08:00">2020-03-03</time>
-              </span>
-            <span class="post-meta-item">
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index">
-                    <span itemprop="name">k8s</span>
-                  </a>
-                </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a></span>
+
+                
+                
+              
             </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
 
           
 
         </div>
       </header>
+    
 
     
     
@@ -326,6 +512,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
+      
+
+      
+        
           <h1 id="4-kube-scheduler"><a href="#4-kube-scheduler" class="headerlink" title="4.kube-scheduler"></a>4.kube-scheduler</h1><p><code>scheduler</code>是<code>k8s</code>集群中负责调度的组件。它监听<code>apiserver</code>，查询未绑定<code>Node</code>资源的<code>Pod</code>，并跟据调度策略为其选择一个最合适的节点。<br>下面本节将从两个方面来介绍<code>scheduler</code>的实现：</p>
 <ol>
 <li>初始化过程</li>
@@ -342,80 +532,136 @@
 <p><strong>SelectorSpreadPriority：</strong>优先减少同一<code>Service</code>下的<code>Pod</code>在同一<code>Node</code>节点上的可能；<br><strong>MostRequestedPriority：</strong>尽量调度到已经使用过的 <code>Node</code> 上，介绍节点使用；<br><strong>RequestedToCapacityRatioPriority：</strong>跟据<code>Node</code>上的资源分配情况计算其分数；<br><strong>ServiceSpreadingPriority：</strong>尽量将同一个 <code>service</code> 的 <code>Pod</code> 分布到不同节点上，被 <code>SelectorSpreadPriority</code> 替代<br><strong>InterPodAffinityPriority：</strong>优先将 <code>Pod</code> 调度到相同的拓扑域上（如同一个节点、地域等）；<br><strong>LeastRequestedPriority：</strong>优先调度到请求资源少的节点上；<br><strong>BalancedResourceAllocation：</strong>优先平衡各节点的资源使用；<br><strong>NodePreferAvoidPodsPriority：</strong>跟据节点<code>scheduler.alpha.kubernetes.io/preferAvoidPods</code>注解来计算<code>Node</code>权重, 权重为 10000，避免其他优先级策略的影响；<br><strong>NodeAffinityPriority：</strong>优先调度到匹配 <code>NodeAffinity</code> 的节点上；<br><strong>TaintTolerationPriority：</strong>优先调度到匹配 <code>TaintToleration</code> 的节点上；<br><strong>ImageLocalityPriority：</strong>尽量将使用大镜像的容器调度到已经下拉了该镜像的节点上。</p>
 </blockquote>
           <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/02/07/k8s/6.k8s-scheduler/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/02/07/k8s/6.k8s-scheduler/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
     </div>
+    
+    
+    
 
     
+
     
+
     
-      <footer class="post-footer">
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
         <div class="post-eof"></div>
-      </footer>
+      
+    </footer>
+  </div>
+  
+  
+  
   </article>
+
+
+    
+      
+
+  
+
   
   
   
 
-        
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2020/02/06/k8s/5.k8s-controllermanager/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
       <meta itemprop="name" content="Zamperini">
       <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Zamperini">
     </span>
+
+    
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/06/k8s/5.k8s-controllermanager/" class="post-title-link" itemprop="url">kube-controller-manager</a>
-        </h1>
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/02/06/k8s/5.k8s-controllermanager/" itemprop="url">kube-controller-manager</a></h1>
+        
 
         <div class="post-meta">
-            <span class="post-meta-item">
+          <span class="post-time">
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-06T00:00:00+08:00">2020-02-06</time>
+            
 
-              <time title="创建时间：2020-02-06 00:00:00" itemprop="dateCreated datePublished" datetime="2020-02-06T00:00:00+08:00">2020-02-06</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-03-03 22:09:48" itemprop="dateModified" datetime="2020-03-03T22:09:48+08:00">2020-03-03</time>
-              </span>
-            <span class="post-meta-item">
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index">
-                    <span itemprop="name">k8s</span>
-                  </a>
-                </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a></span>
+
+                
+                
+              
             </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
 
           
 
         </div>
       </header>
+    
 
     
     
@@ -423,6 +669,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
+      
+
+      
+        
           <h1 id="3-controller-manager"><a href="#3-controller-manager" class="headerlink" title="3. controller-manager"></a>3. controller-manager</h1><p><code>controller-manager</code>是整个<code>k8s</code>的大脑，<br>其由<code>kube-conrtoller-manager</code>和<code>cloud-controller-manager</code>组成。其中<code>clound-controller-manager</code>用来配合云服务提供商的控制，因此本章将不对其做详细描述。<br><code>controller-manager</code>中包含众多控制器见附件^1，通过这些控制器来完成集群管理的作用。监控集群状态，并确保集群处于预期的状态。<br>本节，将从如下几个方面来讲解<code>controller-manager</code>的工作原理：</p>
 <ol>
 <li>启动过程</li>
@@ -474,80 +724,136 @@
 <p>可以看到，其关注监听<code>Deployment</code>、<code>ReplicaSets</code>和<code>Pod</code>资源。再继续查看<code>DeploymentController</code>的创建过程，其关注这三种资源，并且添加事件监听器，当<code>Deployment</code>资源更新时回调<code>addDeplotment\updateDeployment\deleteDeployment</code>方法，<code>ReplicaSets</code>和<code>Pod</code>的更新也会回调<code>DeploymentController</code>的相应方法。</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">dc := &amp;DeploymentController&#123;</span><br><span class="line">	client:        client,</span><br><span class="line">	eventRecorder: eventBroadcaster.NewRecorder(scheme.Scheme, v1.EventSource&#123;Component: <span class="string">"deployment-controller"</span>&#125;),</span><br><span class="line">	queue:         workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), <span class="string">"deployment"</span>),</span><br><span class="line">&#125;</span><br><span class="line">dc.rsControl = controller.RealRSControl&#123;</span><br><span class="line">	KubeClient: client,</span><br><span class="line">	Recorder:   dc.eventRecorder,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">dInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">	AddFunc:    dc.addDeployment,</span><br><span class="line">	UpdateFunc: dc.updateDeployment,</span><br><span class="line">	DeleteFunc: dc.deleteDeployment,</span><br><span class="line">&#125;)</span><br><span class="line">rsInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">	AddFunc:    dc.addReplicaSet,</span><br><span class="line">	UpdateFunc: dc.updateReplicaSet,</span><br><span class="line">	DeleteFunc: dc.deleteReplicaSet,</span><br><span class="line">&#125;)</span><br><span class="line">podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">	DeleteFunc: dc.deletePod,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
           <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/02/06/k8s/5.k8s-controllermanager/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/02/06/k8s/5.k8s-controllermanager/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
     </div>
+    
+    
+    
 
     
+
     
+
     
-      <footer class="post-footer">
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
         <div class="post-eof"></div>
-      </footer>
+      
+    </footer>
+  </div>
+  
+  
+  
   </article>
+
+
+    
+      
+
+  
+
   
   
   
 
-        
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2020/02/05/k8s/4.k8s-informer/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
       <meta itemprop="name" content="Zamperini">
       <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Zamperini">
     </span>
+
+    
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/05/k8s/4.k8s-informer/" class="post-title-link" itemprop="url">通信组件 Informer</a>
-        </h1>
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/02/05/k8s/4.k8s-informer/" itemprop="url">通信组件 Informer</a></h1>
+        
 
         <div class="post-meta">
-            <span class="post-meta-item">
+          <span class="post-time">
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-05T00:00:00+08:00">2020-02-05</time>
+            
 
-              <time title="创建时间：2020-02-05 00:00:00" itemprop="dateCreated datePublished" datetime="2020-02-05T00:00:00+08:00">2020-02-05</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-03-03 22:09:52" itemprop="dateModified" datetime="2020-03-03T22:09:52+08:00">2020-03-03</time>
-              </span>
-            <span class="post-meta-item">
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index">
-                    <span itemprop="name">k8s</span>
-                  </a>
-                </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a></span>
+
+                
+                
+              
             </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
 
           
 
         </div>
       </header>
+    
 
     
     
@@ -555,6 +861,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
+      
+
+      
+        
           <h1 id="2-Informer"><a href="#2-Informer" class="headerlink" title="2. Informer"></a>2. Informer</h1><p>[TOC]</p>
 <p>在介绍完<code>apiserver</code>之后，在介绍其他重要组件之前，本章将介绍各组件与<code>apiserver</code>交互的重要工具<code>Informer</code>。通过其我们可以轻松<code>List\Get</code>所有资源对象，同时可以监听资源的变更事件，当变化发生时触发回调函数。<br>下面将从<code>Informer</code>的初始化过程、更新变更两个方便来讲解其工作原理。</p>
 <h2 id="初始化-amp-监听更新变更流程"><a href="#初始化-amp-监听更新变更流程" class="headerlink" title="初始化&amp;监听更新变更流程"></a>初始化&amp;监听更新变更流程</h2><p>首先，<code>k8s</code> 里 <code>Informer</code> 的创建需要借助于<code>SharedInformerFactory</code>，其可以提供<code>k8s</code>中已知所有API组版本资源的 <code>informer</code> ，其接口定义如下 ：</p>
@@ -564,80 +874,136 @@
 <p>其中<code>client</code>是<code>k8s</code>中所有<code>API</code>资源操作（更删改查）的工具（其通过http与<code>apiserver</code>通信）。<br>下面，就以<code>PodInformer</code>为例来讲解其创建过程：</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sharedInformerFactory.Core().V1().Pods().Informer()</span><br><span class="line">|- core.New(f, f.namespace, f.tweakListOptions)</span><br><span class="line">    |- v1.New(g.factory, g.namespace, g.tweakListOptions)</span><br><span class="line">        |- podInformer&#123;factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions&#125;</span><br></pre></td></tr></table></figure>
           <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/02/05/k8s/4.k8s-informer/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/02/05/k8s/4.k8s-informer/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
     </div>
+    
+    
+    
 
     
+
     
+
     
-      <footer class="post-footer">
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
         <div class="post-eof"></div>
-      </footer>
+      
+    </footer>
+  </div>
+  
+  
+  
   </article>
+
+
+    
+      
+
+  
+
   
   
   
 
-        
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2020/02/04/k8s/3.k8s-apiserver/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
       <meta itemprop="name" content="Zamperini">
       <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Zamperini">
     </span>
+
+    
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/04/k8s/3.k8s-apiserver/" class="post-title-link" itemprop="url">k8s-apiserver</a>
-        </h1>
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/02/04/k8s/3.k8s-apiserver/" itemprop="url">k8s-apiserver</a></h1>
+        
 
         <div class="post-meta">
-            <span class="post-meta-item">
+          <span class="post-time">
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-04T00:00:00+08:00">2020-02-04</time>
+            
 
-              <time title="创建时间：2020-02-04 00:00:00" itemprop="dateCreated datePublished" datetime="2020-02-04T00:00:00+08:00">2020-02-04</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-03-03 22:09:57" itemprop="dateModified" datetime="2020-03-03T22:09:57+08:00">2020-03-03</time>
-              </span>
-            <span class="post-meta-item">
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/k8s/" itemprop="url" rel="index">
-                    <span itemprop="name">k8s</span>
-                  </a>
-                </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a></span>
+
+                
+                
+              
             </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
 
           
 
         </div>
       </header>
+    
 
     
     
@@ -645,6 +1011,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
+      
+
+      
+        
           <h1 id="1-kube-apiserver（-v1-17-2）"><a href="#1-kube-apiserver（-v1-17-2）" class="headerlink" title="1. kube-apiserver（@v1.17.2）"></a>1. kube-apiserver（<code>@v1.17.2</code>）</h1><p>[TOC]</p>
 <p><code>ApiServer</code>是<code>K8S</code>服务调度的核心，其同时负责与外界的交互、集群内其他组件的交互，也是<code>K8S</code>中唯一与持久化存储<code>Etcd</code>交互的组件。</p>
 <p>下面将从以下几点来解析 <code>ApiSever</code>：</p>
@@ -671,32 +1041,50 @@
 </blockquote>
 <p>首先创建<code>ApiServerCommond</code>，然后执行命令：(整个<code>k8s</code>代码体系都引用<code>CLI</code>框架<code>Cobra</code>)<br>创建命令的过程：</p>
           <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/02/04/k8s/3.k8s-apiserver/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/02/04/k8s/3.k8s-apiserver/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
     </div>
+    
+    
+    
 
     
+
     
+
     
-      <footer class="post-footer">
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
         <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
+      
+    </footer>
   </div>
+  
+  
+  
+  </article>
+
+
+    
+  </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/2/">&lt;i class&#x3D;&quot;fa fa-angle-right&quot;&gt;&lt;&#x2F;i&gt;</a>
   </nav>
 
 
@@ -704,126 +1092,227 @@
           </div>
           
 
-<script>
-  window.addEventListener('tabs:register', () => {
-    let activeClass = CONFIG.comments.activeClass;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
         </div>
+        
           
   
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
   </div>
 
-  <aside class="sidebar">
+  <aside id="sidebar" class="sidebar">
+    
     <div class="sidebar-inner">
 
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
+      
 
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-      </div>
-      <!--/noindex-->
+      
 
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="Zamperini"
-      src="/images/avator.png">
-  <p class="site-author-name" itemprop="name">Zamperini</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
-        
-          <span class="site-state-item-count">56</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-categories">
-            <a href="/categories/">
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avator.png"
+                alt="Zamperini" />
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
           
-        <span class="site-state-item-count">11</span>
-        <span class="site-state-item-name">分类</span></a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
           
-        <span class="site-state-item-count">23</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="https://github.com/DorgenJones" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;DorgenJones" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="mailto:dblpfilter@163.com" title="E-Mail → mailto:dblpfilter@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="https://weibo.com/u/1938368215" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1938368215" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
-      </span>
-  </div>
 
+          
 
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/DorgenJones" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:dblpfilter@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/u/1938368215" target="_blank" title="Weibo">
+                      
+                        <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                  </span>
+                
+            </div>
+          
 
-      </div>
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+
+      
 
     </div>
   </aside>
-  <div id="sidebar-dimmer"></div>
 
 
+        
       </div>
     </main>
 
-    <footer class="footer">
+    <footer id="footer" class="footer">
       <div class="footer-inner">
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2020</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.2.0
-  </div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
   <span class="post-meta-divider">|</span>
-  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.7.1
-  </div>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
 
         
 
@@ -833,25 +1322,110 @@
 
 
 
-
+        
       </div>
     </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
   </div>
 
   
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
 
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/pisces.js"></script>
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
 
 
-<script src="/js/next-boot.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
 
 
 
@@ -867,10 +1441,26 @@
 
 
 
+  
 
 
 
 
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
 
   
 

@@ -1,52 +1,109 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
 
 
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
 
 
-<script id="hexo-configurations">
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
   var NexT = window.NexT || {};
   var CONFIG = {
-    hostname: new URL('https://dorgenjones.github.io').hostname,
     root: '/',
     scheme: 'Gemini',
-    version: '7.7.1',
-    exturl: false,
-    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":true},
-    copycode: {"enable":false,"show_result":false,"style":null},
-    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
-    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: false,
-    mediumzoom: false,
+    fastclick: false,
     lazyload: false,
-    pangu: false,
-    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     algolia: {
-      appID: '',
+      applicationID: '',
       apiKey: '',
       indexName: '',
       hits: {"per_page":10},
       labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
-    },
-    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
-    path: '',
-    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+    }
   };
 </script>
 
-  <meta property="og:type" content="website">
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+<meta property="og:type" content="website">
 <meta property="og:title" content="Zamperini">
 <meta property="og:url" content="https://dorgenjones.github.io/page/3/index.html">
 <meta property="og:site_name" content="Zamperini">
@@ -54,18 +111,20 @@
 <meta property="article:author" content="Zamperini">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://dorgenjones.github.io/page/3/">
 
 
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/page/3/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
   CONFIG.page = {
     sidebar: "",
-    isHome: true,
-    isPost: false
   };
 </script>
-
   <title>Zamperini</title>
   
 
@@ -74,161 +133,228 @@
 
 
 
+
+
+
   <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
 
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
 
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
   </style>
 </noscript>
 
-</head>
+<meta name="generator" content="Hexo 4.2.0"></head>
 
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left 
+  page-home">
     <div class="headband"></div>
 
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-meta">
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
 
-    <div>
-      <a href="/" class="brand" rel="start">
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
         <span class="site-title">Zamperini</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
+      
+        <p class="site-subtitle"></p>
+      
   </div>
 
   <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
   </div>
 </div>
-
 
 <nav class="site-nav">
   
-  <ul id="menu" class="menu">
+
+  
+    <ul id="menu" class="menu">
+      
+        
         <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
-
-  </li>
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
         <li class="menu-item menu-item-about">
-
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
-
-  </li>
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
         <li class="menu-item menu-item-tags">
-
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">23</span></a>
-
-  </li>
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
         <li class="menu-item menu-item-categories">
-
-    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">11</span></a>
-
-  </li>
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
         <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">56</span></a>
+      
+    </ul>
+  
 
-  </li>
-  </ul>
-
+  
 </nav>
-</div>
+
+
+  
+
+
+
+ </div>
     </header>
 
     
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
 
 
-    <main class="main">
+    <main id="main" class="main">
       <div class="main-inner">
         <div class="content-wrap">
-          
-
-          <div class="content">
+          <div id="content" class="content">
             
+  <section id="posts" class="posts-expand">
+    
+      
 
-  <div class="posts-expand">
-        
+  
+
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2019/11/24/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/6.etcd-ttl&lease/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
       <meta itemprop="name" content="Zamperini">
       <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Zamperini">
     </span>
+
+    
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2019/11/24/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/6.etcd-ttl&lease/" class="post-title-link" itemprop="url">TTL&Lease实现</a>
-        </h1>
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/11/24/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/6.etcd-ttl&lease/" itemprop="url">TTL&Lease实现</a></h1>
+        
 
         <div class="post-meta">
-            <span class="post-meta-item">
+          <span class="post-time">
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-24T00:00:00+08:00">2019-11-24</time>
+            
 
-              <time title="创建时间：2019-11-24 00:00:00" itemprop="dateCreated datePublished" datetime="2019-11-24T00:00:00+08:00">2019-11-24</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-13 19:11:13" itemprop="dateModified" datetime="2020-02-13T19:11:13+08:00">2020-02-13</time>
-              </span>
-            <span class="post-meta-item">
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/etcd/" itemprop="url" rel="index">
-                    <span itemprop="name">etcd</span>
-                  </a>
-                </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/etcd/" itemprop="url" rel="index"><span itemprop="name">etcd</span></a></span>
+
+                
+                
+              
             </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
 
           
 
         </div>
       </header>
+    
 
     
     
@@ -236,6 +362,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
+      
+
+      
+        
           <h1 id="5-TTL-amp-Lease-实现"><a href="#5-TTL-amp-Lease-实现" class="headerlink" title="5. TTL &amp; Lease 实现"></a>5. TTL &amp; Lease 实现</h1><p><code>etcd</code>中用来实现<code>TTL</code>的机制叫<code>Lease</code>，<code>Lease</code>可以用来绑定多个key。<code>Lease</code>的主要用法如下：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span> etcdctl lease grant <span class="number">1900</span> <span class="comment">// 申请一个租约，返回租约ID</span></span><br><span class="line"> - lease <span class="number">326969472</span>b0c5d05 granted with TTL(<span class="number">1900</span>s)</span><br><span class="line"><span class="number">2.</span> etcdctl lease revoke <span class="number">326969472</span>b0c5d05 <span class="comment">// 取消租约</span></span><br><span class="line">- lease <span class="number">326969472</span>b0c5d05 revoked</span><br><span class="line"><span class="number">3.</span> etcdctl lease timetolive  <span class="number">326969472</span>b0c5d08 <span class="comment">// 查询剩余多长时间</span></span><br><span class="line">- lease <span class="number">326969472</span>b0c5d08 granted with TTL(<span class="number">190</span>s), remaining(<span class="number">182</span>s)</span><br><span class="line"><span class="number">4.</span> etcdctl lease keep-alive <span class="number">326969472</span>b0c5d05 <span class="comment">// 到期续约</span></span><br><span class="line">- lease <span class="number">326969472</span>b0c5d05 keepalived with TTL(<span class="number">1900</span>)</span><br><span class="line"><span class="number">5.</span> etcdctl lease keep-alive --once=<span class="literal">true</span> <span class="number">326969472</span>b0c5d0c <span class="comment">// 单次续约</span></span><br><span class="line">- lease <span class="number">326969472</span>b0c5d0c keepalived with TTL(<span class="number">200</span>)</span><br></pre></td></tr></table></figure>
 <p>下面将解析其工作原理，首先将介绍其初始化过程，然后介绍创建、以及绑定<code>key</code>以及过期的操作。</p>
@@ -245,80 +375,136 @@
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">当从 bucket<span class="string">`key`</span>中获取所有key-val后，执行<span class="string">`restoreChunk`</span>方法</span><br><span class="line">restoreChunk</span><br><span class="line">|- 其会检测kv是否带<span class="string">`Lease`</span>，若有则加入到<span class="string">`keyToLease`</span><span class="keyword">map</span>中</span><br><span class="line">|- 对<span class="string">`keyToLease`</span><span class="keyword">map</span>中的每个entry</span><br><span class="line">    |- s.le.Attach(lid, []lease.LeaseItem&#123;&#123;Key: key&#125;&#125;)</span><br><span class="line">        |- 将<span class="string">`key`</span>绑定到<span class="string">`lease`</span>中，并建立<span class="string">`key`</span>到<span class="string">`lease`</span>的映射</span><br></pre></td></tr></table></figure>
 <h2 id="5-2-Lease创建"><a href="#5-2-Lease创建" class="headerlink" title="5.2 Lease创建"></a>5.2 <code>Lease</code>创建</h2>
           <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/11/24/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/6.etcd-ttl&lease/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/11/24/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/6.etcd-ttl&lease/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
     </div>
+    
+    
+    
 
     
+
     
+
     
-      <footer class="post-footer">
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
         <div class="post-eof"></div>
-      </footer>
+      
+    </footer>
+  </div>
+  
+  
+  
   </article>
+
+
+    
+      
+
+  
+
   
   
   
 
-        
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2019/11/23/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/5.etcd-%E4%BA%8B%E5%8A%A1%E8%AF%B7%E6%B1%82/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
       <meta itemprop="name" content="Zamperini">
       <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Zamperini">
     </span>
+
+    
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2019/11/23/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/5.etcd-%E4%BA%8B%E5%8A%A1%E8%AF%B7%E6%B1%82/" class="post-title-link" itemprop="url">ETCD事务请求</a>
-        </h1>
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/11/23/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/5.etcd-%E4%BA%8B%E5%8A%A1%E8%AF%B7%E6%B1%82/" itemprop="url">ETCD事务请求</a></h1>
+        
 
         <div class="post-meta">
-            <span class="post-meta-item">
+          <span class="post-time">
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-23T00:00:00+08:00">2019-11-23</time>
+            
 
-              <time title="创建时间：2019-11-23 00:00:00" itemprop="dateCreated datePublished" datetime="2019-11-23T00:00:00+08:00">2019-11-23</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-25 19:43:47" itemprop="dateModified" datetime="2020-02-25T19:43:47+08:00">2020-02-25</time>
-              </span>
-            <span class="post-meta-item">
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/etcd/" itemprop="url" rel="index">
-                    <span itemprop="name">etcd</span>
-                  </a>
-                </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/etcd/" itemprop="url" rel="index"><span itemprop="name">etcd</span></a></span>
+
+                
+                
+              
             </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
 
           
 
         </div>
       </header>
+    
 
     
     
@@ -326,6 +512,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
+      
+
+      
+        
           <h1 id="4-事务请求"><a href="#4-事务请求" class="headerlink" title="4. 事务请求"></a>4. 事务请求</h1><p>[TOC]</p>
 <p>本节我们将讲述 <code>etcd</code>集群的事务请求处理过程。首先我们将以<code>put</code>操作为例来讲解一般性事务请求过程。其次，我们将介绍 <code>etcd</code>特有的线性一致性读请求过程。</p>
 <h2 id="put-请求"><a href="#put-请求" class="headerlink" title="put 请求"></a>put 请求</h2><p>通过 <code>etcdctl put ty dj</code> 命令，向本地监听<code>2380</code>端口的节点发送 写请求。<br>该请求为<code>GRPC</code>请求，会中转到<code>quotaKVServer</code>进行处理。</p>
@@ -334,80 +524,136 @@
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">node.Propose</span><br><span class="line">|- n.stepWait(ctx, pb.Message&#123;Type: pb.MsgProp, Entries: []pb.Entry&#123;&#123;Data: data&#125;&#125;&#125;) <span class="comment">// 将请求包装成 `MsgProp`消息</span></span><br><span class="line">    |- n.stepWithWaitOption</span><br><span class="line">        |- pm := msgWithResult&#123;m: m&#125; <span class="comment">// 将消息再一次封装</span></span><br><span class="line">        |- 将消息传递给 通道<span class="string">`n.propc`</span></span><br></pre></td></tr></table></figure>
 <p>可以看出 将请求两层封装之后传递给通道<code>n.propc</code>。<br>在<code>node</code>的循环中，其会监听<code>proc</code>通道，当有消息到来时：</p>
           <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/11/23/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/5.etcd-%E4%BA%8B%E5%8A%A1%E8%AF%B7%E6%B1%82/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/11/23/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/5.etcd-%E4%BA%8B%E5%8A%A1%E8%AF%B7%E6%B1%82/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
     </div>
+    
+    
+    
 
     
+
     
+
     
-      <footer class="post-footer">
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
         <div class="post-eof"></div>
-      </footer>
+      
+    </footer>
+  </div>
+  
+  
+  
   </article>
+
+
+    
+      
+
+  
+
   
   
   
 
-        
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2019/11/22/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/4.etcd-%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
       <meta itemprop="name" content="Zamperini">
       <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Zamperini">
     </span>
+
+    
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2019/11/22/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/4.etcd-%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" class="post-title-link" itemprop="url">ETCD网络通信</a>
-        </h1>
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/11/22/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/4.etcd-%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" itemprop="url">ETCD网络通信</a></h1>
+        
 
         <div class="post-meta">
-            <span class="post-meta-item">
+          <span class="post-time">
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-22T00:00:00+08:00">2019-11-22</time>
+            
 
-              <time title="创建时间：2019-11-22 00:00:00" itemprop="dateCreated datePublished" datetime="2019-11-22T00:00:00+08:00">2019-11-22</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-13 19:56:38" itemprop="dateModified" datetime="2020-02-13T19:56:38+08:00">2020-02-13</time>
-              </span>
-            <span class="post-meta-item">
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/etcd/" itemprop="url" rel="index">
-                    <span itemprop="name">etcd</span>
-                  </a>
-                </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/etcd/" itemprop="url" rel="index"><span itemprop="name">etcd</span></a></span>
+
+                
+                
+              
             </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
 
           
 
         </div>
       </header>
+    
 
     
     
@@ -415,6 +661,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
+      
+
+      
+        
           <h1 id="2-网络通信"><a href="#2-网络通信" class="headerlink" title="2. 网络通信"></a>2. 网络通信</h1><p>在上一节，我们介绍了<code>etcd</code>集群的启动过程。在其中也简单介绍了会初始化与其他成员节点通信的连接，以及启动为其他成员节点提供服务的<code>GRPC</code>服务和<code>Http</code>服务以及启动服务客户端的服务。本章我们将详细介绍通信相关的实现。</p>
 <h2 id="2-1-成员节点间通信（peer）"><a href="#2-1-成员节点间通信（peer）" class="headerlink" title="2.1 成员节点间通信（peer）"></a>2.1 成员节点间通信（peer）</h2><p>前一章节介绍了peer服务端启动过程。下面，我们来讲解下调用端是如何初始化以及如何调用的。<br>与成员节点间通信传输的初始化之前介绍过，是调用<code>Transport.AddPeer</code>方法。<br>前面我们介绍了<code>Transport</code>的作用：向成员节点发送raft消息，并从成员节点获取raft消息。下面将详细描述其作用。<br>首先来看其初始化和启动过程：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">tr := &amp;rafthttp.Transport&#123;</span><br><span class="line">	DialTimeout: cfg.peerDialTimeout(),</span><br><span class="line">	ID:          id,</span><br><span class="line">	URLs:        cfg.PeerURLs,</span><br><span class="line">	ClusterID:   cl.ID(),</span><br><span class="line">	Raft:        srv, <span class="comment">// EtcdServer</span></span><br><span class="line">	Snapshotter: ss,</span><br><span class="line">	ServerStats: sstats,</span><br><span class="line">	LeaderStats: lstats,</span><br><span class="line">	ErrorC:      srv.errorc,</span><br><span class="line">&#125;</span><br><span class="line">tr.Start()</span><br><span class="line">|- t.streamRt = newStreamRoundTripper(t.TLSInfo, t.DialTimeout) <span class="comment">// 其作用前面介绍过：可以执行事务性HTTP请求，给定请求获取结果</span></span><br><span class="line">|- t.pipelineRt = NewRoundTripper(t.TLSInfo, t.DialTimeout) <span class="comment">//</span></span><br><span class="line">|- t.remotes = <span class="built_in">make</span>(<span class="keyword">map</span>[types.ID]*remote) <span class="comment">// 初始化复制节点映射</span></span><br><span class="line">|- t.peers = <span class="built_in">make</span>(<span class="keyword">map</span>[types.ID]Peer) <span class="comment">// 初始化成员节点映射</span></span><br><span class="line">|- t.pipelineProber = probing.NewProber(t.pipelineRt) <span class="comment">// Prober的作用是探测，探测链路监控状态</span></span><br><span class="line">|- t.streamProber = probing.NewProber(t.streamRt)</span><br></pre></td></tr></table></figure>
@@ -424,80 +674,136 @@
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">w := &amp;streamWriter&#123;</span><br><span class="line">	peerID:  id,</span><br><span class="line">	status: status,</span><br><span class="line">	fs:     fs,</span><br><span class="line">	r:      r,</span><br><span class="line">	msgc:   <span class="built_in">make</span>(<span class="keyword">chan</span> raftpb.Message, streamBufSize),</span><br><span class="line">	connc:  <span class="built_in">make</span>(<span class="keyword">chan</span> *outgoingConn),</span><br><span class="line">	stopc:  <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;),</span><br><span class="line">	done:   <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;),</span><br><span class="line">&#125;</span><br><span class="line">w.run:</span><br><span class="line">|- <span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> &lt;-heartbeatc:</span><br><span class="line">	<span class="comment">//发送心跳消息</span></span><br><span class="line">	<span class="keyword">case</span> m := &lt;-msgc:</span><br><span class="line">	<span class="comment">// 接收到需要发送的消息，进行编码并使用conn进行发送</span></span><br><span class="line">    <span class="keyword">case</span> conn := &lt;-cw.connc:</span><br><span class="line">    <span class="comment">// 监听附加上来的连接通道，进行初始化 编码器、Flusher等</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><code>streamWriter</code>里比较关键的一点是，这里的<code>conn</code>从哪来？往<code>cw.connc</code>传递<code>conn</code>的只有<code>peer.attachOutgoingConn</code>方法。<br>而在上面初始化并启动<code>peer</code>的时候是没有发现调用这个方法的 ？？？哪是哪里进行执行的呢？通过 追踪<code>peer.attachOutgoingConn</code>的调用方，最终发现，其在<code>rafthhtp/http.go/ServeHTTP() L483</code>处调用。而这个方法会在客户端建立连接<strong>进行http服务调用</strong>的时候执行。所以，在这里调用 <code>peer.attachOutgoingConn</code> 的作用是复用<code>连接</code>。当我们分析完读处理过程后，再来整体看 <code>etcd</code>节点是怎么建立通信链路的。</p>
           <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/11/22/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/4.etcd-%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/11/22/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/4.etcd-%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
     </div>
+    
+    
+    
 
     
+
     
+
     
-      <footer class="post-footer">
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
         <div class="post-eof"></div>
-      </footer>
+      
+    </footer>
+  </div>
+  
+  
+  
   </article>
+
+
+    
+      
+
+  
+
   
   
   
 
-        
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2019/11/21/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/3.etcd-%E5%AD%98%E5%82%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
       <meta itemprop="name" content="Zamperini">
       <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Zamperini">
     </span>
+
+    
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2019/11/21/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/3.etcd-%E5%AD%98%E5%82%A8/" class="post-title-link" itemprop="url">ETCD数据存储</a>
-        </h1>
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/11/21/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/3.etcd-%E5%AD%98%E5%82%A8/" itemprop="url">ETCD数据存储</a></h1>
+        
 
         <div class="post-meta">
-            <span class="post-meta-item">
+          <span class="post-time">
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-21T00:00:00+08:00">2019-11-21</time>
+            
 
-              <time title="创建时间：2019-11-21 00:00:00" itemprop="dateCreated datePublished" datetime="2019-11-21T00:00:00+08:00">2019-11-21</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-13 19:56:32" itemprop="dateModified" datetime="2020-02-13T19:56:32+08:00">2020-02-13</time>
-              </span>
-            <span class="post-meta-item">
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/etcd/" itemprop="url" rel="index">
-                    <span itemprop="name">etcd</span>
-                  </a>
-                </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/etcd/" itemprop="url" rel="index"><span itemprop="name">etcd</span></a></span>
+
+                
+                
+              
             </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
 
           
 
         </div>
       </header>
+    
 
     
     
@@ -505,6 +811,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
+      
+
+      
+        
           <h1 id="3-数据存储"><a href="#3-数据存储" class="headerlink" title="3. 数据存储"></a>3. 数据存储</h1><p><code>Etcd</code>的存储部分，可以分两部分来讲解。一部分是其应用层的数据存储方式，另一部分是<code>raft</code>相关数据的存储。<code>Etcd</code>应用层的数据存储从<code>v3</code>版本开始就延用<code>boltDB</code>，其也是<code>CoreOS</code>的产品<a href="https://github.com/etcd-io/bbolt" target="_blank" rel="noopener">boltDB</a>。PS:本文主要聚焦于v3版本，对于v2版本不作解读。</p>
 <p>下面将分别介绍这两部分内容：</p>
 <h2 id="3-1-raft数据存储"><a href="#3-1-raft数据存储" class="headerlink" title="3.1 raft数据存储"></a>3.1 raft数据存储</h2><p>首先我们来介绍下<code>raft</code>相关的数据存储：<br><code>raft</code>中有两个比较重要的组件：</p>
@@ -518,80 +828,136 @@
 <p>下图描述了数据从客户端请求到落地各个阶段与以前存储结构的关系：<br><img src="/media/15516348174091.jpg" alt></p>
 <p>其中，8’、9、11 是涉及 <strong>I/O</strong> 的操作，其他均为内存操作。<br>对<code>WAL</code>的操作在每次写事务操作中都会存在，因此其是制约<code>etcd</code>写性能的一个重要因素。接下来，将重点介绍<code>WAL</code>的工作原理。</p>
           <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/11/21/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/3.etcd-%E5%AD%98%E5%82%A8/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/11/21/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/3.etcd-%E5%AD%98%E5%82%A8/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
     </div>
+    
+    
+    
 
     
+
     
+
     
-      <footer class="post-footer">
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
         <div class="post-eof"></div>
-      </footer>
+      
+    </footer>
+  </div>
+  
+  
+  
   </article>
+
+
+    
+      
+
+  
+
   
   
   
 
-        
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2019/11/20/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/2.etcd-%E5%88%9D%E5%A7%8B%E5%8C%96/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
       <meta itemprop="name" content="Zamperini">
       <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Zamperini">
     </span>
+
+    
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2019/11/20/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/2.etcd-%E5%88%9D%E5%A7%8B%E5%8C%96/" class="post-title-link" itemprop="url">ETCD初始化</a>
-        </h1>
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/11/20/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/2.etcd-%E5%88%9D%E5%A7%8B%E5%8C%96/" itemprop="url">ETCD初始化</a></h1>
+        
 
         <div class="post-meta">
-            <span class="post-meta-item">
+          <span class="post-time">
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-20T00:00:00+08:00">2019-11-20</time>
+            
 
-              <time title="创建时间：2019-11-20 00:00:00" itemprop="dateCreated datePublished" datetime="2019-11-20T00:00:00+08:00">2019-11-20</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-25 12:24:51" itemprop="dateModified" datetime="2020-02-25T12:24:51+08:00">2020-02-25</time>
-              </span>
-            <span class="post-meta-item">
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/etcd/" itemprop="url" rel="index">
-                    <span itemprop="name">etcd</span>
-                  </a>
-                </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/etcd/" itemprop="url" rel="index"><span itemprop="name">etcd</span></a></span>
+
+                
+                
+              
             </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
 
           
 
         </div>
       </header>
+    
 
     
     
@@ -599,6 +965,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
+      
+
+      
+        
           <h1 id="1-Etcd初始化流程解析"><a href="#1-Etcd初始化流程解析" class="headerlink" title="1. Etcd初始化流程解析"></a>1. Etcd初始化流程解析</h1><p><code>Etcd</code>的启动类为 父目录的<code>main.go</code>文件。其启动过程调用如下：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">main.<span class="keyword">go</span></span><br><span class="line">|- etcdmain/main.<span class="keyword">go</span>(暂且忽略<span class="string">`gateway`</span>和<span class="string">`proxy`</span>模式启动)</span><br><span class="line">    |- checkSupportArch <span class="comment">// 检查是否是支持的处理器架构</span></span><br><span class="line">    |- startEtcdOrProxyV2 <span class="comment">// 解析参数并根据参数决定启动etcd节点还是按Proxy模式启动（这里按etcd节点形式启动）</span></span><br><span class="line">        |- 生成默认参数<span class="string">`newConfig()`</span>解析参数 <span class="string">`cfg.parse(os.Args[1:])`</span>解析命令行启动参数</span><br><span class="line">        |- startEtcd(&amp;cfg.ec)<span class="comment">// 启动过程最核心的地方</span></span><br></pre></td></tr></table></figure>
 <p><code>startEtcd</code>中执行<code>etcd</code>启动的主要过程：</p>
@@ -609,32 +979,50 @@
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">etcdserver/NewServer(srvcfg)</span><br><span class="line">|- fileutil.TouchDirAll(cfg.DataDir) <span class="comment">//检查是否可以获取目录权限：DataDir:"集群名.etcd"</span></span><br><span class="line">|- fileutil.TouchDirAll(cfg.SnapDir()) <span class="comment">// 检查是佛偶可以获取快照目录权限 ”集群名.etcd/member/snap“</span></span><br><span class="line">|- snap.New(cfg.Logger, cfg.SnapDir()) <span class="comment">//创建快照管理器</span></span><br><span class="line">|- be := openBackend(cfg) <span class="comment">// 创建数据库后端，其底层使用boltDB存储数据，然后在其之上进行了一次封装：包括批量提交事务。（关于存储的内容，我们后面讲单独讲解）</span></span><br><span class="line">|- rafthttp.NewRoundTripper(cfg.PeerTLSInfo, cfg.peerDialTimeout()) <span class="comment">// 创建一个RoundTripper，其作用是封装一个具有执行一次http事务，为一个http request获取response的对象</span></span><br></pre></td></tr></table></figure>
 <p>初始化快照管理器和数据库后端后，就会根据一系列条件来决定怎样启动节点：</p>
           <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/11/20/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/2.etcd-%E5%88%9D%E5%A7%8B%E5%8C%96/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/11/20/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/2.etcd-%E5%88%9D%E5%A7%8B%E5%8C%96/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
     </div>
+    
+    
+    
 
     
+
     
+
     
-      <footer class="post-footer">
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
         <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
+      
+    </footer>
   </div>
+  
+  
+  
+  </article>
+
+
+    
+  </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/2/">&lt;i class&#x3D;&quot;fa fa-angle-left&quot;&gt;&lt;&#x2F;i&gt;</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/4/">&lt;i class&#x3D;&quot;fa fa-angle-right&quot;&gt;&lt;&#x2F;i&gt;</a>
   </nav>
 
 
@@ -642,126 +1030,227 @@
           </div>
           
 
-<script>
-  window.addEventListener('tabs:register', () => {
-    let activeClass = CONFIG.comments.activeClass;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
         </div>
+        
           
   
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
   </div>
 
-  <aside class="sidebar">
+  <aside id="sidebar" class="sidebar">
+    
     <div class="sidebar-inner">
 
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
+      
 
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-      </div>
-      <!--/noindex-->
+      
 
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="Zamperini"
-      src="/images/avator.png">
-  <p class="site-author-name" itemprop="name">Zamperini</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
-        
-          <span class="site-state-item-count">56</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-categories">
-            <a href="/categories/">
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avator.png"
+                alt="Zamperini" />
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
           
-        <span class="site-state-item-count">11</span>
-        <span class="site-state-item-name">分类</span></a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
           
-        <span class="site-state-item-count">23</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="https://github.com/DorgenJones" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;DorgenJones" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="mailto:dblpfilter@163.com" title="E-Mail → mailto:dblpfilter@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="https://weibo.com/u/1938368215" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1938368215" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
-      </span>
-  </div>
 
+          
 
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/DorgenJones" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:dblpfilter@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/u/1938368215" target="_blank" title="Weibo">
+                      
+                        <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                  </span>
+                
+            </div>
+          
 
-      </div>
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+
+      
 
     </div>
   </aside>
-  <div id="sidebar-dimmer"></div>
 
 
+        
       </div>
     </main>
 
-    <footer class="footer">
+    <footer id="footer" class="footer">
       <div class="footer-inner">
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2020</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.2.0
-  </div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
   <span class="post-meta-divider">|</span>
-  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.7.1
-  </div>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
 
         
 
@@ -771,25 +1260,110 @@
 
 
 
-
+        
       </div>
     </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
   </div>
 
   
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
 
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/pisces.js"></script>
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
 
 
-<script src="/js/next-boot.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
 
 
 
@@ -805,10 +1379,26 @@
 
 
 
+  
 
 
 
 
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
 
   
 

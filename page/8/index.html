@@ -1,52 +1,109 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
 
 
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
 
 
-<script id="hexo-configurations">
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.3" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
   var NexT = window.NexT || {};
   var CONFIG = {
-    hostname: new URL('https://dorgenjones.github.io').hostname,
     root: '/',
     scheme: 'Gemini',
-    version: '7.7.1',
-    exturl: false,
-    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":true},
-    copycode: {"enable":false,"show_result":false,"style":null},
-    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
-    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    version: '6.0.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: false,
-    mediumzoom: false,
+    fastclick: false,
     lazyload: false,
-    pangu: false,
-    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     algolia: {
-      appID: '',
+      applicationID: '',
       apiKey: '',
       indexName: '',
       hits: {"per_page":10},
       labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
-    },
-    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
-    path: '',
-    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+    }
   };
 </script>
 
-  <meta property="og:type" content="website">
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+<meta property="og:type" content="website">
 <meta property="og:title" content="Zamperini">
 <meta property="og:url" content="https://dorgenjones.github.io/page/8/index.html">
 <meta property="og:site_name" content="Zamperini">
@@ -54,18 +111,20 @@
 <meta property="article:author" content="Zamperini">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://dorgenjones.github.io/page/8/">
 
 
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
+
+
+
+  <link rel="canonical" href="https://dorgenjones.github.io/page/8/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
   CONFIG.page = {
     sidebar: "",
-    isHome: true,
-    isPost: false
   };
 </script>
-
   <title>Zamperini</title>
   
 
@@ -74,250 +133,228 @@
 
 
 
+
+
+
   <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
 
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
 
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
   </style>
 </noscript>
 
-</head>
+<meta name="generator" content="Hexo 4.2.0"></head>
 
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left 
+  page-home">
     <div class="headband"></div>
 
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-meta">
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
 
-    <div>
-      <a href="/" class="brand" rel="start">
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
         <span class="site-title">Zamperini</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
+      
+        <p class="site-subtitle"></p>
+      
   </div>
 
   <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
   </div>
 </div>
-
 
 <nav class="site-nav">
   
-  <ul id="menu" class="menu">
+
+  
+    <ul id="menu" class="menu">
+      
+        
         <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
-
-  </li>
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
         <li class="menu-item menu-item-about">
-
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
-
-  </li>
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
         <li class="menu-item menu-item-tags">
-
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">23</span></a>
-
-  </li>
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
         <li class="menu-item menu-item-categories">
-
-    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">11</span></a>
-
-  </li>
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
         <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">56</span></a>
+      
+    </ul>
+  
 
-  </li>
-  </ul>
-
+  
 </nav>
-</div>
+
+
+  
+
+
+
+ </div>
     </header>
 
     
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
 
 
-    <main class="main">
+    <main id="main" class="main">
       <div class="main-inner">
         <div class="content-wrap">
-          
-
-          <div class="content">
+          <div id="content" class="content">
             
-
-  <div class="posts-expand">
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2018/03/21/mq/5.rocketmq-%E6%B6%88%E6%81%AF%E5%8F%91%E9%80%81&%E5%AD%98%E5%82%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
-      <meta itemprop="name" content="Zamperini">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zamperini">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/03/21/mq/5.rocketmq-%E6%B6%88%E6%81%AF%E5%8F%91%E9%80%81&%E5%AD%98%E5%82%A8/" class="post-title-link" itemprop="url">RocketMQ 消息发送&存储</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2018-03-21 00:00:00" itemprop="dateCreated datePublished" datetime="2018-03-21T00:00:00+08:00">2018-03-21</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-13 19:05:19" itemprop="dateModified" datetime="2020-02-13T19:05:19+08:00">2020-02-13</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/rocketmq/" itemprop="url" rel="index">
-                    <span itemprop="name">rocketmq</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
+  <section id="posts" class="posts-expand">
     
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
       
-          <h1 id="5-消息发送并存储"><a href="#5-消息发送并存储" class="headerlink" title="5. 消息发送并存储"></a>5. 消息发送并存储</h1><p>发送分为<code>同步和异步</code>的方式，本章主要解析同步方式，异步方式与同步方式很相似。<br>发送的过程，<code>Producer</code>发送消息，<code>Broker</code>接收消息并存储。</p>
-<h2 id="发送"><a href="#发送" class="headerlink" title="发送"></a>发送</h2><p>发送过程，最主要逻辑在<code>DefaultMQProducerImpl.sendDefaultImpl</code>中：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> SendResult <span class="title">sendDefaultImpl</span><span class="params">(Message msg, <span class="keyword">final</span> CommunicationMode communicationMode, <span class="keyword">final</span> SendCallback sendCallback, <span class="keyword">final</span> <span class="keyword">long</span> timeout)</span> <span class="keyword">throws</span> ... </span>&#123;</span><br><span class="line">   <span class="keyword">final</span> <span class="keyword">long</span> invokeID = random.nextLong();</span><br><span class="line">   <span class="keyword">long</span> beginTimestampFirst = System.currentTimeMillis();</span><br><span class="line">   <span class="keyword">long</span> beginTimestampPrev = beginTimestampFirst;</span><br><span class="line">   <span class="meta">@SuppressWarnings</span>(<span class="string">"UnusedAssignment"</span>)</span><br><span class="line">   <span class="keyword">long</span> endTimestamp = beginTimestampFirst;</span><br><span class="line">   <span class="comment">// 获取topic路由信息</span></span><br><span class="line">   TopicPublishInfo topicPublishInfo = <span class="keyword">this</span>.tryToFindTopicPublishInfo(msg.getTopic());</span><br><span class="line">   <span class="keyword">if</span> (topicPublishInfo != <span class="keyword">null</span> &amp;&amp; topicPublishInfo.ok()) &#123;</span><br><span class="line">       MessageQueue mq = <span class="keyword">null</span>;</span><br><span class="line">       SendResult sendResult = <span class="keyword">null</span>;</span><br><span class="line">       <span class="keyword">int</span> timesTotal = communicationMode == CommunicationMode.SYNC ? <span class="number">1</span> + <span class="keyword">this</span>.defaultMQProducer.getRetryTimesWhenSendFailed() : <span class="number">1</span>;</span><br><span class="line">       <span class="keyword">int</span> times = <span class="number">0</span>;</span><br><span class="line">       String[] brokersSent = <span class="keyword">new</span> String[timesTotal];</span><br><span class="line">       <span class="comment">// 最多重试timeTotal次</span></span><br><span class="line">       <span class="keyword">for</span> (; times &lt; timesTotal; times++) &#123;</span><br><span class="line">           String lastBrokerName = <span class="keyword">null</span> == mq ? <span class="keyword">null</span> : mq.getBrokerName();</span><br><span class="line">           <span class="comment">// 按一定策略 选择一个队列进行发送消息（目前是轮询法）</span></span><br><span class="line">           <span class="meta">@SuppressWarnings</span>(<span class="string">"SpellCheckingInspection"</span>)</span><br><span class="line">           MessageQueue tmpmq = <span class="keyword">this</span>.selectOneMessageQueue(topicPublishInfo, lastBrokerName);</span><br><span class="line">           <span class="keyword">if</span> (tmpmq != <span class="keyword">null</span>) &#123;</span><br><span class="line">               mq = tmpmq;</span><br><span class="line">               brokersSent[times] = mq.getBrokerName();</span><br><span class="line">               <span class="keyword">try</span> &#123;</span><br><span class="line">                   beginTimestampPrev = System.currentTimeMillis();</span><br><span class="line">                   <span class="comment">// 调用发送消息核心方法</span></span><br><span class="line">                   sendResult = <span class="keyword">this</span>.sendKernelImpl(msg, mq, communicationMode, sendCallback, topicPublishInfo, timeout);</span><br><span class="line">                   endTimestamp = System.currentTimeMillis();</span><br><span class="line">                   <span class="comment">// 更新Broker可用性信息</span></span><br><span class="line">                   <span class="keyword">this</span>.updateFaultItem(mq.getBrokerName(), endTimestamp - beginTimestampPrev, <span class="keyword">false</span>);</span><br><span class="line">                   <span class="keyword">switch</span> (communicationMode) &#123;</span><br><span class="line">                       <span class="keyword">case</span> ASYNC:</span><br><span class="line">                           <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">                       <span class="keyword">case</span> ONEWAY:</span><br><span class="line">                           <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">                       <span class="keyword">case</span> SYNC:</span><br><span class="line">                           <span class="comment">//重试</span></span><br><span class="line">                           <span class="keyword">if</span> (sendResult.getSendStatus() != SendStatus.SEND_OK) &#123;</span><br><span class="line">                               <span class="keyword">if</span> (<span class="keyword">this</span>.defaultMQProducer.isRetryAnotherBrokerWhenNotStoreOK()) &#123;</span><br><span class="line">                                   <span class="keyword">continue</span>;</span><br><span class="line">                               &#125;</span><br><span class="line">                           &#125;</span><br><span class="line">                           <span class="keyword">return</span> sendResult;</span><br><span class="line">                       <span class="keyword">default</span>:</span><br><span class="line">                           <span class="keyword">break</span>;</span><br><span class="line">                   &#125;</span><br><span class="line">               &#125; <span class="keyword">catch</span> <span class="comment">//...</span></span><br><span class="line">           &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               <span class="keyword">break</span>;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">if</span> (sendResult != <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">return</span> sendResult;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">//...</span></span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>可以看出整个过程：首先获取路由信息，然后按一定策略选择一个队列进行发送消息，当失败时会重试，最多重试<code>timesTotal</code>次。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> SendResult <span class="title">sendKernelImpl</span><span class="params">(<span class="keyword">final</span> Message msg, <span class="keyword">final</span> MessageQueue mq, <span class="keyword">final</span> CommunicationMode communicationMode, <span class="keyword">final</span> SendCallback sendCallback, <span class="keyword">final</span> TopicPublishInfo topicPublishInfo, <span class="keyword">final</span> <span class="keyword">long</span> timeout)</span> <span class="keyword">throws</span> MQClientException, RemotingException, MQBrokerException, InterruptedException </span>&#123;</span><br><span class="line">   <span class="comment">// 跟据队列对应broker地址</span></span><br><span class="line">   String brokerAddr = <span class="keyword">this</span>.mQClientFactory.findBrokerAddressInPublish(mq.getBrokerName());</span><br><span class="line">   <span class="keyword">if</span> (<span class="keyword">null</span> == brokerAddr) &#123;</span><br><span class="line">       tryToFindTopicPublishInfo(mq.getTopic());</span><br><span class="line">       brokerAddr = <span class="keyword">this</span>.mQClientFactory.findBrokerAddressInPublish(mq.getBrokerName());</span><br><span class="line">   &#125;</span><br><span class="line">   SendMessageContext context = <span class="keyword">null</span>;</span><br><span class="line">   <span class="keyword">if</span> (brokerAddr != <span class="keyword">null</span>) &#123;</span><br><span class="line">       <span class="comment">// 是否使用VIP通道，否认使用，之前在介绍broker的时候介绍过broker会起两个server，端口号-2 的server为fast server</span></span><br><span class="line">       brokerAddr = MixAll.brokerVIPChannel(<span class="keyword">this</span>.defaultMQProducer.isSendMessageWithVIPChannel(), brokerAddr);</span><br><span class="line">       <span class="keyword">try</span> &#123;</span><br><span class="line">           <span class="comment">// 生成msg唯一ID 时间差 + counter</span></span><br><span class="line">           MessageClientIDSetter.setUniqID(msg);</span><br><span class="line">           <span class="keyword">int</span> sysFlag = <span class="number">0</span>;</span><br><span class="line">           <span class="comment">// 消息压缩</span></span><br><span class="line">           <span class="keyword">if</span> (<span class="keyword">this</span>.tryToCompressMessage(msg)) &#123;</span><br><span class="line">               sysFlag |= MessageSysFlag.COMPRESSED_FLAG;</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="comment">// 事务</span></span><br><span class="line">           <span class="keyword">final</span> String tranMsg = msg.getProperty(MessageConst.PROPERTY_TRANSACTION_PREPARED);</span><br><span class="line">           <span class="keyword">if</span> (tranMsg != <span class="keyword">null</span> &amp;&amp; Boolean.parseBoolean(tranMsg)) &#123;</span><br><span class="line">               sysFlag |= MessageSysFlag.TRANSACTION_PREPARED_TYPE;</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="comment">// ...发送前校验逻辑</span></span><br><span class="line">           <span class="comment">// 构建发送消息请求</span></span><br><span class="line">           SendMessageRequestHeader requestHeader = <span class="keyword">new</span> SendMessageRequestHeader();</span><br><span class="line">           requestHeader.setProducerGroup(<span class="keyword">this</span>.defaultMQProducer.getProducerGroup());</span><br><span class="line">           requestHeader.setTopic(msg.getTopic());</span><br><span class="line">           requestHeader.setDefaultTopic(<span class="keyword">this</span>.defaultMQProducer.getCreateTopicKey());</span><br><span class="line">           requestHeader.setDefaultTopicQueueNums(<span class="keyword">this</span>.defaultMQProducer.getDefaultTopicQueueNums());</span><br><span class="line">           requestHeader.setQueueId(mq.getQueueId());</span><br><span class="line">           requestHeader.setSysFlag(sysFlag);</span><br><span class="line">           requestHeader.setBornTimestamp(System.currentTimeMillis());</span><br><span class="line">           requestHeader.setFlag(msg.getFlag());</span><br><span class="line">           requestHeader.setProperties(MessageDecoder.messageProperties2String(msg.getProperties()));</span><br><span class="line">           requestHeader.setReconsumeTimes(<span class="number">0</span>);</span><br><span class="line">           requestHeader.setUnitMode(<span class="keyword">this</span>.isUnitMode());</span><br><span class="line">           <span class="comment">// 消息重发</span></span><br><span class="line">           <span class="keyword">if</span> (requestHeader.getTopic().startsWith(MixAll.RETRY_GROUP_TOPIC_PREFIX)) &#123;</span><br><span class="line">               String reconsumeTimes = MessageAccessor.getReconsumeTime(msg);</span><br><span class="line">               <span class="keyword">if</span> (reconsumeTimes != <span class="keyword">null</span>) &#123;</span><br><span class="line">                   requestHeader.setReconsumeTimes(Integer.valueOf(reconsumeTimes));</span><br><span class="line">                   MessageAccessor.clearProperty(msg, MessageConst.PROPERTY_RECONSUME_TIME);</span><br><span class="line">               &#125;</span><br><span class="line">               String maxReconsumeTimes = MessageAccessor.getMaxReconsumeTimes(msg);</span><br><span class="line">               <span class="keyword">if</span> (maxReconsumeTimes != <span class="keyword">null</span>) &#123;</span><br><span class="line">                   requestHeader.setMaxReconsumeTimes(Integer.valueOf(maxReconsumeTimes));</span><br><span class="line">                   MessageAccessor.clearProperty(msg, MessageConst.PROPERTY_MAX_RECONSUME_TIMES);</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="comment">// 发送消息</span></span><br><span class="line">           SendResult sendResult = <span class="keyword">null</span>;</span><br><span class="line">           <span class="keyword">switch</span> (communicationMode) &#123;</span><br><span class="line">               <span class="keyword">case</span> SYNC:</span><br><span class="line">                    <span class="comment">// 调用MQclient进行发送消息</span></span><br><span class="line">                   sendResult = <span class="keyword">this</span>.mQClientFactory.getMQClientAPIImpl().sendMessage(</span><br><span class="line">                       brokerAddr,</span><br><span class="line">                       mq.getBrokerName(),</span><br><span class="line">                       msg,</span><br><span class="line">                       requestHeader,</span><br><span class="line">                       timeout,</span><br><span class="line">                       communicationMode,</span><br><span class="line">                       context,</span><br><span class="line">                       <span class="keyword">this</span>);</span><br><span class="line">                   <span class="keyword">break</span>;</span><br><span class="line">               <span class="keyword">case</span> <span class="comment">//...</span></span><br><span class="line">           &#125;</span><br><span class="line">           <span class="comment">// 返回发送结果</span></span><br><span class="line">           <span class="keyword">return</span> sendResult;</span><br><span class="line">       &#125; <span class="keyword">catch</span> <span class="comment">//...</span></span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="接收"><a href="#接收" class="headerlink" title="接收"></a>接收</h2><p><code>Broker</code>的fast Server接收到消息后，交给<code>SendMessageProcessor</code>进行处理。以下为其主要核心逻辑：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> RemotingCommand <span class="title">sendMessage</span><span class="params">(<span class="keyword">final</span> ChannelHandlerContext ctx, <span class="keyword">final</span> RemotingCommand request, <span class="keyword">final</span> SendMessageContext sendMessageContext, <span class="keyword">final</span> SendMessageRequestHeader requestHeader)</span> <span class="keyword">throws</span> RemotingCommandException </span>&#123;</span><br><span class="line">   <span class="comment">// 初始化响应</span></span><br><span class="line">   <span class="keyword">final</span> RemotingCommand response = RemotingCommand.createResponseCommand(SendMessageResponseHeader<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">   <span class="keyword">final</span> SendMessageResponseHeader responseHeader = (SendMessageResponseHeader) response.readCustomHeader();</span><br><span class="line">   response.setOpaque(request.getOpaque());</span><br><span class="line">   response.addExtField(MessageConst.PROPERTY_MSG_REGION, <span class="keyword">this</span>.brokerController.getBrokerConfig().getRegionId());</span><br><span class="line">   response.addExtField(MessageConst.PROPERTY_TRACE_SWITCH, String.valueOf(<span class="keyword">this</span>.brokerController.getBrokerConfig().isTraceOn()));</span><br><span class="line">   <span class="keyword">final</span> <span class="keyword">byte</span>[] body = request.getBody();</span><br><span class="line">   <span class="comment">//.... 校验</span></span><br><span class="line">   <span class="comment">// 如果队列小于0，从可用队列随机选择</span></span><br><span class="line">   <span class="keyword">int</span> queueIdInt = requestHeader.getQueueId();</span><br><span class="line">   TopicConfig topicConfig = <span class="keyword">this</span>.brokerController.getTopicConfigManager().selectTopicConfig(requestHeader.getTopic());</span><br><span class="line">   <span class="keyword">if</span> (queueIdInt &lt; <span class="number">0</span>) &#123;</span><br><span class="line">       queueIdInt = Math.abs(<span class="keyword">this</span>.random.nextInt() % <span class="number">99999999</span>) % topicConfig.getWriteQueueNums();</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">int</span> sysFlag = requestHeader.getSysFlag();</span><br><span class="line">   <span class="keyword">if</span> (TopicFilterType.MULTI_TAG == topicConfig.getTopicFilterType()) &#123;</span><br><span class="line">       sysFlag |= MessageSysFlag.MULTI_TAGS_FLAG;</span><br><span class="line">   &#125;</span><br><span class="line">   String newTopic = requestHeader.getTopic();</span><br><span class="line">   <span class="comment">//重试消息</span></span><br><span class="line">   <span class="keyword">if</span> (<span class="keyword">null</span> != newTopic &amp;&amp; newTopic.startsWith(MixAll.RETRY_GROUP_TOPIC_PREFIX)) &#123;</span><br><span class="line">       String groupName = newTopic.substring(MixAll.RETRY_GROUP_TOPIC_PREFIX.length());</span><br><span class="line">       SubscriptionGroupConfig subscriptionGroupConfig =</span><br><span class="line">           <span class="keyword">this</span>.brokerController.getSubscriptionGroupManager().findSubscriptionGroupConfig(groupName);</span><br><span class="line">       <span class="keyword">if</span> (<span class="keyword">null</span> == subscriptionGroupConfig) &#123;</span><br><span class="line">           response.setCode(ResponseCode.SUBSCRIPTION_GROUP_NOT_EXIST);</span><br><span class="line">           response.setRemark(<span class="string">"subscription group not exist, "</span> + groupName + <span class="string">" "</span> + FAQUrl.suggestTodo(FAQUrl.SUBSCRIPTION_GROUP_NOT_EXIST));</span><br><span class="line">           <span class="keyword">return</span> response;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">int</span> maxReconsumeTimes = subscriptionGroupConfig.getRetryMaxTimes();</span><br><span class="line">       <span class="keyword">if</span> (request.getVersion() &gt;= MQVersion.Version.V3_4_9.ordinal()) &#123;</span><br><span class="line">           maxReconsumeTimes = requestHeader.getMaxReconsumeTimes();</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">//超过消费最大次数则放入死信队列中</span></span><br><span class="line">       <span class="keyword">int</span> reconsumeTimes = requestHeader.getReconsumeTimes() == <span class="keyword">null</span> ? <span class="number">0</span> : requestHeader.getReconsumeTimes();</span><br><span class="line">       <span class="keyword">if</span> (reconsumeTimes &gt;= maxReconsumeTimes) &#123;</span><br><span class="line">           newTopic = MixAll.getDLQTopic(groupName);</span><br><span class="line">           queueIdInt = Math.abs(<span class="keyword">this</span>.random.nextInt() % <span class="number">99999999</span>) % DLQ_NUMS_PER_GROUP;</span><br><span class="line">           topicConfig = <span class="keyword">this</span>.brokerController.getTopicConfigManager().createTopicInSendMessageBackMethod(newTopic, DLQ_NUMS_PER_GROUP, PermName.PERM_WRITE, <span class="number">0</span>);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">// 创建MessageExtBrokerInner</span></span><br><span class="line">   MessageExtBrokerInner msgInner = <span class="keyword">new</span> MessageExtBrokerInner();</span><br><span class="line">   msgInner.setTopic(newTopic);</span><br><span class="line">   msgInner.setBody(body);</span><br><span class="line">   msgInner.setFlag(requestHeader.getFlag());</span><br><span class="line">   MessageAccessor.setProperties(msgInner, MessageDecoder.string2messageProperties(requestHeader.getProperties()));</span><br><span class="line">   msgInner.setPropertiesString(requestHeader.getProperties());</span><br><span class="line">   msgInner.setTagsCode(MessageExtBrokerInner.tagsString2tagsCode(topicConfig.getTopicFilterType(), msgInner.getTags()));</span><br><span class="line">   msgInner.setQueueId(queueIdInt);</span><br><span class="line">   msgInner.setSysFlag(sysFlag);</span><br><span class="line">   msgInner.setBornTimestamp(requestHeader.getBornTimestamp());</span><br><span class="line">   msgInner.setBornHost(ctx.channel().remoteAddress());</span><br><span class="line">   msgInner.setStoreHost(<span class="keyword">this</span>.getStoreHost());</span><br><span class="line">   msgInner.setReconsumeTimes(requestHeader.getReconsumeTimes() == <span class="keyword">null</span> ? <span class="number">0</span> : requestHeader.getReconsumeTimes());</span><br><span class="line"></span><br><span class="line">   <span class="comment">// 校验是否不允许发送事务消息</span></span><br><span class="line">   <span class="keyword">if</span> (<span class="keyword">this</span>.brokerController.getBrokerConfig().isRejectTransactionMessage()) &#123;</span><br><span class="line">       String traFlag = msgInner.getProperty(MessageConst.PROPERTY_TRANSACTION_PREPARED);</span><br><span class="line">       <span class="keyword">if</span> (traFlag != <span class="keyword">null</span>) &#123;</span><br><span class="line">           response.setCode(ResponseCode.NO_PERMISSION);</span><br><span class="line">           response.setRemark(</span><br><span class="line">               <span class="string">"the broker["</span> + <span class="keyword">this</span>.brokerController.getBrokerConfig().getBrokerIP1() + <span class="string">"] sending transaction message is forbidden"</span>);</span><br><span class="line">           <span class="keyword">return</span> response;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">// 调用MessageStore存储消息</span></span><br><span class="line">   PutMessageResult putMessageResult = <span class="keyword">this</span>.brokerController.getMessageStore().putMessage(msgInner);</span><br><span class="line">   <span class="comment">//... 统计与响应</span></span><br><span class="line">   <span class="keyword">return</span> response;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/03/21/mq/5.rocketmq-%E6%B6%88%E6%81%AF%E5%8F%91%E9%80%81&%E5%AD%98%E5%82%A8/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
 
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
+  
+
   
   
   
 
-        
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2018/03/20/mq/3.rocketmq-%E5%AD%98%E5%82%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
       <meta itemprop="name" content="Zamperini">
       <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Zamperini">
     </span>
+
+    
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/03/20/mq/3.rocketmq-%E5%AD%98%E5%82%A8/" class="post-title-link" itemprop="url">RocketMQ 存储</a>
-        </h1>
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/03/20/mq/3.rocketmq-%E5%AD%98%E5%82%A8/" itemprop="url">RocketMQ 存储</a></h1>
+        
 
         <div class="post-meta">
-            <span class="post-meta-item">
+          <span class="post-time">
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-20T00:00:00+08:00">2018-03-20</time>
+            
 
-              <time title="创建时间：2018-03-20 00:00:00" itemprop="dateCreated datePublished" datetime="2018-03-20T00:00:00+08:00">2018-03-20</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-22 12:08:53" itemprop="dateModified" datetime="2020-02-22T12:08:53+08:00">2020-02-22</time>
-              </span>
-            <span class="post-meta-item">
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/rocketmq/" itemprop="url" rel="index">
-                    <span itemprop="name">rocketmq</span>
-                  </a>
-                </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/rocketmq/" itemprop="url" rel="index"><span itemprop="name">rocketmq</span></a></span>
+
+                
+                
+              
             </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
 
           
 
         </div>
       </header>
+    
 
     
     
@@ -325,6 +362,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
+      
+
+      
+        
           <h1 id="4-store"><a href="#4-store" class="headerlink" title="4. store"></a>4. store</h1><p>[TOC]</p>
 <p>存储是<code>RocketMQ</code>中至关重要的一部分。<br><code>DefaultMessageStore</code>是<code>RocketMQ</code>中用于存储消息的入口。一条消息存储过程大致如图所示：<br><img src="/media/15262276039412.jpg" alt><br>首先通过调用<code>CommitLog.putMessage</code>方法将消息追加到<code>MappedFile</code>文件中，然后再以异步的形式进行构建<code>ConsumeQueue</code>，如果用户设置了Key则同时进行构建<code>Index</code>。</p>
 <p>我们将从<code>DefaultMessageStore</code>的初始化和其追加消息来分析其工作原理。</p>
@@ -336,80 +377,136 @@
 
 <p>初始化完成员变量后，会执行一次<code>load()</code>方法。判断是否有历史文件，如果有则加载历史文件。</p>
           <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/03/20/mq/3.rocketmq-%E5%AD%98%E5%82%A8/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/03/20/mq/3.rocketmq-%E5%AD%98%E5%82%A8/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
     </div>
+    
+    
+    
 
     
+
     
+
     
-      <footer class="post-footer">
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
         <div class="post-eof"></div>
-      </footer>
+      
+    </footer>
+  </div>
+  
+  
+  
   </article>
+
+
+    
+      
+
+  
+
   
   
   
 
-        
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2018/03/19/database/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
       <meta itemprop="name" content="Zamperini">
       <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Zamperini">
     </span>
+
+    
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/03/19/database/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" class="post-title-link" itemprop="url">分布式事务</a>
-        </h1>
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/03/19/database/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" itemprop="url">分布式事务</a></h1>
+        
 
         <div class="post-meta">
-            <span class="post-meta-item">
+          <span class="post-time">
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-19T15:10:13+08:00">2018-03-19</time>
+            
 
-              <time title="创建时间：2018-03-19 15:10:13" itemprop="dateCreated datePublished" datetime="2018-03-19T15:10:13+08:00">2018-03-19</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-03-03 21:57:07" itemprop="dateModified" datetime="2020-03-03T21:57:07+08:00">2020-03-03</time>
-              </span>
-            <span class="post-meta-item">
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/database/" itemprop="url" rel="index">
-                    <span itemprop="name">database</span>
-                  </a>
-                </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/database/" itemprop="url" rel="index"><span itemprop="name">database</span></a></span>
+
+                
+                
+              
             </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
 
           
 
         </div>
       </header>
+    
 
     
     
@@ -417,6 +514,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
+      
+
+      
+        
           <h1 id="分布式事务"><a href="#分布式事务" class="headerlink" title="分布式事务"></a>分布式事务</h1><p>[TOC]</p>
 <h2 id="事务"><a href="#事务" class="headerlink" title="事务"></a><strong>事务</strong></h2><blockquote>
 </blockquote>
@@ -429,80 +530,136 @@
 </blockquote>
 <a id="more"></a>
           <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/03/19/database/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/03/19/database/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
     </div>
+    
+    
+    
 
     
+
     
+
     
-      <footer class="post-footer">
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
         <div class="post-eof"></div>
-      </footer>
+      
+    </footer>
+  </div>
+  
+  
+  
   </article>
+
+
+    
+      
+
+  
+
   
   
   
 
-        
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2018/03/19/mq/4.rocketmq-%E5%88%9D%E5%A7%8B%E5%8C%96/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
       <meta itemprop="name" content="Zamperini">
       <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Zamperini">
     </span>
+
+    
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/03/19/mq/4.rocketmq-%E5%88%9D%E5%A7%8B%E5%8C%96/" class="post-title-link" itemprop="url">RocketMQ 初始化</a>
-        </h1>
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/03/19/mq/4.rocketmq-%E5%88%9D%E5%A7%8B%E5%8C%96/" itemprop="url">RocketMQ 初始化</a></h1>
+        
 
         <div class="post-meta">
-            <span class="post-meta-item">
+          <span class="post-time">
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-19T00:00:00+08:00">2018-03-19</time>
+            
 
-              <time title="创建时间：2018-03-19 00:00:00" itemprop="dateCreated datePublished" datetime="2018-03-19T00:00:00+08:00">2018-03-19</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-22 12:08:45" itemprop="dateModified" datetime="2020-02-22T12:08:45+08:00">2020-02-22</time>
-              </span>
-            <span class="post-meta-item">
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/rocketmq/" itemprop="url" rel="index">
-                    <span itemprop="name">rocketmq</span>
-                  </a>
-                </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/rocketmq/" itemprop="url" rel="index"><span itemprop="name">rocketmq</span></a></span>
+
+                
+                
+              
             </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
 
           
 
         </div>
       </header>
+    
 
     
     
@@ -510,6 +667,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
+      
+
+      
+        
           <h1 id="3-初始化"><a href="#3-初始化" class="headerlink" title="3. 初始化"></a>3. 初始化</h1><p>[TOC]</p>
 <p><code>NameServer</code>和<code>Broker</code>是<code>RocetMQ</code>中独立部署的集群。<br>下面我们将来分别介绍他们。</p>
 <h2 id="NameServer"><a href="#NameServer" class="headerlink" title="NameServer"></a>NameServer</h2><p><code>NameServer</code>管理<code>Broker</code>集群的注册信息并提供心跳来检测他们是否可用，持有关于Broker集群和队列的全部路由信息。接下来详细了解其具体功能和实现。</p>
@@ -518,80 +679,136 @@
 <p><code>NameServer</code>的启动过程如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> NamesrvController controller = <span class="keyword">new</span> NamesrvController(namesrvConfig, nettyServerConfig);</span><br><span class="line"><span class="comment">//初始化服务</span></span><br><span class="line"><span class="keyword">boolean</span> initResult = controller.initialize();</span><br><span class="line"><span class="keyword">if</span> (!initResult) &#123;</span><br><span class="line"> controller.shutdown();</span><br><span class="line"> System.exit(-<span class="number">3</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//启动Socekt链接，对外提供服务</span></span><br><span class="line">controller.start();</span><br></pre></td></tr></table></figure>
           <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/03/19/mq/4.rocketmq-%E5%88%9D%E5%A7%8B%E5%8C%96/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/03/19/mq/4.rocketmq-%E5%88%9D%E5%A7%8B%E5%8C%96/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
     </div>
+    
+    
+    
 
     
+
     
+
     
-      <footer class="post-footer">
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
         <div class="post-eof"></div>
-      </footer>
+      
+    </footer>
+  </div>
+  
+  
+  
   </article>
+
+
+    
+      
+
+  
+
   
   
   
 
-        
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2018/03/18/mq/2.rocketmq-%E9%80%9A%E4%BF%A1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avator.png">
       <meta itemprop="name" content="Zamperini">
       <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Zamperini">
     </span>
+
+    
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/03/18/mq/2.rocketmq-%E9%80%9A%E4%BF%A1/" class="post-title-link" itemprop="url">RocketMQ 通信</a>
-        </h1>
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/03/18/mq/2.rocketmq-%E9%80%9A%E4%BF%A1/" itemprop="url">RocketMQ 通信</a></h1>
+        
 
         <div class="post-meta">
-            <span class="post-meta-item">
+          <span class="post-time">
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-calendar-o"></i>
               </span>
-              <span class="post-meta-item-text">发表于</span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-18T00:00:00+08:00">2018-03-18</time>
+            
 
-              <time title="创建时间：2018-03-18 00:00:00" itemprop="dateCreated datePublished" datetime="2018-03-18T00:00:00+08:00">2018-03-18</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-13 20:09:16" itemprop="dateModified" datetime="2020-02-13T20:09:16+08:00">2020-02-13</time>
-              </span>
-            <span class="post-meta-item">
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/rocketmq/" itemprop="url" rel="index">
-                    <span itemprop="name">rocketmq</span>
-                  </a>
-                </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/rocketmq/" itemprop="url" rel="index"><span itemprop="name">rocketmq</span></a></span>
+
+                
+                
+              
             </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
 
           
 
         </div>
       </header>
+    
 
     
     
@@ -599,6 +816,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
+      
+
+      
+        
           <h1 id="2-remoting"><a href="#2-remoting" class="headerlink" title="2. remoting"></a>2. remoting</h1><p>[TOC]</p>
 <p><code>RocketMQ</code>的通讯模块实现的比较简单，不像<code>Dubbo</code>那样给用户提供多种可选的方式，只有一种基于通讯框架<code>Netty</code>的实现方式。<br>其最主要的两个类是<code>NettyRemotingServer</code>、<code>NettyRemotingClient</code>。以下为其类图：<br><img src="/media/15261996364642.jpg" alt></p>
 <p>首先我们来分析<code>Server</code>部分，再看<code>Client</code>部分。</p>
@@ -606,32 +827,204 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">NettyRemotingServer</span><span class="params">(<span class="keyword">final</span> NettyServerConfig nettyServerConfig, <span class="keyword">final</span> ChannelEventListener channelEventListener)</span> </span>&#123;</span><br><span class="line">   <span class="comment">// 限流，设置信号量，设置同一时间单向请求和异步请求最大的请求数。</span></span><br><span class="line">   <span class="keyword">super</span>(nettyServerConfig.getServerOnewaySemaphoreValue(), nettyServerConfig.getServerAsyncSemaphoreValue());</span><br><span class="line">   <span class="keyword">this</span>.serverBootstrap = <span class="keyword">new</span> ServerBootstrap();</span><br><span class="line">   <span class="keyword">this</span>.nettyServerConfig = nettyServerConfig;</span><br><span class="line">   <span class="comment">// 设置通道事件监听器</span></span><br><span class="line">   <span class="keyword">this</span>.channelEventListener = channelEventListener;</span><br><span class="line">   <span class="keyword">int</span> publicThreadNums = nettyServerConfig.getServerCallbackExecutorThreads();</span><br><span class="line">   <span class="keyword">if</span> (publicThreadNums &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">       publicThreadNums = <span class="number">4</span>;</span><br><span class="line">   &#125;</span><br><span class="line">    <span class="comment">// 通用的处理线程池实例化，当业务方没有设置processor的线程池时，使用共用的线程池publiceExecutor</span></span><br><span class="line">   <span class="keyword">this</span>.publicExecutor = Executors.newFixedThreadPool(publicThreadNums, <span class="keyword">new</span> ThreadFactory() &#123;</span><br><span class="line">       <span class="keyword">private</span> AtomicInteger threadIndex = <span class="keyword">new</span> AtomicInteger(<span class="number">0</span>);</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> Thread <span class="title">newThread</span><span class="params">(Runnable r)</span> </span>&#123;</span><br><span class="line">           <span class="keyword">return</span> <span class="keyword">new</span> Thread(r, <span class="string">"NettyServerPublicExecutor_"</span> + <span class="keyword">this</span>.threadIndex.incrementAndGet());</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;);</span><br><span class="line">   <span class="comment">// 设置Netty Acceptor线程池大小</span></span><br><span class="line">   <span class="keyword">this</span>.eventLoopGroupBoss = <span class="keyword">new</span> NioEventLoopGroup(<span class="number">1</span>, <span class="keyword">new</span> ThreadFactory() &#123;</span><br><span class="line">       <span class="keyword">private</span> AtomicInteger threadIndex = <span class="keyword">new</span> AtomicInteger(<span class="number">0</span>);</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> Thread <span class="title">newThread</span><span class="params">(Runnable r)</span> </span>&#123;</span><br><span class="line">           <span class="keyword">return</span> <span class="keyword">new</span> Thread(r, String.format(<span class="string">"NettyBoss_%d"</span>, <span class="keyword">this</span>.threadIndex.incrementAndGet()));</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;);</span><br><span class="line">    <span class="comment">// 设置Netty Selector线程池大小，此处判断若是linux平台，使用Epoll线程池，否则使用</span></span><br><span class="line">   <span class="keyword">if</span> (RemotingUtil.isLinuxPlatform() <span class="comment">//</span></span><br><span class="line">       &amp;&amp; nettyServerConfig.isUseEpollNativeSelector()) &#123;</span><br><span class="line">       <span class="keyword">this</span>.eventLoopGroupSelector = <span class="keyword">new</span> EpollEventLoopGroup(nettyServerConfig.getServerSelectorThreads(), <span class="keyword">new</span> ThreadFactory() &#123;</span><br><span class="line">           <span class="keyword">private</span> AtomicInteger threadIndex = <span class="keyword">new</span> AtomicInteger(<span class="number">0</span>);</span><br><span class="line">           <span class="keyword">private</span> <span class="keyword">int</span> threadTotal = nettyServerConfig.getServerSelectorThreads();</span><br><span class="line">           <span class="meta">@Override</span></span><br><span class="line">           <span class="function"><span class="keyword">public</span> Thread <span class="title">newThread</span><span class="params">(Runnable r)</span> </span>&#123;</span><br><span class="line">               <span class="keyword">return</span> <span class="keyword">new</span> Thread(r, String.format(<span class="string">"NettyServerEPOLLSelector_%d_%d"</span>, threadTotal, <span class="keyword">this</span>.threadIndex.incrementAndGet()));</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;);</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">   <span class="comment">//否则使用一般的</span></span><br><span class="line">       <span class="keyword">this</span>.eventLoopGroupSelector = <span class="keyword">new</span> NioEventLoopGroup(nettyServerConfig.getServerSelectorThreads(), <span class="keyword">new</span> ThreadFactory() &#123;</span><br><span class="line">           <span class="keyword">private</span> AtomicInteger threadIndex = <span class="keyword">new</span> AtomicInteger(<span class="number">0</span>);</span><br><span class="line">           <span class="keyword">private</span> <span class="keyword">int</span> threadTotal = nettyServerConfig.getServerSelectorThreads();</span><br><span class="line">           <span class="meta">@Override</span></span><br><span class="line">           <span class="function"><span class="keyword">public</span> Thread <span class="title">newThread</span><span class="params">(Runnable r)</span> </span>&#123;</span><br><span class="line">               <span class="keyword">return</span> <span class="keyword">new</span> Thread(r, String.format(<span class="string">"NettyServerNIOSelector_%d_%d"</span>, threadTotal, <span class="keyword">this</span>.threadIndex.incrementAndGet()));</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h4 id="2-启动"><a href="#2-启动" class="headerlink" title="2. 启动"></a>2. 启动</h4><p>调用<code>start()</code>方法，启动<code>Server</code>。监听端口，开启服务，并开启后台线程，扫描超时的响应并作回调。</p>
           <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/03/18/mq/2.rocketmq-%E9%80%9A%E4%BF%A1/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/03/18/mq/2.rocketmq-%E9%80%9A%E4%BF%A1/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
           <!--/noindex-->
         
       
     </div>
+    
+    
+    
 
     
+
     
+
     
-      <footer class="post-footer">
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
         <div class="post-eof"></div>
-      </footer>
+      
+    </footer>
+  </div>
+  
+  
+  
   </article>
+
+
+    
+      
+
+  
+
   
   
   
 
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2018/03/17/mq/1.rocketmq-%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/03/17/mq/1.rocketmq-%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84/" itemprop="url">RocketMQ 整体架构</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-17T00:00:00+08:00">2018-03-17</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/rocketmq/" itemprop="url" rel="index"><span itemprop="name">rocketmq</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="1-RocketMQ-整体架构"><a href="#1-RocketMQ-整体架构" class="headerlink" title="1. RocketMQ 整体架构"></a>1. RocketMQ 整体架构</h1><p>[TOC]</p>
+<h2 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h2><p><code>RocketMQ</code>主要由四部分组成，<code>NameServer</code>、<code>Broker</code>、<code>Producer</code>、<code>Consumer</code>。其中<code>NameServer</code>、<code>Broker</code>是独立部署集群，而<code>Producer</code>、<code>Consumer</code>一般是以SDK的形式提供给业务方，嵌在业务集群内。另外还有一个<code>FilterSrv</code>，可选择性使用，用于消费者自定义消息过滤。<br><img src="/media/15259116098234.jpg" alt></p>
+<h3 id="NameServer"><a href="#NameServer" class="headerlink" title="NameServer"></a><strong>NameServer</strong></h3><p>类似于服务治理框架里的注册中心。管理<code>Broker</code>集群的注册信息并提供心跳来检测他们是否可用，持有关于broker集群和队列的全部路由信息；</p>
+<h3 id="Broker"><a href="#Broker" class="headerlink" title="Broker"></a><strong>Broker</strong></h3><p>负责消息的存储传递，客户端查询并保证高可用。此外，代理提供了灾难恢复、丰富的度量统计和警报机制。主要功能如下；<br><img src="/media/15260235205668.jpg" alt="set up-w600"></p>
+<ol>
+<li><code>Remoting Module</code>:服务入口，接收来自客户端的请求并转发;</li>
+<li><code>Client Manager</code>:客户端管理，管理客户端（生产者/消费者）还有维护消费者主题订阅;</li>
+<li><code>Store Service</code>:信息存储和查询的api服务;</li>
+<li><code>HA Service</code>: 提供主从broker的数据同步;</li>
+<li><code>Index Service</code>:为消息建立索引提供消息快速查询。</li>
+</ol>
+<h3 id="Producer"><a href="#Producer" class="headerlink" title="Producer"></a><strong>Producer</strong></h3>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/03/17/mq/1.rocketmq-%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
   </div>
+  
+  
+  
+  </article>
+
+
+    
+  </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/7/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/9/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/7/">&lt;i class&#x3D;&quot;fa fa-angle-left&quot;&gt;&lt;&#x2F;i&gt;</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/9/">&lt;i class&#x3D;&quot;fa fa-angle-right&quot;&gt;&lt;&#x2F;i&gt;</a>
   </nav>
 
 
@@ -639,126 +1032,227 @@
           </div>
           
 
-<script>
-  window.addEventListener('tabs:register', () => {
-    let activeClass = CONFIG.comments.activeClass;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
         </div>
+        
           
   
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
   </div>
 
-  <aside class="sidebar">
+  <aside id="sidebar" class="sidebar">
+    
     <div class="sidebar-inner">
 
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
+      
 
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-      </div>
-      <!--/noindex-->
+      
 
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="Zamperini"
-      src="/images/avator.png">
-  <p class="site-author-name" itemprop="name">Zamperini</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
-        
-          <span class="site-state-item-count">56</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-categories">
-            <a href="/categories/">
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avator.png"
+                alt="Zamperini" />
+            
+              <p class="site-author-name" itemprop="name">Zamperini</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
           
-        <span class="site-state-item-count">11</span>
-        <span class="site-state-item-name">分类</span></a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
           
-        <span class="site-state-item-count">23</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="https://github.com/DorgenJones" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;DorgenJones" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="mailto:dblpfilter@163.com" title="E-Mail → mailto:dblpfilter@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="https://weibo.com/u/1938368215" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;1938368215" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
-      </span>
-  </div>
 
+          
 
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/DorgenJones" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:dblpfilter@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/u/1938368215" target="_blank" title="Weibo">
+                      
+                        <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                  </span>
+                
+            </div>
+          
 
-      </div>
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+
+      
 
     </div>
   </aside>
-  <div id="sidebar-dimmer"></div>
 
 
+        
       </div>
     </main>
 
-    <footer class="footer">
+    <footer id="footer" class="footer">
       <div class="footer-inner">
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2020</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">Zamperini</span>
+
+  
+
+  
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.2.0
-  </div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
   <span class="post-meta-divider">|</span>
-  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.7.1
-  </div>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.0.3</div>
+
+
+
 
         
 
@@ -768,25 +1262,110 @@
 
 
 
-
+        
       </div>
     </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
   </div>
 
   
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
 
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/pisces.js"></script>
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
 
 
-<script src="/js/next-boot.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.3"></script>
+
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.3"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
 
 
 
@@ -802,10 +1381,26 @@
 
 
 
+  
 
 
 
 
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
 
   
 

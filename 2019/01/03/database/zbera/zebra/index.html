@@ -130,7 +130,7 @@
 <meta property="og:image" content="https://dorgenjones.github.io/media/15119598460937.jpg">
 <meta property="og:image" content="https://dorgenjones.github.io/media/15119747197151.jpg">
 <meta property="article:published_time" content="2019-01-03T06:51:53.613Z">
-<meta property="article:modified_time" content="2020-02-13T12:12:56.236Z">
+<meta property="article:modified_time" content="2020-03-04T10:55:03.249Z">
 <meta property="article:author" content="Zamperini">
 <meta property="article:tag" content="database">
 <meta property="article:tag" content="zebra">
@@ -396,7 +396,7 @@
 <li>读写分离、分库分表</li>
 <li>支持配置动态修改生效(连接池的配置、用户密码、数据库节点访问路由负载均衡配置)</li>
 <li>CAT全方位监控（SQL执行情况、数据库连接数、端到端监控）</li>
-<li>支持压测(改写表名)、SQL限流、黑白名单、SQL改写、<a href="https://wiki-in.sankuai.com/pages/viewpage.action?pageId=1169090716" target="_blank" rel="noopener">SQL审计</a>(日志审计，SQL安全监控)…</li>
+<li>支持压测(改写表名)、SQL限流、黑白名单、SQL改写、<a href="">SQL审计</a>(日志审计，SQL安全监控)…</li>
 </ol>
 <h2 id="同类产品有哪些，以及比较？"><a href="#同类产品有哪些，以及比较？" class="headerlink" title="同类产品有哪些，以及比较？"></a>同类产品有哪些，以及比较？</h2><table>
 <thead>
@@ -423,7 +423,7 @@
 <p><strong>基于代理：</strong><br><img src="/media/15117932686716.jpg" alt=""></p>
 <p><strong>基于客户端：</strong><br><img src="/media/15117932921029.jpg" alt="set up-w500"></p>
 <blockquote>
-<p>公司目前：北京侧 <code>Altas</code>居多，也有<code>Atlas</code>与<code>zebra</code>搭配使用（使用其压测处理、SQL监控特性），上海侧统一使用<code>zebra</code>。趋势是转向<strong>Zebra</strong>。<a href="https://wiki-ini.sankuai.com/pages/viewpage.action?pageId=686244717" target="_blank" rel="noopener">Atlas与Zebra的对比</a>。<strong>zebra秒杀Atlas?</strong><br><a href="https://wiki-ini.sankuai.com/pages/viewpage.action?pageId=1114400138" target="_blank" rel="noopener">数据库中间件比较</a></p>
+<p>公司目前：北京侧 <code>Altas</code>居多，也有<code>Atlas</code>与<code>zebra</code>搭配使用（使用其压测处理、SQL监控特性），上海侧统一使用<code>zebra</code>。趋势是转向<strong>Zebra</strong>。<a href="">Atlas与Zebra的对比</a>。<strong>zebra秒杀Atlas?</strong><br><a href="">数据库中间件比较</a></p>
 </blockquote>
 <p><strong><em>为什么美团一开始没有选择基于sdk的方式，而是基于代理的方式来做的？</em></strong></p>
 <h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p><img src="/media/15117945912786.jpg" alt=""></p>
@@ -437,7 +437,7 @@
 <blockquote>
 <p>MHA（Master High Availability）是作为MySQL高可用环境下，操作故障切换、主从提升的一套解决方案。MHA（Master High Availability）目前在MySQL高可用方面是一个相对成熟的解决方案。能做到30内完成故障切换。 <a href="http://ronaldbradford.com/#introduction" target="_blank" rel="noopener">官网</a>。<br>PS: <strong>Atlas</strong>维护主的高可用性也是MHA，且和Zebra是同一个MHA。</p>
 </blockquote>
-<h2 id="高可用"><a href="#高可用" class="headerlink" title="高可用"></a>高可用</h2><h3 id="主库的高可用"><a href="#主库的高可用" class="headerlink" title="主库的高可用"></a>主库的高可用</h3><p>利用MHA进行master节点的可用性监控，在发生故障，master节点不可用时，<strong>MHA进行mysql层的主从切换</strong>，切换成功后通知zebra新master节点的IP，由zebra客户端负责应用访问层的切换。<a href="https://wiki-in.sankuai.com/pages/viewpage.action?pageId=614561285" target="_blank" rel="noopener">官方文档</a><br>切换流程如下：</p>
+<h2 id="高可用"><a href="#高可用" class="headerlink" title="高可用"></a>高可用</h2><h3 id="主库的高可用"><a href="#主库的高可用" class="headerlink" title="主库的高可用"></a>主库的高可用</h3><p>利用MHA进行master节点的可用性监控，在发生故障，master节点不可用时，<strong>MHA进行mysql层的主从切换</strong>，切换成功后通知zebra新master节点的IP，由zebra客户端负责应用访问层的切换。<a href="">官方文档</a><br>切换流程如下：</p>
 <p><img src="/media/15117954829456.jpg" alt=""></p>
 <ol>
 <li>MHA对MySQL集群进行监控管理</li>
@@ -475,8 +475,8 @@
 <p><img src="/media/15120563275340.jpg" alt=""></p>
 <p><img src="/media/15120563707402.jpg" alt=""></p>
 <p><img src="/media/15120564127233.jpg" alt=""></p>
-<p><strong>读写分离策略：</strong> <a href="https://wiki-in.sankuai.com/pages/viewpage.action?pageId=735464033" target="_blank" rel="noopener">官方文档</a>：<br><img src="/media/15118644696383.jpg" alt="set up-w460"></p>
-<p><strong>路由策略：</strong> <a href="https://wiki-in.sankuai.com/pages/viewpage.action?pageId=943490395" target="_blank" rel="noopener">官方文档</a>，见代码片段<br><img src="/media/15120566448649.jpg" alt="set up-w500"></p>
+<p><strong>读写分离策略：</strong> <a href="">官方文档</a>：<br><img src="/media/15118644696383.jpg" alt="set up-w460"></p>
+<p><strong>路由策略：</strong> <a href="">官方文档</a>，见代码片段<br><img src="/media/15120566448649.jpg" alt="set up-w500"></p>
 <h3 id="ShardDataSource"><a href="#ShardDataSource" class="headerlink" title="ShardDataSource"></a>ShardDataSource</h3><p><code>ShardDataSource</code>的职责是支持<strong>分库分表路由</strong>，除此之外还有并发执行等。<br><img src="/media/15118830559654.jpg" alt="set up-w600"></p>
 <h4 id="分片规则："><a href="#分片规则：" class="headerlink" title="分片规则："></a>分片规则：</h4><p>利用脚本语言的灵活性，支持任意维度的分片：支持HASH、时间等，同时也可以使用Groovy内置的函数</p>
 <p>示例脚本：</p>
@@ -492,7 +492,7 @@
 <li>在META-INF中添加一个<code>zebra-filter.properties</code>中记录需要加入到<code>Filter链</code>中的自定义<code>Filter</code>:</li>
 </ol>
 <figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">zebra.filter.mtrace</span>=<span class="string">com.meituan.mtrace.zebra.filter.MtraceFilter</span></span><br></pre></td></tr></table></figure>
-<h2 id="zebra-dao"><a href="#zebra-dao" class="headerlink" title="zebra-dao"></a>zebra-dao</h2><p><strong>zebra-dao</strong>职责是<strong>异步化</strong>和<strong>物理分页</strong>。是在ORM框架<strong>MyBatis</strong>上做的一层封装（<a href="https://wiki-in.sankuai.com/pages/viewpage.action?pageId=507134914" target="_blank" rel="noopener">接入指南</a>）。</p>
+<h2 id="zebra-dao"><a href="#zebra-dao" class="headerlink" title="zebra-dao"></a>zebra-dao</h2><p><strong>zebra-dao</strong>职责是<strong>异步化</strong>和<strong>物理分页</strong>。是在ORM框架<strong>MyBatis</strong>上做的一层封装。</p>
 <p><strong>异步化：</strong><br><code>MyBatis</code>中对每个访问层接口，都会生成一个代理对象，每个代理对象对应的<code>InvocationHandler</code>为<code>MapperProxy</code>。<br>而<code>zebra-dao</code>是在<code>MyBatis.MapperProxy</code>的代理对象上加了又加了一层代理<code>AsyncMapperProxy</code>。在<code>AsyncMapperProxy</code>中实现异步化。</p>
 <blockquote>
 <p>值得注意的是，这里异步化将请求放到线程池去执行，然后通过future.get()的形式，从IO模式上来说也只是阻塞模式，而不是NIO的方式；<br>另外，这里一个进程会共用一个线程池。</p>

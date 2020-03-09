@@ -100,21 +100,21 @@
 
 
   
-  <meta name="keywords" content="istio,servicemesh," />
+  <meta name="keywords" content="etcd,zookeeper," />
 
 
-<meta name="description" content="Istio  Istio 是An open platform to connect, manage, and secure microservices.（用于连接、管理、保护微服务的开发平台)。由Google|Lyft|IBM联合开发，是当下开源社区最火的ServiceMesh项目。  由于作者从事ServiceMesh相关研发工作，因此决定抽出时间来细致研究Istio核心原理，并落地本系列文章。">
+<meta name="description" content="Zookeeper &amp; Etcd 关键对比汇总1. 选举1.1 Etcd选举过程 每个节点启动时作为Follwer角色，经过一个ElectionTimeout(启动时随时生成的 默认150ms~300ms)后进入Candidate状态，并向其他节点发送消息MsgVote消息（本节点的Term、最新的日志Index，最新日志的LogTerm）；  其他节点收到投标后，进行两步判断：  预判断">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Istio 简介">
-<meta property="og:url" content="https://dorgenjones.github.io/2019/10/12/istio/1.istio-%E7%AE%80%E4%BB%8B/index.html">
+<meta property="og:title" content="Zookeeper &amp; Etcd 关键对比汇总">
+<meta property="og:url" content="https://dorgenjones.github.io/2019/12/01/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/2020-03-10/index.html">
 <meta property="og:site_name" content="Zamperini">
-<meta property="og:description" content="Istio  Istio 是An open platform to connect, manage, and secure microservices.（用于连接、管理、保护微服务的开发平台)。由Google|Lyft|IBM联合开发，是当下开源社区最火的ServiceMesh项目。  由于作者从事ServiceMesh相关研发工作，因此决定抽出时间来细致研究Istio核心原理，并落地本系列文章。">
+<meta property="og:description" content="Zookeeper &amp; Etcd 关键对比汇总1. 选举1.1 Etcd选举过程 每个节点启动时作为Follwer角色，经过一个ElectionTimeout(启动时随时生成的 默认150ms~300ms)后进入Candidate状态，并向其他节点发送消息MsgVote消息（本节点的Term、最新的日志Index，最新日志的LogTerm）；  其他节点收到投标后，进行两步判断：  预判断">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2019-10-11T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-02-13T11:02:53.577Z">
+<meta property="article:published_time" content="2019-11-30T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-03-09T18:28:57.501Z">
 <meta property="article:author" content="Zamperini">
-<meta property="article:tag" content="istio">
-<meta property="article:tag" content="servicemesh">
+<meta property="article:tag" content="etcd">
+<meta property="article:tag" content="zookeeper">
 <meta name="twitter:card" content="summary">
 
 
@@ -122,7 +122,7 @@
 
 
 
-  <link rel="canonical" href="https://dorgenjones.github.io/2019/10/12/istio/1.istio-简介/"/>
+  <link rel="canonical" href="https://dorgenjones.github.io/2019/12/01/分布式存储/2020-03-10/"/>
 
 
 
@@ -131,7 +131,7 @@
     sidebar: "",
   };
 </script>
-  <title>Istio 简介 | Zamperini</title>
+  <title>Zookeeper & Etcd 关键对比汇总 | Zamperini</title>
   
 
 
@@ -284,7 +284,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2019/10/12/istio/1.istio-%E7%AE%80%E4%BB%8B/">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2019/12/01/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/2020-03-10/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Zamperini">
@@ -301,7 +301,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Istio 简介</h1>
+          <h1 class="post-title" itemprop="name headline">Zookeeper & Etcd 关键对比汇总</h1>
         
 
         <div class="post-meta">
@@ -313,7 +313,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-12T00:00:00+08:00">2019-10-12</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-01T00:00:00+08:00">2019-12-01</time>
             
 
             
@@ -334,7 +334,14 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/istio/" itemprop="url" rel="index"><span itemprop="name">istio</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/etcd/" itemprop="url" rel="index"><span itemprop="name">etcd</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/etcd/zookeeper/" itemprop="url" rel="index"><span itemprop="name">zookeeper</span></a></span>
 
                 
                 
@@ -368,8 +375,116 @@
       
 
       
-        <h1 id="Istio"><a href="#Istio" class="headerlink" title="Istio"></a><a href="https://github.com/istio/istio" target="_blank" rel="noopener">Istio</a></h1><p>  <strong>Istio</strong> 是<code>An open platform to connect, manage, and secure microservices.</code>（用于连接、管理、保护微服务的开发平台)。由Google|Lyft|IBM联合开发，是当下开源社区最火的ServiceMesh项目。<br>  由于作者从事ServiceMesh相关研发工作，因此决定抽出时间来细致研究<code>Istio</code>核心原理，并落地本系列文章。<br>  本系列文章将详细讲解如下内容：<br>    1. <code>Istio</code> 整体架构&amp;核心工作流程<br>    2. <code>Pilot</code> 控制中枢源码解析<br>    2. <code>Galley</code><strong>&amp;</strong><code>MCP</code>源码解析<br>    3. <code>Mixer</code> 原理解析<br>    4. <code>Envoy</code> 原理解析<br>    5. 总结&amp;讨论</p>
-<p>特别说明，本文内容基于<code>Istio@1.4.2</code>进行的源码分析。</p>
+        <h1 id="Zookeeper-amp-Etcd-关键对比汇总"><a href="#Zookeeper-amp-Etcd-关键对比汇总" class="headerlink" title="Zookeeper &amp; Etcd 关键对比汇总"></a>Zookeeper &amp; Etcd 关键对比汇总</h1><h2 id="1-选举"><a href="#1-选举" class="headerlink" title="1. 选举"></a>1. 选举</h2><h3 id="1-1-Etcd选举过程"><a href="#1-1-Etcd选举过程" class="headerlink" title="1.1 Etcd选举过程"></a>1.1 Etcd选举过程</h3><ol>
+<li><p>每个节点启动时作为<code>Follwer</code>角色，经过一个<code>ElectionTimeout</code>(启动时随时生成的 <code>默认150ms~300ms</code>)后进入<code>Candidate</code>状态，并向其他节点发送消息<code>MsgVote</code>消息（本节点的<code>Term</code>、最新的日志<code>Index</code>，最新日志的<code>LogTerm</code>）；</p>
+</li>
+<li><p>其他节点收到投标后，进行两步判断：</p>
+<ol>
+<li><strong>预判断</strong>，： <ol>
+<li><code>r.Vote==m.Form</code>(<strong>是否已经投标给该节点</strong>)</li>
+<li>当前节点未投标且无leader节点；</li>
+<li>对于预投标（<code>PreVote</code>），消息的任期比当前节点大；</li>
+</ol>
+</li>
+<li>任何一个条件判断则可以进入<strong>正式判断</strong>：<ol>
+<li>若消息中<code>日志Term</code> 对当前节点大则投给消息发送方，若<code>日志Term</code>相等，<code>Index</code>比当前节点大则也将票投给消息发送方<code>r.raftLog.isUpToDate(m.Index, m.LogTerm)</code></li>
+</ol>
+</li>
+<li>若上面的判断失败，则返回拒绝</li>
+</ol>
+</li>
+<li><p>当发起投标方收到半数以上的头条，则转换自己的角色<code>becomeLader</code> (<code>raft.go/stepCandidate</code>)，并广播一条空消息给其他所有节点。</p>
+<ul>
+<li><strong>Candidate</strong> <strong>–&gt;</strong> <strong>Leader</strong></li>
+<li><strong>Candidate</strong> <strong>–&gt;</strong> <strong>Follower</strong> </li>
+</ul>
+<h4 id="广播时间-lt-lt-选举超时时间-lt-lt-平均故障间隔时间"><a href="#广播时间-lt-lt-选举超时时间-lt-lt-平均故障间隔时间" class="headerlink" title="广播时间 &lt;&lt; 选举超时时间 &lt;&lt; 平均故障间隔时间"></a><strong>广播时间 &lt;&lt; 选举超时时间 &lt;&lt; 平均故障间隔时间</strong></h4></li>
+</ol>
+<h3 id="1-2-Zookeeper选举过程"><a href="#1-2-Zookeeper选举过程" class="headerlink" title="1.2 Zookeeper选举过程"></a>1.2 Zookeeper选举过程</h3><p>双向心跳，<code>Leader</code>收不到半数以上的<code>Follower</code>节点发来的心跳则发起选举；<code>Follower</code>未收到<code>Leader</code>心跳则发起选举，选举时状态切换成<code>LOOKING</code>。</p>
+<ol start="0">
+<li><p><strong>投票节点：</strong>首先将节点状态转变成<code>LOOKING</code>状态；</p>
+</li>
+<li><p><strong>投票节点：</strong>将自己作为<code>(SID、ZXID)</code>广播给其他节点；</p>
+</li>
+<li><p><strong>其他节点：</strong>接收其他节点的选举投票；</p>
+</li>
+<li><p><strong>其他节点：</strong>如果接收的选举纪元大于本地的选举轮数则更新本地选举轮数，并将接收的投票跟本地投票比较后更新本地投票，再广播出去。否则执行<strong>4</strong>；</p>
+</li>
+<li><p><strong>其他节点：</strong>判断外部投票是否优于本地，如果是则更新本地提议再广播出去；</p>
+<ol>
+<li><p>比较纪元大小（<strong>最新日志记录的纪元，并不是当前选举纪元</strong>）；</p>
+</li>
+<li><p>纪元相等的情况，比较 <code>Zxid</code>；</p>
+</li>
+<li><p><code>Zxid</code>相等的情况下 则比较 <code>Sid</code>；</p>
+<blockquote>
+<p>return ((newEpoch &gt; curEpoch) ||</p>
+<pre><code>((newEpoch == curEpoch) &amp;&amp;
+((newZxid &gt; curZxid) || ((newZxid == curZxid) &amp;&amp; (newId &gt; curId)))));</code></pre></blockquote>
+</li>
+</ol>
+</li>
+<li><p><strong>投票节点：</strong>收集投票提议，并进行统计，若有节点收集的投票大于一半以上则认为该节点为<code>Leader</code>节点；</p>
+</li>
+<li><p><strong>投票节点：</strong> 若<strong>投票选定节点</strong>是该节点则转变自己的服务器状态为<code>LEADING</code>，若不是则转换成<code>FOLLOWING | OBSERVING</code>。</p>
+</li>
+</ol>
+<ul>
+<li><strong>LOOKING</strong> <strong>–&gt;</strong> <strong>LEADING</strong></li>
+<li><strong>LOOKING</strong> <strong>–&gt;</strong> <strong>FOLLOWING</strong></li>
+</ul>
+<h2 id="2-数据同步"><a href="#2-数据同步" class="headerlink" title="2. 数据同步"></a>2. 数据同步</h2><h3 id="2-1-Zookeeper数据同步"><a href="#2-1-Zookeeper数据同步" class="headerlink" title="2.1 Zookeeper数据同步"></a>2.1 Zookeeper数据同步</h3><p>数据同步分为四种<code>DIFF</code>、<code>TRUNC</code>、<code>TRUNC+DIFF</code>、<code>SNAP</code><br>设 <strong>Learner</strong>节点最后处理的<code>ZXID</code>为<code>peerLastZxid</code>，<strong>Leader</strong>服务器提议缓存队列<code>commitedLog</code>最小最大<strong>ZXID</strong>为<code>minCommitedLog</code>、<code>maxCommitedLog</code>；</p>
+<ol>
+<li>若<code>peerLastZxid</code>小于<code>minCommitedLog</code>，则执行<code>SNAP</code>；</li>
+<li>若<code>peerLastZxid</code>在<code>minCommitedLog</code>与<code>maxCommitedLog</code>之间，则执行<code>DIFF</code>；</li>
+<li>若<code>peerLastZxid</code>大于 <code>maxCommitedLog</code> 时，则执行<code>TRUNC</code>；</li>
+<li>若<code>peerLastZxid</code>在<code>minCommitedLog</code>与<code>maxCommitedLog</code>之间但又不在<code>leader</code>中，则<code>TRUNC+DIFF</code>。</li>
+</ol>
+<h3 id="2-2-Etcd数据同步"><a href="#2-2-Etcd数据同步" class="headerlink" title="2.2 Etcd数据同步"></a>2.2 Etcd数据同步</h3><p><strong>Etcd</strong> 中<code>Leader</code>为每个从节点保存两个信息<code>nextIndex</code>（下一次要复制的位置）、<code>matchIndex</code>（已经匹配的位置）</p>
+<ol>
+<li><p>当从<code>Candidate</code>角色转换成<code>Leader</code>角色后，会将所有节点的<code>nextIndex</code>改为当前节点最大的<code>Index</code>，<code>matchIndex</code>设置为 <strong>0</strong>，向所有节点发送<code>Append Entries</code>信息；</p>
+<ol>
+<li><p>若接收到信息的节点的<code>commitedId</code>大于发送过来的<code>nextIndex</code>，则告诉<code>Leader</code>该索引号；</p>
+</li>
+<li><p>若<code>msg.Index&amp;Term</code>在节点日志中，则告知<code>Leader</code>节点目前的<code>mLastIndex</code>；</p>
+</li>
+<li><p>若不匹配，则发送拒绝，并返回其日志中的<code>LastIndex</code>。</p>
+<p>若节点信息对不上<code>nextIndex</code>则返回日志失败，<code>Leader</code>不断前移<code>nextIndex</code>进行循环往复尝试，直至节点追加成功；</p>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="3-Watch机制"><a href="#3-Watch机制" class="headerlink" title="3. Watch机制"></a>3. Watch机制</h2><h3 id="3-1-Zookeeper"><a href="#3-1-Zookeeper" class="headerlink" title="3.1 Zookeeper"></a>3.1 Zookeeper</h3><p><code>Zookeeper</code>的<code>watch</code>由引用层的<code>WatchManager</code>进行管理，其中包含<code>NodeWatcher</code>和<code>ChildWatcher</code>：</p>
+<ol>
+<li>当有数据更新时同时会调用<code>WatchManager</code>进行触发事件；</li>
+<li>从<code>WatcherManager</code>中筛选出符合条件的<code>Watcher</code>触发下发，并把映射给摘除。<ol>
+<li>只会触发一次，且不会把真正的数据下发下去而只下发<code>通知状态、事件类型、节点路径</code>，具体变更数据由<code>Client</code>自行来查询；</li>
+<li><code>Watcher</code>事件传递到<code>Client</code>触发后也会删除映射关系。</li>
+</ol>
+</li>
+</ol>
+<p>因此存在丢失的可能：</p>
+<ul>
+<li>在对于同一个key或者同一范围的监听，若修改速度迅速，<strong>会漏事件</strong>。</li>
+</ul>
+<h3 id="3-2-Etcd"><a href="#3-2-Etcd" class="headerlink" title="3.2 Etcd"></a>3.2 Etcd</h3><p><code>Etcd</code>由两个协程和两个<code>WatcherGroup</code>来管理<code>Watcher</code>事件。详细见：<a href="http://175.24.40.213/2019/11/25/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/7.etcd-watch/" target="_blank" rel="noopener">Etcd Watch机制</a></p>
+<ol>
+<li>带版本号监听；</li>
+<li>连续监听不是单次监听。</li>
+</ol>
+<h2 id="4-线性一致性"><a href="#4-线性一致性" class="headerlink" title="4. 线性一致性"></a>4. 线性一致性</h2><p><code>zab</code>&amp;<code>Raft</code> 只是共识算法，并非线性一致性，实现线性一致性需要上层做出努力。如<code>etcd</code>的线性一致性读。</p>
+<p>什么是<strong>线性一致性读</strong>？</p>
+<blockquote>
+<p>对于同一对象，读写请求按顺序线性进行。（<strong>读到最新写的数据</strong>）</p>
+</blockquote>
+<h3 id="4-1-引用"><a href="#4-1-引用" class="headerlink" title="4.1 引用"></a>4.1 引用</h3><ul>
+<li><a href="https://pingcap.com/blog-cn/linearizability-and-raft/" target="_blank" rel="noopener">线性一致性和 Raft</a></li>
+<li><a href="https://zhengyinyong.com/post/etcd-linearizable-read-implementation/" target="_blank" rel="noopener">etcd 中线性一致性读的具体实现</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/50455478" target="_blank" rel="noopener">Etcd 之 Lease read</a></li>
+</ul>
+<h2 id="5-参考材料"><a href="#5-参考材料" class="headerlink" title="5. 参考材料"></a>5. 参考材料</h2><ul>
+<li><a href="https://www.cnblogs.com/qiniu/p/10735183.html" target="_blank" rel="noopener">Etcd和ZooKeeper，究竟谁在watch的功能表现更好？</a></li>
+</ul>
 
       
     </div>
@@ -416,9 +531,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/istio/" rel="tag"># istio</a>
+            <a href="/tags/etcd/" rel="tag"># etcd</a>
           
-            <a href="/tags/servicemesh/" rel="tag"># servicemesh</a>
+            <a href="/tags/zookeeper/" rel="tag"># zookeeper</a>
           
         </div>
       
@@ -431,8 +546,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/01/03/database/zbera/zebra/" rel="next" title="数据库中间件Zebra">
-                <i class="fa fa-chevron-left"></i> 数据库中间件Zebra
+              <a href="/2019/12/01/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/etcd/2020-02-25/" rel="next" title="ETCD汇总">
+                <i class="fa fa-chevron-left"></i> ETCD汇总
               </a>
             
           </div>
@@ -441,8 +556,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/10/14/istio/2.istio-pilot/" rel="prev" title="Istio Pilot">
-                Istio Pilot <i class="fa fa-chevron-right"></i>
+              <a href="/2020/02/03/k8s/1.k8s%E7%AE%80%E4%BB%8B/" rel="prev" title="k8s简介">
+                k8s简介 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -675,7 +790,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Istio"><span class="nav-number">1.</span> <span class="nav-text">Istio</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Zookeeper-amp-Etcd-关键对比汇总"><span class="nav-number">1.</span> <span class="nav-text">Zookeeper &amp; Etcd 关键对比汇总</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-选举"><span class="nav-number">1.1.</span> <span class="nav-text">1. 选举</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-Etcd选举过程"><span class="nav-number">1.1.1.</span> <span class="nav-text">1.1 Etcd选举过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#广播时间-lt-lt-选举超时时间-lt-lt-平均故障间隔时间"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">广播时间 &lt;&lt; 选举超时时间 &lt;&lt; 平均故障间隔时间</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-Zookeeper选举过程"><span class="nav-number">1.1.2.</span> <span class="nav-text">1.2 Zookeeper选举过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-数据同步"><span class="nav-number">1.2.</span> <span class="nav-text">2. 数据同步</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-Zookeeper数据同步"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.1 Zookeeper数据同步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-Etcd数据同步"><span class="nav-number">1.2.2.</span> <span class="nav-text">2.2 Etcd数据同步</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Watch机制"><span class="nav-number">1.3.</span> <span class="nav-text">3. Watch机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-Zookeeper"><span class="nav-number">1.3.1.</span> <span class="nav-text">3.1 Zookeeper</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-Etcd"><span class="nav-number">1.3.2.</span> <span class="nav-text">3.2 Etcd</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-线性一致性"><span class="nav-number">1.4.</span> <span class="nav-text">4. 线性一致性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-引用"><span class="nav-number">1.4.1.</span> <span class="nav-text">4.1 引用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-参考材料"><span class="nav-number">1.5.</span> <span class="nav-text">5. 参考材料</span></a></li></ol></li></ol></div>
             
 
           </div>

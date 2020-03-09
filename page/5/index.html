@@ -279,6 +279,184 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2019/01/03/database/zbera/zebra/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/01/03/database/zbera/zebra/" itemprop="url">数据库中间件Zebra</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-01-03T14:51:53+08:00">2019-01-03</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/database/" itemprop="url" rel="index"><span itemprop="name">database</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="Zebra"><a href="#Zebra" class="headerlink" title="Zebra"></a>Zebra</h1><p>[TOC]</p>
+<h2 id="Zebra是什么？能干甚么？"><a href="#Zebra是什么？能干甚么？" class="headerlink" title="Zebra是什么？能干甚么？"></a>Zebra是什么？能干甚么？</h2><p><code>Zebra</code>是一个在JDBC协议上开发的<strong>数据库连接池中间件</strong>，它不是真连接池(与DB直接交互的连接池)，而是对连接池做了一层包装。<br><img src="/media/15117842144905.jpg" alt><br><strong>功能：</strong></p>
+<ol>
+<li>支持适配目前主流的数据库连接池（如上图）</li>
+<li>读写分离、分库分表</li>
+<li>支持配置动态修改生效(连接池的配置、用户密码、数据库节点访问路由负载均衡配置)</li>
+<li>CAT全方位监控（SQL执行情况、数据库连接数、端到端监控）</li>
+<li>支持压测(改写表名)、SQL限流、黑白名单、SQL改写、<a href>SQL审计</a>(日志审计，SQL安全监控)…</li>
+</ol>
+<h2 id="同类产品有哪些，以及比较？"><a href="#同类产品有哪些，以及比较？" class="headerlink" title="同类产品有哪些，以及比较？"></a>同类产品有哪些，以及比较？</h2><table>
+<thead>
+<tr>
+<th>类别</th>
+<th>案例</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>基于代理</td>
+<td>mycat、cobor、atlas、jed</td>
+<td>多语言支持、节省数据库连接</td>
+<td>风险大(链路长)、实现难度大、共享连接时有风险</td>
+</tr>
+<tr>
+<td>基于客户端(jdbc层)</td>
+<td>tddl</td>
+<td>直连数据库(风险较小)、更灵活</td>
+<td>对于每种语言都需要重写sdk、富客户端的常见缺点</td>
+</tr>
+</tbody></table>
+<p><strong>基于代理：</strong><br><img src="/media/15117932686716.jpg" alt></p>
+<p><strong>基于客户端：</strong><br><img src="/media/15117932921029.jpg" alt="set up-w500"></p>
+<blockquote>
+<p>公司目前：北京侧 <code>Altas</code>居多，也有<code>Atlas</code>与<code>zebra</code>搭配使用（使用其压测处理、SQL监控特性），上海侧统一使用<code>zebra</code>。趋势是转向<strong>Zebra</strong>。<a href>Atlas与Zebra的对比</a>。<strong>zebra秒杀Atlas?</strong><br><a href>数据库中间件比较</a></p>
+</blockquote>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/01/03/database/zbera/zebra/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2018/04/26/rpc/dubbo/6.dubbo-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -873,179 +1051,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2018/04/22/rpc/dubbo/2.dubbo-spi/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zamperini">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avator.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zamperini">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/04/22/rpc/dubbo/2.dubbo-spi/" itemprop="url">Dubbo SPI拓展机制</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-22T00:00:00+08:00">2018-04-22</time>
-            
-
-            
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/dubbo/" itemprop="url" rel="index"><span itemprop="name">dubbo</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="SPI拓展机制（IOC、AOP、自适应拓展）"><a href="#SPI拓展机制（IOC、AOP、自适应拓展）" class="headerlink" title="SPI拓展机制（IOC、AOP、自适应拓展）"></a>SPI拓展机制（IOC、AOP、自适应拓展）</h1><p>Dubbo 官方文档 <a href="http://dubbo.io/books/dubbo-dev-book/SPI.html" target="_blank" rel="noopener">拓展点加载</a> 介绍了Dubbo的<strong>SPI拓展机制</strong>，总结起来如下：</p>
-<blockquote>
-<ol>
-<li>是<code>JDK SPI</code>的加强版：<ul>
-<li>只有使用的时候才会实例化拓展点，而摒弃<code>JDK SPI</code>一次性实例化所有拓展点</li>
-<li>增加了对IOC、AOP的支持</li>
-</ul>
-</li>
-<li>拓展的方法：在扩展类的 jar 包内，放置扩展点配置文件 <code>META-INF/dubbo/接口全限定名</code>，内容为：配置名=扩展实现类全限定名，多个实现类用换行符分隔。即可被Dubbo自动加载。</li>
-<li>扩展点的特性：<ul>
-<li>扩展点自动装配(<strong>IOC</strong>)：加载扩展点时，扩展点实现类的成员如果为其它扩展点类型，在会自动注入依赖的扩展点；</li>
-<li>扩展点自动包装：<strong>AOP</strong>的一种实现方式，为拓展点自动添加一层包装，将某些可拓展的共有逻辑放在包装类(Wrapper)中。调用时，会先调用包装类的逻辑再调用拓展点的内容；</li>
-<li>扩展点<strong>自适应</strong>：在拓展点方法执行的时候，根据调用的参数(<strong>URL</strong>)决定调用的是哪个拓展点实现，而不会在初始化时就直接指定是哪个拓展点；</li>
-<li>扩展点自动激活：对于集合类拓展点，可以同时加载多个实现。自动激活可以简化配置，且可以编排它们的顺序。</li>
-</ul>
-</li>
-</ol>
-</blockquote>
-<p><code>ExtensionLoader</code>是实现其SPI拓展机制的关键类，Dubbo会为每种类型拓展点都创建有一个<code>ExtensionLoader</code>实例:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">ExtensionLoader&lt;T&gt; <span class="title">getExtensionLoader</span><span class="params">(Class&lt;T&gt; type)</span> </span>&#123;</span><br><span class="line">   <span class="comment">//首先从缓存里获取</span></span><br><span class="line">   ExtensionLoader&lt;T&gt; loader = (ExtensionLoader&lt;T&gt;) EXTENSION_LOADERS.get(type);</span><br><span class="line">   <span class="keyword">if</span> (loader == <span class="keyword">null</span>) &#123;</span><br><span class="line">       EXTENSION_LOADERS.putIfAbsent(type, <span class="keyword">new</span> ExtensionLoader&lt;T&gt;(type));</span><br><span class="line">       loader = (ExtensionLoader&lt;T&gt;) EXTENSION_LOADERS.get(type);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> loader;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//私有构造函数</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="title">ExtensionLoader</span><span class="params">(Class&lt;?&gt; type)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">this</span>.type = type;</span><br><span class="line">   objectFactory = (type == ExtensionFactory.class ? null : ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>其最主要的属性如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//所处理的拓展点类型（接口类型）</span></span><br><span class="line">Class&lt;?&gt; type;</span><br><span class="line"><span class="comment">//拓展点工厂，用于在拓展点注入属性时获取属性的实例（从SPI中获取或者从Spring的上下文中获取）</span></span><br><span class="line">ExtensionFactory objectFactory;</span><br><span class="line"><span class="comment">//拓展点类和名称的映射</span></span><br><span class="line">ConcurrentMap&lt;Class&lt;?&gt;, String&gt; cachedNames = <span class="keyword">new</span> ConcurrentHashMap&lt;Class&lt;?&gt;, String&gt;();</span><br><span class="line"><span class="comment">// 名称和类的映射，类可能有多个名称</span></span><br><span class="line">Holder&lt;Map&lt;String, Class&lt;?&gt;&gt;&gt; cachedClasses = <span class="keyword">new</span> Holder&lt;Map&lt;String, Class&lt;?&gt;&gt;&gt;();</span><br><span class="line"><span class="comment">// 名称与激活拓展点注解的映射。</span></span><br><span class="line">Map&lt;String, Activate&gt; cachedActivates = <span class="keyword">new</span> ConcurrentHashMap&lt;String, Activate&gt;();</span><br><span class="line"><span class="comment">//名称与拓展点实例的映射，一般一个拓展点只会有一个实例</span></span><br><span class="line">ConcurrentMap&lt;String, Holder&lt;Object&gt;&gt; cachedInstances = <span class="keyword">new</span></span><br><span class="line">ConcurrentHashMap&lt;String, Holder&lt;Object&gt;&gt;();</span><br><span class="line"><span class="comment">// 自适应拓展点实例</span></span><br><span class="line">Holder&lt;Object&gt; cachedAdaptiveInstance = <span class="keyword">new</span> Holder&lt;Object&gt;();</span><br><span class="line"><span class="comment">//自实例拓展点类型</span></span><br><span class="line">Class&lt;?&gt; cachedAdaptiveClass = <span class="keyword">null</span>;</span><br><span class="line">String cachedDefaultName;</span><br><span class="line"><span class="comment">//包装类集合 AOP</span></span><br><span class="line">Set&lt;Class&lt;?&gt;&gt; cachedWrapperClasses;</span><br></pre></td></tr></table></figure>
-
-<p>对外暴露的最主要的方法如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//获取自适应拓展</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">getAdaptiveExtension</span><span class="params">()</span></span>;</span><br><span class="line"><span class="comment">//根据name获取特定的拓展实例</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">getExtension</span><span class="params">(String name)</span></span>;</span><br><span class="line"><span class="comment">// 根据条件获取当前扩展可自动激活的实现</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> List&lt;T&gt; <span class="title">getActivateExtension</span><span class="params">(URL url, String[] values, String group)</span></span>;</span><br></pre></td></tr></table></figure>
-<p>Dubbo初始化时，获取拓展点时一般是调用<code>getActivateExtension</code>获取自适应拓展点，然后在运行时调用方法时，根据实时的参数<code>URL</code>确定拓展点实例的name，调用<code>getExtension(name)</code>获取实例。下面我们依次看这三个实现方法：</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/04/22/rpc/dubbo/2.dubbo-spi/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/4/">&lt;i class&#x3D;&quot;fa fa-angle-left&quot;&gt;&lt;&#x2F;i&gt;</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/6/">&lt;i class&#x3D;&quot;fa fa-angle-right&quot;&gt;&lt;&#x2F;i&gt;</a>
+    <a class="extend prev" rel="prev" href="/page/4/">&lt;i class&#x3D;&quot;fa fa-angle-left&quot;&gt;&lt;&#x2F;i&gt;</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/6/">&lt;i class&#x3D;&quot;fa fa-angle-right&quot;&gt;&lt;&#x2F;i&gt;</a>
   </nav>
 
 
@@ -1092,7 +1102,7 @@
                 
                   <a href="/archives/%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-count">56</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -1127,7 +1137,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">11</span>
+                      
+                    
+                    <span class="site-state-item-count">12</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>

@@ -105,7 +105,7 @@
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="Zamperini">
-<meta property="og:url" content="https://dorgenjones.github.io/tags/servicemesh/index.html">
+<meta property="og:url" content="https://dorgenjones.github.io/page/12/index.html">
 <meta property="og:site_name" content="Zamperini">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:author" content="Zamperini">
@@ -116,7 +116,7 @@
 
 
 
-  <link rel="canonical" href="https://dorgenjones.github.io/tags/servicemesh/"/>
+  <link rel="canonical" href="https://dorgenjones.github.io/page/12/"/>
 
 
 
@@ -125,7 +125,7 @@
     sidebar: "",
   };
 </script>
-  <title>标签: servicemesh | Zamperini</title>
+  <title>Zamperini</title>
   
 
 
@@ -172,7 +172,8 @@
     
   
 
-  <div class="container sidebar-position-left ">
+  <div class="container sidebar-position-left 
+  page-home">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -261,111 +262,168 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
+  <section id="posts" class="posts-expand">
+    
+      
+
+  
 
   
   
   
-  <div class="post-block tag">
 
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>servicemesh<small>标签</small>
-        </h1>
-      </div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://dorgenjones.github.io/2017/03/11/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/log/1.java%20log%E7%AE%80%E4%BB%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zamperini">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avator.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zamperini">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/03/11/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/log/1.java%20log%E7%AE%80%E4%BB%8B/" itemprop="url">Java Log简介</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-03-11T00:00:00+08:00">2017-03-11</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/log4j/" itemprop="url" rel="index"><span itemprop="name">log4j</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
 
       
         
+          <h1 id="Java-Log-简介"><a href="#Java-Log-简介" class="headerlink" title="Java Log 简介"></a>Java Log 简介</h1><p>[TOC]</p>
+<h2 id="初衷及目的"><a href="#初衷及目的" class="headerlink" title="初衷及目的"></a>初衷及目的</h2><h3 id="初衷"><a href="#初衷" class="headerlink" title="初衷"></a>初衷</h3><p>为什么项目里会引入这么多关于log的jar包？<br>都是干嘛吃的？<br>日志圈真<strong>乱</strong>！！！</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">commons-logging-1.2.jar</span><br><span class="line">log4j-1.2.17.jar</span><br><span class="line">log4j-1.2-api-2.3.jar</span><br><span class="line">log4j-api-2.1.jar</span><br><span class="line">log4j-core-2.1.jar</span><br><span class="line">log4j-over-slf4j-1.7.7.jar</span><br><span class="line">log4j-slf4j-impl-2.1.jar</span><br><span class="line">jcl-over-slf4j-1.7.7.jar</span><br><span class="line">jul-to-slf4j-1.7.7.jar</span><br><span class="line">slf4j-api-1.7.7.jar</span><br></pre></td></tr></table></figure>
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2019/10/15/istio/3.istio-mcp&galley/" itemprop="url">
-              
-                <span itemprop="name">Istio MCP&Galley</span>
-              
+<h3 id="目的"><a href="#目的" class="headerlink" title="目的"></a>目的</h3><ol>
+<li>介绍java日志体系的脉络和关系</li>
+<li>重点介绍Log4j2的配置</li>
+<li>Log4j2的原理浅析</li>
+</ol>
+<p>Java日志体系分为日志门面和日志实现。下面将分别介绍它们。</p>
+<h2 id="日志门面"><a href="#日志门面" class="headerlink" title="日志门面"></a>日志门面</h2>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/03/11/%E5%9F%BA%E7%A1%80%E5%B7%A5%E5%85%B7/log/1.java%20log%E7%AE%80%E4%BB%8B/#more" rel="contents">
+              阅读全文 &raquo;
             </a>
+          </div>
+          <!--/noindex-->
         
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2019-10-15T00:00:00+08:00"
-              content="2019-10-15" >
-          10-15
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-      
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2019/10/14/istio/2.istio-pilot/" itemprop="url">
-              
-                <span itemprop="name">Istio Pilot</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2019-10-14T00:00:00+08:00"
-              content="2019-10-14" >
-          10-14
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-      
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2019/10/12/istio/1.istio-%E7%AE%80%E4%BB%8B/" itemprop="url">
-              
-                <span itemprop="name">Istio 简介</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2019-10-12T00:00:00+08:00"
-              content="2019-10-12" >
-          10-12
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
       
     </div>
+    
+    
+    
 
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
   </div>
   
   
   
+  </article>
+
+
+    
+  </section>
 
   
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/page/11/">&lt;i class&#x3D;&quot;fa fa-angle-left&quot;&gt;&lt;&#x2F;i&gt;</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><span class="page-number current">12</span>
+  </nav>
+
 
 
           </div>

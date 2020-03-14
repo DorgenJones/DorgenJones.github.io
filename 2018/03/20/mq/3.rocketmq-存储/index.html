@@ -103,12 +103,12 @@
   <meta name="keywords" content="rocketmq,store," />
 
 
-<meta name="description" content="4. store[TOC] 存储是RocketMQ中至关重要的一部分。DefaultMessageStore是RocketMQ中用于存储消息的入口。一条消息存储过程大致如图所示：首先通过调用CommitLog.putMessage方法将消息追加到MappedFile文件中，然后再以异步的形式进行构建ConsumeQueue，如果用户设置了Key则同时进行构建Index。 我们将从DefaultMe">
+<meta name="description" content="4. store****[TOC] 存储是RocketMQ中至关重要的一部分。DefaultMessageStore是RocketMQ中用于存储消息的入口。一条消息存储过程大致如图所示：首先通过调用CommitLog.putMessage方法将消息追加到MappedFile文件中，然后再以异步的形式进行构建ConsumeQueue，如果用户设置了Key则同时进行构建Index。 我们将从Defau">
 <meta property="og:type" content="article">
 <meta property="og:title" content="RocketMQ 存储">
 <meta property="og:url" content="https://dorgenjones.github.io/2018/03/20/mq/3.rocketmq-%E5%AD%98%E5%82%A8/index.html">
 <meta property="og:site_name" content="Zamperini">
-<meta property="og:description" content="4. store[TOC] 存储是RocketMQ中至关重要的一部分。DefaultMessageStore是RocketMQ中用于存储消息的入口。一条消息存储过程大致如图所示：首先通过调用CommitLog.putMessage方法将消息追加到MappedFile文件中，然后再以异步的形式进行构建ConsumeQueue，如果用户设置了Key则同时进行构建Index。 我们将从DefaultMe">
+<meta property="og:description" content="4. store****[TOC] 存储是RocketMQ中至关重要的一部分。DefaultMessageStore是RocketMQ中用于存储消息的入口。一条消息存储过程大致如图所示：首先通过调用CommitLog.putMessage方法将消息追加到MappedFile文件中，然后再以异步的形式进行构建ConsumeQueue，如果用户设置了Key则同时进行构建Index。 我们将从Defau">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://dorgenjones.github.io/media/15262276039412.jpg">
 <meta property="og:image" content="https://dorgenjones.github.io/media/15262783557950.jpg">
@@ -116,7 +116,7 @@
 <meta property="og:image" content="https://dorgenjones.github.io/media/15262826812253.jpg">
 <meta property="og:image" content="https://dorgenjones.github.io/media/15263460992712.jpg">
 <meta property="article:published_time" content="2018-03-19T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-02-22T04:08:53.304Z">
+<meta property="article:modified_time" content="2020-03-11T03:19:15.230Z">
 <meta property="article:author" content="Zamperini">
 <meta property="article:tag" content="rocketmq">
 <meta property="article:tag" content="store">
@@ -374,7 +374,7 @@
       
 
       
-        <h1 id="4-store"><a href="#4-store" class="headerlink" title="4. store"></a>4. store</h1><p>[TOC]</p>
+        <h1 id="4-store"><a href="#4-store" class="headerlink" title="4. store****"></a>4. store****</h1><p>[TOC]</p>
 <p>存储是<code>RocketMQ</code>中至关重要的一部分。<br><code>DefaultMessageStore</code>是<code>RocketMQ</code>中用于存储消息的入口。一条消息存储过程大致如图所示：<br><img src="/media/15262276039412.jpg" alt=""><br>首先通过调用<code>CommitLog.putMessage</code>方法将消息追加到<code>MappedFile</code>文件中，然后再以异步的形式进行构建<code>ConsumeQueue</code>，如果用户设置了Key则同时进行构建<code>Index</code>。</p>
 <p>我们将从<code>DefaultMessageStore</code>的初始化和其追加消息来分析其工作原理。</p>
 <h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><p>首先进行成员变量的初始化：</p>
@@ -609,9 +609,7 @@
                     
                       
                     
-                      
-                    
-                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-count">11</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -728,7 +726,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#4-store"><span class="nav-number">1.</span> <span class="nav-text">4. store</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#初始化"><span class="nav-number">1.1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消息存储"><span class="nav-number">1.2.</span> <span class="nav-text">消息存储</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#消息回放"><span class="nav-number">1.2.1.</span> <span class="nav-text">消息回放</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消息读取"><span class="nav-number">1.3.</span> <span class="nav-text">消息读取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">1.4.</span> <span class="nav-text">Reference</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#4-store"><span class="nav-number">1.</span> <span class="nav-text">4. store****</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#初始化"><span class="nav-number">1.1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消息存储"><span class="nav-number">1.2.</span> <span class="nav-text">消息存储</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#消息回放"><span class="nav-number">1.2.1.</span> <span class="nav-text">消息回放</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消息读取"><span class="nav-number">1.3.</span> <span class="nav-text">消息读取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">1.4.</span> <span class="nav-text">Reference</span></a></li></ol></li></ol></div>
             
 
           </div>

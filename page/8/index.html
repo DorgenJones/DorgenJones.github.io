@@ -515,7 +515,7 @@
 
       
         
-          <h1 id="4-store"><a href="#4-store" class="headerlink" title="4. store"></a>4. store</h1><p>[TOC]</p>
+          <h1 id="4-store"><a href="#4-store" class="headerlink" title="4. store****"></a>4. store****</h1><p>[TOC]</p>
 <p>存储是<code>RocketMQ</code>中至关重要的一部分。<br><code>DefaultMessageStore</code>是<code>RocketMQ</code>中用于存储消息的入口。一条消息存储过程大致如图所示：<br><img src="/media/15262276039412.jpg" alt><br>首先通过调用<code>CommitLog.putMessage</code>方法将消息追加到<code>MappedFile</code>文件中，然后再以异步的形式进行构建<code>ConsumeQueue</code>，如果用户设置了Key则同时进行构建<code>Index</code>。</p>
 <p>我们将从<code>DefaultMessageStore</code>的初始化和其追加消息来分析其工作原理。</p>
 <h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><p>首先进行成员变量的初始化：</p>
@@ -1101,9 +1101,7 @@
                     
                       
                     
-                      
-                    
-                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-count">11</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>

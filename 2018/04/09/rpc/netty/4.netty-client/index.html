@@ -100,7 +100,7 @@
 
 
   
-  <meta name="keywords" content="rpc,nio,netty," />
+  <meta name="keywords" content="nio,netty,rpc," />
 
 
 <meta name="description" content="客户端请求发送与获取响应在Netty里，发送请求的过程可以分为两步：1. 将请求写到缓存队列中，2.将缓存队列中的请求进行 flush —– 调用原生的SocketChannel进行发送。 在客户端初始化时，讲到客户端的Channel会在Selector上注册OP_READ操作，当有服务端响应结果时，则触发OP_READ事件。 请求发送首先来看发送请求的过程：SocketChannel 有两个方法">
@@ -113,9 +113,9 @@
 <meta property="article:published_time" content="2018-04-08T16:00:00.000Z">
 <meta property="article:modified_time" content="2020-02-13T11:06:01.857Z">
 <meta property="article:author" content="Zamperini">
-<meta property="article:tag" content="rpc">
 <meta property="article:tag" content="nio">
 <meta property="article:tag" content="netty">
+<meta property="article:tag" content="rpc">
 <meta name="twitter:card" content="summary">
 
 
@@ -433,11 +433,11 @@
       
         <div class="post-tags">
           
-            <a href="/tags/rpc/" rel="tag"># rpc</a>
-          
             <a href="/tags/nio/" rel="tag"># nio</a>
           
             <a href="/tags/netty/" rel="tag"># netty</a>
+          
+            <a href="/tags/rpc/" rel="tag"># rpc</a>
           
         </div>
       
@@ -575,9 +575,7 @@
                     
                       
                     
-                      
-                    
-                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-count">11</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>

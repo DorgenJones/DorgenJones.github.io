@@ -110,6 +110,7 @@
 <meta property="og:site_name" content="Zamperini">
 <meta property="og:description" content="MCP协议&amp;Galley[TOC] MCP协议 MCP协议全称是 Mesh Configuration Protocol。 在Istio历史版本里，基于k8s来存储数据导致其与k8s耦合，限制了Istio的拓展性（非k8s机制则无法使用）。 MCP协议的出现即是为了解决与k8s耦合的问题。MCP定义了一套配置订阅与下发的标准协议，Pilot和Mixer 作为MCP client，任何实现了">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://dorgenjones.github.io/media/15851976434078.jpg">
 <meta property="og:image" content="https://dorgenjones.github.io/media/15776177806339.jpg">
 <meta property="og:image" content="https://dorgenjones.github.io/media/15780350474622.jpg">
 <meta property="og:image" content="https://dorgenjones.github.io/media/15780373176301.jpg">
@@ -117,12 +118,12 @@
 <meta property="og:image" content="https://dorgenjones.github.io/media/15780623306136.jpg">
 <meta property="og:image" content="https://dorgenjones.github.io/media/15779491994478.jpg">
 <meta property="article:published_time" content="2019-10-14T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-02-13T12:07:52.119Z">
+<meta property="article:modified_time" content="2020-03-26T04:40:48.161Z">
 <meta property="article:author" content="Zamperini">
 <meta property="article:tag" content="istio">
 <meta property="article:tag" content="servicemesh">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://dorgenjones.github.io/media/15776177806339.jpg">
+<meta name="twitter:image" content="https://dorgenjones.github.io/media/15851976434078.jpg">
 
 
 
@@ -392,8 +393,7 @@
 <li>通常情况下，<code>source</code>作为Grpc的server，提供<code>ResourceSource</code>服务；<code>sink</code>作为Grpc的client，提供<code>ResourceSink</code>服务，<code>sink</code>主动向<code>source</code>发起连接，请求资源。当有资源更新时<code>source</code>将信息push给<code>sink</code>；</li>
 <li>但<code>MCP</code>也支持一些特殊场景，<code>Source</code> 作为<strong>Client</strong> 向<code>Sink</code> <strong>Server</strong>建立新连接，然后<code>Sever</code>向<code>Client</code>发起资源请求（实际还是<code>Sink</code>请求<code>Source</code>，只是<code>Sink</code>作为Server，让<code>Source</code>连上来）。</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">participant Sink(Pilot|Mixer) as sink</span><br><span class="line">participant Source(Galley) as source</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">note right of sink: stream established</span><br><span class="line">sink-&gt;source:conn:&#x3D; grpc.Dial</span><br><span class="line">sink-&gt;source: svc:&#x3D;mcp.NewResourceSourceService(conn)</span><br><span class="line">sink-&gt;source: stream:&#x3D;svc.EstablishResourceStream()</span><br><span class="line">sink-&gt;source: stream:&#x3D;stream.Send(RequestResources)</span><br><span class="line">source--&gt;sink: Resources:&#x3D; stream.Recv()</span><br><span class="line"></span><br><span class="line">note right of sink: request Resources</span><br><span class="line">sink-&gt;source: stream:&#x3D; RequestResources&#123;Collection&#x3D;VirtualService,nonce&#x3D;&#125;</span><br><span class="line">source--&gt;sink: Resources&#123;Collection&#x3D;VirtualService, nonce&#x3D;1, reources&#x3D;&#123;&#123;foo,v1&#125;,&#123;bar,v2&#125;&#125;&#125;</span><br><span class="line">sink-&gt;source: stream:&#x3D; RequestResources&#123;Collection&#x3D;VirtualService,nonce&#x3D;1&#125;(ACK)</span><br><span class="line"></span><br><span class="line">note right of sink: push Resources</span><br><span class="line">source--&gt;sink: Resources&#123;Collection&#x3D;VirtualService, nonce&#x3D;2, reources&#x3D;&#123;&#123;foo,v2&#125;,&#123;bar,v3&#125;&#125;&#125;</span><br><span class="line">sink-&gt;source: stream:&#x3D; RequestResources&#123;Collection&#x3D;VirtualService,nonce&#x3D;2&#125;(ACK)</span><br><span class="line"></span><br><span class="line">note right of sink: error Push</span><br><span class="line">source--&gt;sink: Resources&#123;Collection&#x3D;VirtualService, nonce&#x3D;3, reources&#x3D;&#123;&#123;foo,v3&#125;,&#123;bar,v4&#125;&#125;&#125;</span><br><span class="line">sink-&gt;source: stream:&#x3D; RequestResources&#123;Collection&#x3D;VirtualService,nonce&#x3D;3&#125;(NACK)</span><br></pre></td></tr></table></figure>
-
+<p><img src="/media/15851976434078.jpg" alt=""></p>
 <p><code>MCP</code>中<code>Sink</code>与<code>Source</code>交互接口定义：</p>
 <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ResourceSource_EstablishResourceStreamClient <span class="keyword">interface</span> &#123;</span><br><span class="line">	Send(*RequestResources) error</span><br><span class="line">	Recv() (*Resources, error)</span><br><span class="line">	grpc.ClientStream</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="Galley"><a href="#Galley" class="headerlink" title="Galley"></a>Galley</h2><p>前面介绍了 <code>MCP</code> 协议，接下来我们先介绍下<code>Galley</code>以及其工作原理，然后再以其与<code>Pilot</code>的交互流程讲解 <code>MCP</code> 的工作原理。</p>
